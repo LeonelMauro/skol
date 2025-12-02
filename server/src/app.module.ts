@@ -4,14 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { ServicesModule } from './services/services.module';
-import { BookingsModule } from './bookings/bookings.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { BarberAvailabilityModule } from './barber-availability/barber-availability.module';
 import { AuthModule } from './auth/auth.module';
-import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from './auth/guards/roles.guard';
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -33,7 +29,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
   UserModule,
   RolesModule,
   ServicesModule,
-  BookingsModule,
   NotificationsModule,
   ReservationModule,
   BarberAvailabilityModule,
@@ -41,15 +36,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 ],
 
   controllers: [],
-  providers: [
-     {
-    provide: APP_GUARD,
-    useClass: JwtAuthGuard,  // SIEMPRE PRIMERO
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
-  ],
+  providers: [],
 })
 export class AppModule {}

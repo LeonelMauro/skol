@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-valid
 export class ChangePasswordDto{
     
   @IsString()
-  @MinLength(6, { message: 'La contraseña actual debe tener al menos 6 caracteres.' })
+  @MinLength(4, { message: 'La contraseña actual debe tener al menos 6 caracteres.' })
   currentPassword: string;
 
   @IsString()
