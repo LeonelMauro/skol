@@ -11,7 +11,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
   // Crear reserva — client y admin
-  @Roles('client','barber')
+  @Roles('client','barber','admin')
   @Post()
   create(@Body() createReservationDto: CreateReservationDto) {
     return this.reservationService.create(createReservationDto);

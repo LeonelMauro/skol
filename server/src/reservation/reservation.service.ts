@@ -6,6 +6,8 @@ import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Reservation } from './entities/reservation.entity';
 import { Service } from 'src/services/entities/service.entity';
+import moment from 'moment';
+import { BarberAvailability } from 'src/barber-availability/entities/barber-availability.entity';
 
 @Injectable()
 export class ReservationService {
@@ -17,28 +19,73 @@ export class ReservationService {
     private readonly reservationRepository: Repository<Reservation>,
 
     @InjectRepository(Service)
-    private readonly serviceRepository: Repository<Service>
+    private readonly serviceRepository: Repository<Service>,
+
+    @InjectRepository(BarberAvailability)
+    private readonly barberAvailRepository: Repository<BarberAvailability>
+
   ){}
 
   async create(dto: CreateReservationDto) {
-    const client = await this.userRepository.findOne({where: {id : +dto.clientId}})
-    if(!client){throw new NotFoundException('No se encontro cliente')};
+  const client = await this.userRepository.findOne({ where: { id: dto.clientId }});
+  if (!client) throw new NotFoundException('No se encontro cliente');
 
-    const barber = await this.userRepository.findOne({ where: {id: +dto.barberId}})
-    if(!barber){ throw new NotFoundException(' No se encontro Barber')};
+  const barber = await this.userRepository.findOne({ where: { id: dto.barberId }});
+  if (!barber) throw new NotFoundException('No se encontro Barber');
 
-    const service = await this.serviceRepository.findOne({ where: {id : +dto.serviceId}})
-    if(!service){ throw new NotFoundException('No se encontro el servicio')} 
+  const service = await this.serviceRepository.findOne({ where: { id: dto.serviceId }});
+  if (!service) throw new NotFoundException('No se encontro el servicio');
 
-    const reservation =  this.reservationRepository.create({
-      date: dto.date,
-      time: dto.time,
-      client,
-      barber,
-      service
-    })
-    return await this.reservationRepository.save(reservation);
+  // --- VALIDACIÓN DEL DÍA ---
+  const dayOfWeek = moment(dto.date).format('dddd').toLowerCase(); // monday, tuesday...
+
+  const availability = await this.barberAvailRepository.findOne({
+    where: {
+      barber: { id: barber.id },
+      day_of_week: dayOfWeek,
+      is_active: true
+    }
+  });
+
+  if (!availability) {
+    throw new NotFoundException(`El barbero no trabaja el día ${dayOfWeek}`);
   }
+
+  // --- VALIDACIÓN DE HORARIOS ---
+  const requested = moment(dto.time, "HH:mm");
+  const start = moment(availability.start_time, "HH:mm");
+  const end = moment(availability.end_time, "HH:mm");
+
+  if (!requested.isBetween(start, end, undefined, '[]')) {
+    throw new NotFoundException(
+      `El barbero no trabaja en el horario solicitado (${availability.start_time} - ${availability.end_time})`
+    );
+  }
+
+  // --- VALIDACIÓN DE CHOQUE DE RESERVAS ---
+  const overlapping = await this.reservationRepository.findOne({
+    where: {
+      barber: { id: barber.id },
+      date: dto.date,
+      time: dto.time
+    }
+  });
+
+  if (overlapping) {
+    throw new NotFoundException(`Ese horario ya está reservado con ese barbero`);
+  }
+
+  const reservation = this.reservationRepository.create({
+    date: dto.date,
+    time: dto.time,
+    client,
+    barber,
+    service
+  });
+
+  return await this.reservationRepository.save(reservation);
+}
+
 
   findAll() {
     return this.reservationRepository.find({
