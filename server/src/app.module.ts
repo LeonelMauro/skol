@@ -8,6 +8,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { BarberAvailabilityModule } from './barber-availability/barber-availability.module';
 import { AuthModule } from './auth/auth.module';
+import { BookingsModule } from './bookings/bookings.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AuthModule } from './auth/auth.module';
   ReservationModule,
   BarberAvailabilityModule,
   AuthModule,
+  BookingsModule,
 ],
 
   controllers: [],
