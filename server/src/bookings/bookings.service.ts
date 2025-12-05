@@ -6,6 +6,7 @@ import { Service } from 'src/services/entities/service.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking';
+import { UpdateBookingDto } from './dto/update-booking.dto';
 
 @Injectable()
 export class BookingsService {
@@ -166,4 +167,81 @@ export class BookingsService {
 
     return await this.reservationRepository.save(newReservation);
     }
+    async update(id: number, dto: UpdateBookingDto) {
+    // 1️⃣ Buscar reserva existente
+    const reservation = await this.reservationRepository.findOne({
+      where: { id },
+      relations: ['barber', 'client', 'service']
+    });
+
+    if (!reservation) {
+      throw new NotFoundException('No se encontró la reserva');
+    }
+
+    // 2️⃣ Actualizar servicio si se envía
+    if (dto.serviceId) {
+      const newService = await this.serviceRepository.findOne({
+        where: { id: dto.serviceId }
+      });
+      if (!newService)
+        throw new NotFoundException('No se encontró el servicio');
+
+      reservation.service = newService;
+    }
+
+    // 3️⃣ Si cambian "date" o "time", validar disponibilidad
+    const newDate = dto.date ?? reservation.date;
+    const newTime = dto.time ?? reservation.time;
+
+    // Obtener disponibilidad del barbero para ese día
+    const jsDate = new Date(newDate + 'T00:00');
+    const weekday = jsDate
+      .toLocaleDateString('en-US', { weekday: 'long' })
+      .toLowerCase();
+
+    const availability = await this.barberAvailabilityRepository.findOne({
+      where: {
+        barber: { id: reservation.barber.id },
+        day_of_week: weekday,
+        is_active: true
+      }
+    });
+
+    if (!availability) {
+      throw new NotFoundException(
+        `El barbero no trabaja el día ${weekday}`
+      );
+    }
+
+    // Validar rango horario
+    if (newTime < availability.start_time || newTime >= availability.end_time) {
+      throw new BadRequestException(
+        `El horario ${newTime} está fuera del rango permitido (${availability.start_time} - ${availability.end_time})`
+      );
+    }
+
+    // Validar si NO está reservado ya ese horario
+    const exists = await this.reservationRepository.findOne({
+      where: {
+        barber: { id: reservation.barber.id },
+        date: newDate,
+        time: newTime
+      }
+    });
+
+    if (exists && exists.id !== reservation.id) {
+      throw new BadRequestException("Ese horario ya está reservado");
+    }
+
+    // 4️⃣ Aplicar actualizaciones
+    reservation.date = newDate;
+    reservation.time = newTime;
+
+    if (dto.status) {
+      reservation.status = dto.status;
+    }
+
+    return await this.reservationRepository.save(reservation);
+  }
+
 }
