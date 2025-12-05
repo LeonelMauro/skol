@@ -1,8 +1,10 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { BookingsService } from './bookings.service';
+import { CreateBookingDto } from './dto/create-booking';
 
 
 @Controller('bookings')
+
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
@@ -15,5 +17,8 @@ export class BookingsController {
     return this.bookingsService.getAvailableSlots(barberId, date, serviceId);
   }
 
-  
+  @Post()
+  create(@Body()dto : CreateBookingDto){
+    return this.bookingsService.create(dto)
+  }
 }
