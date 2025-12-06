@@ -29,5 +29,13 @@ export class BookingsController {
   ) {
     return this.bookingsService.update(id, dto);
   }
+  @Post(':id/confirm')
+  confirm(@Param('id') id: number) {
+    return this.bookingsService.confirmReservation(id);}
+
+  @Post(':id/canceled')
+  canceled(@Param('id') id: number){
+    return this.bookingsService.canceledReservation(id)
+  }
 
 }

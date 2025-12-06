@@ -243,5 +243,42 @@ export class BookingsService {
 
     return await this.reservationRepository.save(reservation);
   }
+    async confirmReservation(reservationId: number) {
+    const reservation = await this.reservationRepository.findOne({
+      where: { id: reservationId },
+      relations: ['client', 'barber', 'service'],
+    });
+
+    if (!reservation) {
+      throw new NotFoundException('No se encontró la reserva');
+    }
+
+    if (reservation.status !== ReservationStatus.PENDING) {
+      throw new BadRequestException(
+        `La reserva no puede ser confirmada porque está en estado ${reservation.status}`
+      );
+    }
+
+    reservation.status = ReservationStatus.CONFIRMED;
+
+    return await this.reservationRepository.save(reservation);
+  }
+
+  async canceledReservation(reservationId){
+    const reservation = await this.reservationRepository.findOne({
+      where: {id: reservationId},
+      relations: ['client','barber','service']
+    })
+    if (!reservation){
+      throw new NotFoundException('No se encontro reserva')
+    }
+    if(reservation.status === ReservationStatus.CANCELED){
+      throw new NotFoundException('La reserva ya fue cancelada')
+    }
+    reservation.status = ReservationStatus.CANCELED
+    
+    return this.reservationRepository.save(reservation)
+  }
+
 
 }
