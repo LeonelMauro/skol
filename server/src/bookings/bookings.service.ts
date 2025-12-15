@@ -8,10 +8,13 @@ import { Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { MailService } from 'src/mail/mail.service';
+import { Logger } from '@nestjs/common';
 
 
 @Injectable()
 export class BookingsService {
+  private readonly logger = new Logger(BookingsService.name)
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -25,7 +28,7 @@ export class BookingsService {
     @InjectRepository(Service)
     private readonly serviceRepository: Repository<Service>,
 
-    private readonly mailService: MailService
+    private readonly mailService: MailService,
 
 
   ) {}
@@ -173,39 +176,8 @@ export class BookingsService {
 
     const savedReservation = await this.reservationRepository.save(newReservation);
 
-    // 9️⃣ Enviar notificaciones por mail (NO bloqueantes)
-    try {
-      await this.mailService.sendMail(
-        client.email,
-        'Reserva creada - Skol Barbería',
-        `
-          <h2>Reserva confirmada</h2>
-          <p>Hola ${client.name},</p>
-          <p>Tu reserva fue creada correctamente.</p>
-          <p>
-            <strong>Barbero:</strong> ${barber.name}<br>
-            <strong>Fecha:</strong> ${dto.date}<br>
-            <strong>Hora:</strong> ${dto.time}
-          </p>
-        `
-      );
-
-      await this.mailService.sendMail(
-        barber.email,
-        'Nueva reserva asignada',
-        `
-          <h2>Nueva reserva</h2>
-          <p>Tenés una nueva reserva.</p>
-          <p>
-            <strong>Cliente:</strong> ${client.name}<br>
-            <strong>Fecha:</strong> ${dto.date}<br>
-            <strong>Hora:</strong> ${dto.time}
-          </p>
-        `
-      );
-    } catch (error) {
-      console.error('Error enviando correos:', error.message);
-    }
+    
+    this.sendReservationCreatedEmails(savedReservation);
 
     return savedReservation;
 
@@ -306,40 +278,7 @@ export class BookingsService {
     reservation.status = ReservationStatus.CONFIRMED;
     const saved = await this.reservationRepository.save(reservation);
 
-    try {
-      await this.mailService.sendMail(
-        reservation.client.email,
-        'Reserva confirmada - Skol Barbería',
-        `
-          <h2>Reserva confirmada</h2>
-          <p>Hola ${reservation.client.name},</p>
-          <p>Tu reserva fue confirmada.</p>
-          <p>
-            <strong>Barbero:</strong> ${reservation.barber.name}<br>
-            <strong>Servicio:</strong> ${reservation.service.name}<br>
-            <strong>Fecha:</strong> ${reservation.date}<br>
-            <strong>Hora:</strong> ${reservation.time}
-          </p>
-        `
-      );
-
-      await this.mailService.sendMail(
-        reservation.barber.email,
-        'Reserva confirmada',
-        `
-          <h2>Reserva confirmada</h2>
-          <p>Tenés una reserva confirmada.</p>
-          <p>
-            <strong>Cliente:</strong> ${reservation.client.name}<br>
-            <strong>Servicio:</strong> ${reservation.service.name}<br>
-            <strong>Fecha:</strong> ${reservation.date}<br>
-            <strong>Hora:</strong> ${reservation.time}
-          </p>
-        `
-      );
-    } catch (error) {
-      console.error('Error enviando mails de confirmación');
-    }
+    this.sendReservationConfirmedEmails(saved);
 
     return saved;
   }
@@ -362,42 +301,156 @@ export class BookingsService {
   reservation.status = ReservationStatus.CANCELED;
   const saved = await this.reservationRepository.save(reservation);
 
+  this.sendReservationCanceledEmails(saved);
+
+
+  return saved;
+}
+  //Metodos Privado Crear//
+
+private async sendReservationCreatedEmails(reservation: Reservation) {
+  try {
+    await this.mailService.sendMail(
+      reservation.client.email,
+      'Reserva creada - Skol Barbería',
+      this.buildClientCreatedTemplate(reservation),
+    );
+
+    await this.mailService.sendMail(
+      reservation.barber.email,
+      'Nueva reserva asignada',
+      this.buildBarberCreatedTemplate(reservation),
+    );
+  } catch (error) {
+    this.logger.error(
+      `Error enviando mails de creación (reserva ${reservation.id})`,
+      error.stack,
+    );
+  }
+};
+
+private buildClientCreatedTemplate(reservation: Reservation): string {
+  return `
+    <h2>Reserva creada</h2>
+    <p>Hola ${reservation.client.name},</p>
+    <p>Tu reserva fue creada correctamente.</p>
+    <p>
+      <strong>Barbero:</strong> ${reservation.barber.name}<br>
+      <strong>Servicio:</strong> ${reservation.service.name}<br>
+      <strong>Fecha:</strong> ${reservation.date}<br>
+      <strong>Hora:</strong> ${reservation.time}
+    </p>
+  `;
+}
+
+private buildBarberCreatedTemplate(reservation: Reservation): string {
+  return `
+    <h2>Nueva reserva</h2>
+    <p>Tenés una nueva reserva asignada.</p>
+    <p>
+      <strong>Cliente:</strong> ${reservation.client.name}<br>
+      <strong>Servicio:</strong> ${reservation.service.name}<br>
+      <strong>Fecha:</strong> ${reservation.date}<br>
+      <strong>Hora:</strong> ${reservation.time}
+    </p>
+  `;
+}
+ 
+//Metodos Privado confimar//
+
+private async sendReservationConfirmedEmails(reservation: Reservation) { 
+  try {
+    await this.mailService.sendMail(
+      reservation.client.email,
+      'Reserva confirmada - Skol Barbería',
+      this.buildClientConfirmedTemplate(reservation),
+    );
+
+    await this.mailService.sendMail(
+      reservation.barber.email,
+      'Reserva confirmada - Skol Barbería',
+      this.buildBarberConfirmedTemplate(reservation),
+    );
+  } catch (error) {
+    this.logger.error(
+      
+      `Error en confimar la reserva (reserva ${reservation.id})`,
+      error.stack,
+    );
+  }
+}
+private buildClientConfirmedTemplate(reservation: Reservation): string {
+  return `
+    <h2>Reserva confirmada</h2>
+    <p>Hola ${reservation.client.name},</p>
+    <p>Tu reserva fue confirmada.</p>
+    <p>
+      <strong>Barbero:</strong> ${reservation.barber.name}<br>
+      <strong>Servicio:</strong> ${reservation.service.name}<br>
+      <strong>Fecha:</strong> ${reservation.date}<br>
+      <strong>Hora:</strong> ${reservation.time}
+    </p>
+  `;
+}
+private buildBarberConfirmedTemplate(reservation: Reservation): string {
+  return `
+    <h2>Reserva confirmada</h2>
+    <p>Tenés una  reserva confirmada.</p>
+    <p>
+      <strong>Cliente:</strong> ${reservation.client.name}<br>
+      <strong>Servicio:</strong> ${reservation.service.name}<br>
+      <strong>Fecha:</strong> ${reservation.date}<br>
+      <strong>Hora:</strong> ${reservation.time}
+    </p>
+  `;
+}
+
+ //Metodos Privado Cancelar//
+
+private async sendReservationCanceledEmails(reservation: Reservation) {
   try {
     await this.mailService.sendMail(
       reservation.client.email,
       'Reserva cancelada - Skol Barbería',
-      `
-        <h2>Reserva cancelada</h2>
-        <p>Hola ${reservation.client.name},</p>
-        <p>Tu reserva fue cancelada.</p>
-        <p>
-          <strong>Servicio:</strong> ${reservation.service.name}<br>
-          <strong>Fecha:</strong> ${reservation.date}<br>
-          <strong>Hora:</strong> ${reservation.time}
-        </p>
-      `
+      this.buildClientCanceledTemplate(reservation),
     );
 
     await this.mailService.sendMail(
       reservation.barber.email,
       'Reserva cancelada',
-      `
-        <h2>Reserva cancelada</h2>
-        <p>Una reserva fue cancelada.</p>
-        <p>
-          <strong>Cliente:</strong> ${reservation.client.name}<br>
-          <strong>Fecha:</strong> ${reservation.date}<br>
-          <strong>Hora:</strong> ${reservation.time}
-        </p>
-      `
+      this.buildBarberCanceledTemplate(reservation),
     );
   } catch (error) {
-    console.error('Error enviando mails de cancelación');
+    this.logger.error(
+      `Error enviando mails de cancelación (reserva ${reservation.id})`,
+      error.stack,
+    );
   }
-
-  return saved;
 }
-
-
+private buildClientCanceledTemplate(reservation: Reservation): string {
+  return `
+    <h2>Reserva cancelada</h2>
+    <p>Hola ${reservation.client.name},</p>
+    <p>Tu reserva fue cancelada.</p>
+    <p>
+      <strong>Barbero:</strong> ${reservation.barber.name}<br>
+      <strong>Servicio:</strong> ${reservation.service.name}<br>
+      <strong>Fecha:</strong> ${reservation.date}<br>
+      <strong>Hora:</strong> ${reservation.time}
+    </p>
+  `;
+}
+private buildBarberCanceledTemplate(reservation: Reservation): string {
+  return `
+    <h2>Reserva cancelada</h2>
+    <p>Tenés una reserva cancelada.</p>
+    <p>
+      <strong>Cliente:</strong> ${reservation.client.name}<br>
+      <strong>Servicio:</strong> ${reservation.service.name}<br>
+      <strong>Fecha:</strong> ${reservation.date}<br>
+      <strong>Hora:</strong> ${reservation.time}
+    </p>
+  `;
+}
 
 }
