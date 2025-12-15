@@ -4,11 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { ServicesModule } from './services/services.module';
-import { NotificationsModule } from './notifications/notifications.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { BarberAvailabilityModule } from './barber-availability/barber-availability.module';
 import { AuthModule } from './auth/auth.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -30,11 +30,11 @@ import { BookingsModule } from './bookings/bookings.module';
   UserModule,
   RolesModule,
   ServicesModule,
-  NotificationsModule,
   ReservationModule,
   BarberAvailabilityModule,
   AuthModule,
   BookingsModule,
+  MailModule,
 ],
 
   controllers: [],

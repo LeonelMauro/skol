@@ -7,6 +7,8 @@ import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking';
 import { UpdateBookingDto } from './dto/update-booking.dto';
+import { MailService } from 'src/mail/mail.service';
+
 
 @Injectable()
 export class BookingsService {
@@ -22,6 +24,10 @@ export class BookingsService {
 
     @InjectRepository(Service)
     private readonly serviceRepository: Repository<Service>,
+
+    private readonly mailService: MailService
+
+
   ) {}
 
   async getAvailableSlots(barberId: number, date: string, serviceId: number) {
@@ -165,8 +171,46 @@ export class BookingsService {
       status: ReservationStatus.PENDING
     });
 
-    return await this.reservationRepository.save(newReservation);
+    const savedReservation = await this.reservationRepository.save(newReservation);
+
+    // 9️⃣ Enviar notificaciones por mail (NO bloqueantes)
+    try {
+      await this.mailService.sendMail(
+        client.email,
+        'Reserva creada - Skol Barbería',
+        `
+          <h2>Reserva confirmada</h2>
+          <p>Hola ${client.name},</p>
+          <p>Tu reserva fue creada correctamente.</p>
+          <p>
+            <strong>Barbero:</strong> ${barber.name}<br>
+            <strong>Fecha:</strong> ${dto.date}<br>
+            <strong>Hora:</strong> ${dto.time}
+          </p>
+        `
+      );
+
+      await this.mailService.sendMail(
+        barber.email,
+        'Nueva reserva asignada',
+        `
+          <h2>Nueva reserva</h2>
+          <p>Tenés una nueva reserva.</p>
+          <p>
+            <strong>Cliente:</strong> ${client.name}<br>
+            <strong>Fecha:</strong> ${dto.date}<br>
+            <strong>Hora:</strong> ${dto.time}
+          </p>
+        `
+      );
+    } catch (error) {
+      console.error('Error enviando correos:', error.message);
     }
+
+    return savedReservation;
+
+  }
+
     async update(id: number, dto: UpdateBookingDto) {
     // 1️⃣ Buscar reserva existente
     const reservation = await this.reservationRepository.findOne({
@@ -260,25 +304,100 @@ export class BookingsService {
     }
 
     reservation.status = ReservationStatus.CONFIRMED;
+    const saved = await this.reservationRepository.save(reservation);
 
-    return await this.reservationRepository.save(reservation);
+    try {
+      await this.mailService.sendMail(
+        reservation.client.email,
+        'Reserva confirmada - Skol Barbería',
+        `
+          <h2>Reserva confirmada</h2>
+          <p>Hola ${reservation.client.name},</p>
+          <p>Tu reserva fue confirmada.</p>
+          <p>
+            <strong>Barbero:</strong> ${reservation.barber.name}<br>
+            <strong>Servicio:</strong> ${reservation.service.name}<br>
+            <strong>Fecha:</strong> ${reservation.date}<br>
+            <strong>Hora:</strong> ${reservation.time}
+          </p>
+        `
+      );
+
+      await this.mailService.sendMail(
+        reservation.barber.email,
+        'Reserva confirmada',
+        `
+          <h2>Reserva confirmada</h2>
+          <p>Tenés una reserva confirmada.</p>
+          <p>
+            <strong>Cliente:</strong> ${reservation.client.name}<br>
+            <strong>Servicio:</strong> ${reservation.service.name}<br>
+            <strong>Fecha:</strong> ${reservation.date}<br>
+            <strong>Hora:</strong> ${reservation.time}
+          </p>
+        `
+      );
+    } catch (error) {
+      console.error('Error enviando mails de confirmación');
+    }
+
+    return saved;
   }
 
-  async canceledReservation(reservationId){
-    const reservation = await this.reservationRepository.findOne({
-      where: {id: reservationId},
-      relations: ['client','barber','service']
-    })
-    if (!reservation){
-      throw new NotFoundException('No se encontro reserva')
-    }
-    if(reservation.status === ReservationStatus.CANCELED){
-      throw new NotFoundException('La reserva ya fue cancelada')
-    }
-    reservation.status = ReservationStatus.CANCELED
-    
-    return this.reservationRepository.save(reservation)
+
+  async canceledReservation(reservationId: number) {
+  const reservation = await this.reservationRepository.findOne({
+    where: { id: reservationId },
+    relations: ['client', 'barber', 'service'],
+  });
+
+  if (!reservation) {
+    throw new NotFoundException('No se encontró la reserva');
   }
+
+  if (reservation.status === ReservationStatus.CANCELED) {
+    throw new BadRequestException('La reserva ya fue cancelada');
+  }
+
+  reservation.status = ReservationStatus.CANCELED;
+  const saved = await this.reservationRepository.save(reservation);
+
+  try {
+    await this.mailService.sendMail(
+      reservation.client.email,
+      'Reserva cancelada - Skol Barbería',
+      `
+        <h2>Reserva cancelada</h2>
+        <p>Hola ${reservation.client.name},</p>
+        <p>Tu reserva fue cancelada.</p>
+        <p>
+          <strong>Servicio:</strong> ${reservation.service.name}<br>
+          <strong>Fecha:</strong> ${reservation.date}<br>
+          <strong>Hora:</strong> ${reservation.time}
+        </p>
+      `
+    );
+
+    await this.mailService.sendMail(
+      reservation.barber.email,
+      'Reserva cancelada',
+      `
+        <h2>Reserva cancelada</h2>
+        <p>Una reserva fue cancelada.</p>
+        <p>
+          <strong>Cliente:</strong> ${reservation.client.name}<br>
+          <strong>Fecha:</strong> ${reservation.date}<br>
+          <strong>Hora:</strong> ${reservation.time}
+        </p>
+      `
+    );
+  } catch (error) {
+    console.error('Error enviando mails de cancelación');
+  }
+
+  return saved;
+}
+
 
 
 }
