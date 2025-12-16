@@ -31,11 +31,14 @@ export class Reservation {
     @Column()
     time: string; // hh:mm
 
+
     @Column({
     type: 'enum',
     enum: ReservationStatus,
     default: ReservationStatus.PENDING,
     })
     status: ReservationStatus;
-
+    
+    @Column({ default: false })
+    reminderSent: boolean;
 }

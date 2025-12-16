@@ -9,9 +9,11 @@ import { BarberAvailabilityModule } from './barber-availability/barber-availabil
 import { AuthModule } from './auth/auth.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { MailModule } from './mail/mail.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+  ScheduleModule.forRoot(),
   ConfigModule.forRoot({ isGlobal: true }),
   TypeOrmModule.forRootAsync({
     imports: [ConfigModule],
