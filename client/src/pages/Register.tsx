@@ -1,3 +1,5 @@
+import { Typography } from '@mui/material';
+
 export default function Register() {
-  return <h2>Register</h2>;
+  return <Typography variant="h4">Register</Typography>;
 }
