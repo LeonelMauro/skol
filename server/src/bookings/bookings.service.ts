@@ -32,6 +32,20 @@ export class BookingsService {
 
 
   ) {}
+  async findAll() {
+  return this.reservationRepository.find({
+    relations: ['client', 'barber', 'service'],
+    order: { date: 'ASC', time: 'ASC' },
+  });
+}
+
+async findPending() {
+  return this.reservationRepository.find({
+    where: { status: ReservationStatus.PENDING },
+    relations: ['client', 'barber', 'service'],
+  });
+}
+
 
   async getAvailableSlots(barberId: number, date: string, serviceId: number) {
 

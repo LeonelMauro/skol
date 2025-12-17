@@ -8,6 +8,14 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
+  @Get()
+  findAll() {
+  return this.bookingsService.findAll();
+}
+  @Get('pending')
+  findPending() {
+    return this.bookingsService.findPending();
+  }
 
   @Get('barbers/:barberId/available-slots')
   getAvailableSlots(

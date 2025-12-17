@@ -18,7 +18,7 @@ export class BookingsReminderService {
   @Cron('*/5 * * * *') // cada 5 minutos
   async sendReminders() {
     const now = new Date();
-    const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    const twoHoursLater = new Date(now.getTime() + 10 * 60 * 1000);
 
     const reservations = await this.reservationRepository
       .createQueryBuilder('r')
