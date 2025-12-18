@@ -1,34 +1,91 @@
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  ButtonBase,
+  Box,
+  IconButton,
+} from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import InstagramIcon from '@mui/icons-material/Instagram';
+
+import icono from '../../img/icono.png';
+
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          SKOL
-        </Typography>
+    <AppBar
+      position="fixed"
+      elevation={4}
+      sx={{
+        backgroundColor: '#000',
+      }}
+    >
+      <Toolbar sx={{ minHeight: 72 }}>
+        {/* IZQUIERDA – LOGO */}
+        <Box sx={{ flex: 1 }}>
+          <ButtonBase component={RouterLink} to="/">
+            <Box
+              component="img"
+              src={icono}
+              alt="SKOL"
+              sx={{ height: 44 }}
+            />
+          </ButtonBase>
+        </Box>
 
-        {user ? (
-          <>
-            <Typography sx={{ mr: 2 }}>{user.email}</Typography>
-            <Button color="inherit" onClick={logout}>
-              Logout
+        {/* CENTRO – MENÚ */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 4,
+          }}
+        >
+          {['Servicios', 'Nosotros', 'Tienda', 'Reservas'].map((item) => (
+            <Button
+              key={item}
+              sx={{
+                color: '#fff',
+                fontWeight: 500,
+                letterSpacing: 1,
+                '&:hover': {
+                  color: '#DBD515',
+                },
+              }}
+            >
+              {item}
             </Button>
-          </>
-        ) : (
-          <>
-            <Button color="inherit" component={RouterLink} to="/login">
-              Login
-            </Button>
-            <Button color="inherit" component={RouterLink} to="/register">
-              Register
-            </Button>
-          </>
-        )}
+          ))}
+        </Box>
+
+        {/* DERECHA – ICONOS */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 1,
+          }}
+        >
+          <IconButton sx={{ color: '#DBD515' }}>
+            <PersonOutlineIcon />
+          </IconButton>
+
+          <IconButton sx={{ color: '#DBD515' }}>
+            <FacebookIcon />
+          </IconButton>
+
+          <IconButton sx={{ color: '#DBD515' }}>
+            <InstagramIcon />
+          </IconButton>
+        </Box>
       </Toolbar>
     </AppBar>
   );
