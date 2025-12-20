@@ -16,7 +16,7 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import icono from '../../img/icono.png';
 
 export default function Header() {
-  const { user } = useAuth();
+   const { user, logout } = useAuth();
 
   return (
     <AppBar
@@ -42,6 +42,7 @@ export default function Header() {
         {/* CENTRO – MENÚ */}
         <Box
           sx={{
+            
             flex: 1,
             display: 'flex',
             justifyContent: 'center',
@@ -52,6 +53,7 @@ export default function Header() {
             <Button
               key={item}
               sx={{
+                fontFamily: 'Keania One',
                 color: '#fff',
                 fontWeight: 500,
                 letterSpacing: 1,
@@ -74,17 +76,40 @@ export default function Header() {
             gap: 1,
           }}
         >
-          <IconButton sx={{ color: '#DBD515' }}>
-            <PersonOutlineIcon />
-          </IconButton>
-
-          <IconButton sx={{ color: '#DBD515' }}>
+          {/* REDES */}
+          <IconButton
+            href="https://facebook.com"
+            target="_blank"
+            sx={{ color: '#DBD515' }}
+          >
             <FacebookIcon />
           </IconButton>
 
-          <IconButton sx={{ color: '#DBD515' }}>
+          <IconButton
+            href="https://instagram.com"
+            target="_blank"
+            sx={{ color: '#DBD515' }}
+          >
             <InstagramIcon />
           </IconButton>
+
+          {/* USER */}
+          {!user ? (
+            <IconButton
+              component={RouterLink}
+              to="/login"
+              sx={{ color: '#DBD515' }}
+            >
+              <PersonOutlineIcon />
+            </IconButton>
+          ) : (
+            <IconButton
+              onClick={logout}
+              sx={{ color: '#DBD515' }}
+            >
+              <PersonOutlineIcon />
+            </IconButton>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

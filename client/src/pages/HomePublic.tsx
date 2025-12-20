@@ -75,7 +75,7 @@ export default function HomePublic() {
             {/* SKOL */}
             <Typography
               sx={{
-                fontFamily: '"Keania One", sans-serif',
+                fontFamily: '"Keania One"',
                 fontSize: { xs: '4.5rem', md: '6.5rem' },
                 color: '#DBD515',
                 letterSpacing: '6px',
@@ -104,7 +104,7 @@ export default function HomePublic() {
             {/* SUBTITLE */}
             <Typography
               sx={{
-                fontFamily: '"Keania One", sans-serif',
+                fontFamily: 'Keania One',
                 fontSize: { xs: '1.6rem', md: '2.2rem' },
                 color: '#DBD515',
                 letterSpacing: '4px',
@@ -161,13 +161,14 @@ export default function HomePublic() {
     <Typography
         variant="h4"
         textAlign="center"
-        sx={{ color: '#fff', mb: 6 }}
+        sx={{ fontFamily: 'Keania One',color: '#fff', mb: 6 }}
     >
         Servicios
     </Typography>
 
     <Box
         sx={{
+          
         display: 'grid',
         gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
         gap: 4,
@@ -229,7 +230,7 @@ export default function HomePublic() {
       variant="h4"
       sx={{
         mb: 3,
-        fontFamily: '"Keania One", sans-serif',
+        fontFamily: 'Keania One',
         letterSpacing: 2,
         color: '#DBD515',
         textTransform: 'uppercase',
@@ -279,7 +280,7 @@ function ServiceCard({
         },
       }}
     >
-      <Typography variant="h6" sx={{ color: '#C9A24D', mb: 1 }}>
+      <Typography variant="h6" sx={{fontFamily: 'Keania One', color: '#C9A24D', mb: 1 }}>
         {title}
       </Typography>
       <Typography variant="body2">{description}</Typography>
