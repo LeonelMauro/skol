@@ -1,7 +1,10 @@
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Card, CardActionArea, CardContent } from '@mui/material';
 import hero1 from '../img/hero1.jpg';
-import hero2 from '../img/hero2.jpg'
-import nosotros from '../img/nosotros.jpg'
+import hero2 from '../img/hero2.jpg';
+import nosotros from '../img/nosotros.jpg';
+import tienda1 from '../img/tienda1.jpg';
+import tienda2 from '../img/tienda2.jpg'
+
 import { useEffect, useState } from 'react';
 
 const heroImages = [
@@ -152,12 +155,12 @@ export default function HomePublic() {
       sx={{
         py: 8,
         backgroundColor: '#0F0F0F',
-    position: 'relative',
-    height: '90vh',
-    width: '100vw',
-    marginLeft: 'calc(50% - 50vw)',
-    overflow: 'hidden',
-  }}>
+        position: 'relative',
+        height: '90vh',
+        width: '100vw',
+        marginLeft: 'calc(50% - 50vw)',
+        overflow: 'hidden',
+      }}>
     <Typography
         variant="h4"
         textAlign="center"
@@ -187,77 +190,203 @@ export default function HomePublic() {
         title="Tratamientos"
         description="Cuidado capilar y facial"
         />
+        <ServiceCard
+        title="Tratamientos"
+        description="Cuidado capilar y facial"
+        />
+        <ServiceCard
+        title="Tratamientos"
+        description="Cuidado capilar y facial"
+        />
+        <ServiceCard
+        title="Tratamientos"
+        description="Cuidado capilar y facial"
+        />
+        
     </Box>
     </Box>
     {/* SOBRE SKOL */}
-<Box
-  sx={{
-    position: 'relative',
-    height: '80vh',
-    width: '100vw',
-    marginLeft: 'calc(50% - 50vw)',
-    overflow: 'hidden',
-    display: 'flex',
-    alignItems: 'center',
-  }}
->
-  {/* BACKGROUND IMAGE */}
-  <Box
-    sx={{
-      position: 'absolute',
-      inset: 0,
-      backgroundImage: `
-        linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
-        url(${nosotros})
-      `,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      zIndex: 1,
-    }}
-  />
-
-  {/* CONTENT */}
-  <Box
-    sx={{
-      position: 'relative',
-      zIndex: 2,
-      maxWidth: 700,
-      px: { xs: 3, md: 10 },
-      color: '#fff',
-    }}
-  >
-    <Typography
-      variant="h4"
+    <Box
       sx={{
-        mb: 3,
-        fontFamily: 'Keania One',
-        letterSpacing: 2,
-        color: '#DBD515',
-        textTransform: 'uppercase',
+        position: 'relative',
+        height: '80vh',
+        width: '100vw',
+        marginLeft: 'calc(50% - 50vw)',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
       }}
     >
-      Sobre SKOL
-    </Typography>
+      {/* BACKGROUND IMAGE */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+            url(${nosotros})
+          `,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          zIndex: 1,
+        }}
+      />
 
-    <Typography
+      {/* NOSOTROS */}
+      <Box
+        sx={{
+          position: 'relative',
+          zIndex: 2,
+          maxWidth: 700,
+          px: { xs: 3, md: 10 },
+          color: '#fff',
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 3,
+            fontFamily: 'Keania One',
+            letterSpacing: 2,
+            color: '#DBD515',
+            textTransform: 'uppercase',
+          }}
+        >
+          Sobre SKOL
+        </Typography>
+
+        <Typography
+          sx={{
+            lineHeight: 1.8,
+            fontSize: '1.05rem',
+            color: '#E0E0E0',
+          }}
+        >
+          En SKOL combinamos la tradición de la barbería clásica con técnicas
+          modernas. Nuestro objetivo es que cada cliente viva una experiencia
+          única, cómoda y profesional.
+        </Typography>
+      </Box>
+    </Box>
+          {/* TIEDAS */}
+    <Box
       sx={{
-        lineHeight: 1.8,
-        fontSize: '1.05rem',
-        color: '#E0E0E0',
+        py: 10,
+        backgroundColor: '#0F0F0F',
+        width: '100vw',
+        marginLeft: 'calc(50% - 50vw)',
       }}
     >
-      En SKOL combinamos la tradición de la barbería clásica con técnicas
-      modernas. Nuestro objetivo es que cada cliente viva una experiencia
-      única, cómoda y profesional.
-    </Typography>
-  </Box>
-</Box>
+      {/* TÍTULO */}
+      <Typography
+        variant="h4"
+        textAlign="center"
+        sx={{
+          color: '#DBD515',
+          fontFamily: 'Keania One',
+          letterSpacing: 2,
+          mb: 6,
+        }}
+      >
+        Nuestros Locales
+      </Typography>
 
+      {/* GRID */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+          gap: 6,
+          px: { xs: 3, md: 10 },
+        }}
+      >
+        {locales.map((local) => (
+          <Card
+            key={local.id}
+            sx={{
+              position: 'relative',
+              height: 380,
+              borderRadius: 3,
+              overflow: 'hidden',
+              backgroundColor: '#000',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.6)',
+              transition: '0.4s',
+              '&:hover': {
+                transform: 'translateY(-8px)',
+                boxShadow: '0 20px 50px rgba(219,213,21,0.35)',
+              },
+            }}
+          >
+            <CardActionArea sx={{ height: '100%' }}>
+              {/* IMAGEN */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `
+                    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.85)),
+                    url(${local.img})
+                  `,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  transition: '0.6s',
+                }}
+              />
 
+              {/* CONTENIDO */}
+              <CardContent
+                sx={{
+                  position: 'relative',
+                  zIndex: 2,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  color: '#fff',
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontFamily: 'Keania One',
+                    letterSpacing: 1,
+                    color: '#DBD515',
+                  }}
+                >
+                  {local.nombre}
+                </Typography>
+
+                <Typography
+                  sx={{
+                    opacity: 0.9,
+                    fontSize: '0.95rem',
+                  }}
+                >
+                  {local.direccion}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        ))}
+      </Box>
+    </Box>
         </>
     );
     }
-
+const locales = [
+  {
+    id: 1,
+    nombre: 'SKOL – Ozamis',
+    direccion: 'Ozamis 359 · Maipú',
+    img: tienda1,
+  },
+  {
+    id: 2,
+    nombre: 'SKOL – Centro',
+    direccion: 'San Martín 1245 · Mendoza',
+    img: tienda2,
+  },
+];
 function ServiceCard({
   title,
   description,
