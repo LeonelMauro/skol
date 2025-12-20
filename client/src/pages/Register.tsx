@@ -39,12 +39,13 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/register', {
+      const response = await api.post('/user/register', {
         name: form.name,
         email: form.email,
         password: form.password,
         phone: form.phone || null,
         birthDate: form.birthDate,
+        
       });
 
       login(response.data);

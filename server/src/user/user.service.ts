@@ -7,6 +7,7 @@ import { Repository, Unique } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CreateClientDto } from './dto/create-client.dto';
 
 
 @Injectable()
@@ -36,6 +37,27 @@ export class UserService {
 
     return await this.userRepository.save(user);
   }
+
+  async createClient(dto: CreateClientDto) {
+  const role = await this.roleRepository.findOne({
+    where: { id: 3 }, // CLIENTE
+  });
+
+  if (!role) {
+    throw new NotFoundException('Rol cliente no encontrado');
+  }
+
+  const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+  const user = this.userRepository.create({
+    ...dto,
+    password: hashedPassword,
+    role,
+  });
+
+  return this.userRepository.save(user);
+}
+
 
   findAll() {
     return this.userRepository.find({

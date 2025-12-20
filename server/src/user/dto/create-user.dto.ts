@@ -1,14 +1,23 @@
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { IsDateString, IsNotEmpty, IsNumber, IsString, Matches, MinLength } from "class-validator";
 
 export class CreateUserDto {
         @IsString()
         @IsNotEmpty()
+        @Transform(({ value }) =>
+        value
+        .toLowerCase()
+        .replace(/\b\w/g, (char) => char.toUpperCase())
+        )
         name: string;
 
         @IsNotEmpty()
         @IsString()
         email: string;
+
+        @IsNotEmpty()
+        @IsString()
+        phone: string;
 
         @IsNotEmpty()
         @IsString()

@@ -16,19 +16,33 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { CreateClientDto } from './dto/create-client.dto';
 
 @Controller('user')
-@UseGuards(JwtAuthGuard, RolesGuard) // <- Se aplica a TODAS las rutas
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  /* =======================
+     REGISTRO PÚBLICO
+     ======================= */
+  @Post('register')
+  createClient(@Body() dto: CreateClientDto) {
+    return this.userService.createClient(dto);
+  }
+
+  /* =======================
+     RUTAS PROTEGIDAS
+     ======================= */
+
   // Perfil del usuario autenticado
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Req() req) {
     return req.user;
   }
 
   // Crear usuario — solo admin
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -36,6 +50,7 @@ export class UserController {
   }
 
   // Obtener todos los usuarios — admin y barber
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'barber')
   @Get()
   findAll() {
@@ -43,6 +58,7 @@ export class UserController {
   }
 
   // Obtener usuario por ID — admin y barber
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'barber')
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -50,6 +66,7 @@ export class UserController {
   }
 
   // Editar usuario — admin, barber, client
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'barber', 'client')
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -57,12 +74,14 @@ export class UserController {
   }
 
   // Cambiar contraseña — cualquier usuario logueado
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/password')
   changePassword(@Param('id') id: string, @Body() dto: ChangePasswordDto) {
     return this.userService.changePassword(+id, dto);
   }
 
   // Eliminar usuario — solo admin
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
