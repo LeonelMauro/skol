@@ -2,22 +2,45 @@ import { Box, Typography, Button, Card, CardActionArea, CardContent } from '@mui
 import hero1 from '../img/hero1.jpg';
 import hero2 from '../img/hero2.jpg';
 import nosotros from '../img/nosotros.jpg';
-import tienda1 from '../img/tienda1.jpg';
-import tienda2 from '../img/tienda2.jpg'
+
 
 import { useEffect, useState } from 'react';
+import api from '../services/api';
 
-const heroImages = [
-hero1,
-hero2,
-];
+const heroImages = [hero1, hero2];
+
+export interface Service {
+  id: number;
+  name: string;
+  description: string;
+  price?: number;
+}
+export interface Location {
+  id: number;
+  name: string;
+  address: string;
+  imageUrl: string;
+}
+
 export default function HomePublic() {
+  const [services, setServices] = useState<Service[]>([]);
 
-    
- 
-    
-      {/* HERO */}
-      const [current, setCurrent] = useState(0);
+  const [locales, setLocales] = useState<Location[]>([]);
+
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const { data } = await api.get<Service[]>('/services');
+        setServices(data);
+      } catch (error) {
+        console.error('Error al cargar servicios', error);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -27,21 +50,32 @@ export default function HomePublic() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+  const fetchLocales = async () => {
+    try {
+      const { data } = await api.get<Location[]>('/location');
+      setLocales(data);
+    } catch (error) {
+      console.error('Error al cargar locales', error);
+    }
+  };
+
+  fetchLocales();
+}, []);
+
+
   return (
     <>
       {/* HERO */}
       <Box
-
-          sx={{
-            position: 'relative',
-            height: '90vh',
-            width: '100vw',
-            marginLeft: 'calc(50% - 50vw)',
-            overflow: 'hidden',
-          }}
-        >
-
-      
+        sx={{
+          position: 'relative',
+          height: '90vh',
+          width: '100vw',
+          marginLeft: 'calc(50% - 50vw)',
+          overflow: 'hidden',
+        }}
+      >
         {/* BACKGROUND IMAGES */}
         {heroImages.map((img, index) => (
           <Box
@@ -75,7 +109,6 @@ export default function HomePublic() {
           }}
         >
           <Box>
-            {/* SKOL */}
             <Typography
               sx={{
                 fontFamily: '"Keania One"',
@@ -104,7 +137,6 @@ export default function HomePublic() {
               SKOL
             </Typography>
 
-            {/* SUBTITLE */}
             <Typography
               sx={{
                 fontFamily: 'Keania One',
@@ -113,21 +145,11 @@ export default function HomePublic() {
                 letterSpacing: '4px',
                 textTransform: 'uppercase',
                 mt: -1,
-                textShadow: `
-                  -1.5px -1.5px 0 rgba(0,0,0,0.2),
-                   1.5px -1.5px 0 rgba(0,0,0,0.2),
-
-                  -3px -3px 0 rgba(0,0,0,1),
-                   3px -3px 0 rgba(0,0,0,1),
-                  -3px  3px 0 rgba(0,0,0,1),
-                   3px  3px 0 rgba(0,0,0,1)
-                `,
               }}
             >
               SALÓN DE CABALLEROS
             </Typography>
 
-            {/* CTA */}
             <Button
               variant="contained"
               sx={{
@@ -136,9 +158,7 @@ export default function HomePublic() {
                 backgroundColor: '#DBD515',
                 color: '#000',
                 fontWeight: 600,
-                '&:hover': {
-                  backgroundColor: '#c4bd13',
-                },
+                '&:hover': { backgroundColor: '#c4bd13' },
               }}
               href="/login"
             >
@@ -148,273 +168,260 @@ export default function HomePublic() {
         </Box>
       </Box>
 
-
-
       {/* SERVICIOS */}
-      <Box 
-      sx={{
-        py: 8,
-        backgroundColor: '#0F0F0F',
-        position: 'relative',
-        height: '90vh',
-        width: '100vw',
-        marginLeft: 'calc(50% - 50vw)',
-        overflow: 'hidden',
-      }}>
-    <Typography
-        variant="h4"
-        textAlign="center"
-        sx={{ fontFamily: 'Keania One',color: '#fff', mb: 6 }}
-    >
-        Servicios
-    </Typography>
-
-    <Box
-        sx={{
-          
-        display: 'grid',
-        gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
-        gap: 4,
-        px: { xs: 2, md: 10 },
-        }}
-    >
-        <ServiceCard
-        title="Corte de cabello"
-        description="Clásico o moderno, a tu estilo"
-        />
-        <ServiceCard
-        title="Barba"
-        description="Perfilado y afeitado profesional"
-        />
-        <ServiceCard
-        title="Tratamientos"
-        description="Cuidado capilar y facial"
-        />
-        <ServiceCard
-        title="Tratamientos"
-        description="Cuidado capilar y facial"
-        />
-        <ServiceCard
-        title="Tratamientos"
-        description="Cuidado capilar y facial"
-        />
-        <ServiceCard
-        title="Tratamientos"
-        description="Cuidado capilar y facial"
-        />
-        
-    </Box>
-    </Box>
-    {/* SOBRE SKOL */}
-    <Box
-      sx={{
-        position: 'relative',
-        height: '80vh',
-        width: '100vw',
-        marginLeft: 'calc(50% - 50vw)',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
-      {/* BACKGROUND IMAGE */}
       <Box
         sx={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: `
-            linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
-            url(${nosotros})
-          `,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          zIndex: 1,
-        }}
-      />
-
-      {/* NOSOTROS */}
-      <Box
-        sx={{
-          position: 'relative',
-          zIndex: 2,
-          maxWidth: 700,
-          px: { xs: 3, md: 10 },
-          color: '#fff',
+          py: 10,
+          backgroundColor: '#0F0F0F',
+          width: '100vw',
+          marginLeft: 'calc(50% - 50vw)',
         }}
       >
+        {/* TÍTULO */}
         <Typography
           variant="h4"
+          textAlign="center"
           sx={{
-            mb: 3,
             fontFamily: 'Keania One',
-            letterSpacing: 2,
             color: '#DBD515',
-            textTransform: 'uppercase',
+            letterSpacing: 2,
+            mb: 6,
           }}
         >
-          Sobre SKOL
+          Servicios
         </Typography>
 
-        <Typography
-          sx={{
-            lineHeight: 1.8,
-            fontSize: '1.05rem',
-            color: '#E0E0E0',
-          }}
-        >
-          En SKOL combinamos la tradición de la barbería clásica con técnicas
-          modernas. Nuestro objetivo es que cada cliente viva una experiencia
-          única, cómoda y profesional.
-        </Typography>
-      </Box>
-    </Box>
-          {/* TIEDAS */}
-    <Box
-      sx={{
-        py: 10,
-        backgroundColor: '#0F0F0F',
-        width: '100vw',
-        marginLeft: 'calc(50% - 50vw)',
-      }}
-    >
-      {/* TÍTULO */}
-      <Typography
-        variant="h4"
-        textAlign="center"
-        sx={{
-          color: '#DBD515',
-          fontFamily: 'Keania One',
-          letterSpacing: 2,
-          mb: 6,
-        }}
-      >
-        Nuestros Locales
-      </Typography>
-
-      {/* GRID */}
-      <Box
+        {/* GRID ORDENADO */}
+        <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
-          gap: 6,
-          px: { xs: 3, md: 10 },
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+          gap: 4,
+          px: { xs: 2, md: 10 },
         }}
       >
-        {locales.map((local) => (
+        {services.map((service) => (
           <Card
-            key={local.id}
+            key={service.id}
             sx={{
-              position: 'relative',
-              height: 380,
-              borderRadius: 3,
-              overflow: 'hidden',
-              backgroundColor: '#000',
-              boxShadow: '0 15px 40px rgba(0,0,0,0.6)',
-              transition: '0.4s',
+              backgroundColor: '#1A1A1A',
+              borderRadius: 2.5,
+              transition: '0.3s',
               '&:hover': {
-                transform: 'translateY(-8px)',
-                boxShadow: '0 20px 50px rgba(219,213,21,0.35)',
+                transform: 'translateY(-6px)',
+                boxShadow: '0 12px 30px rgba(219,213,21,0.35)',
               },
             }}
           >
-            <CardActionArea sx={{ height: '100%' }}>
-              {/* IMAGEN */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `
-                    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.85)),
-                    url(${local.img})
-                  `,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  transition: '0.6s',
-                }}
-              />
-
-              {/* CONTENIDO */}
-              <CardContent
-                sx={{
-                  position: 'relative',
-                  zIndex: 2,
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'flex-end',
-                  color: '#fff',
-                }}
-              >
+            <CardActionArea
+              onClick={() => window.location.href = '/login'}
+            >
+              <CardContent sx={{ textAlign: 'center' }}>
                 <Typography
-                  variant="h5"
+                  variant="h6"
                   sx={{
                     fontFamily: 'Keania One',
-                    letterSpacing: 1,
                     color: '#DBD515',
+                    letterSpacing: 1,
+                    mb: 1,
                   }}
                 >
-                  {local.nombre}
+                  {service.name}
                 </Typography>
 
                 <Typography
-                  sx={{
-                    opacity: 0.9,
-                    fontSize: '0.95rem',
-                  }}
+                  variant="body2"
+                  sx={{ color: '#ccc' }}
                 >
-                  {local.direccion}
+                  {service.description}
                 </Typography>
               </CardContent>
             </CardActionArea>
           </Card>
         ))}
       </Box>
-    </Box>
-        </>
-    );
-    }
-const locales = [
-  {
-    id: 1,
-    nombre: 'SKOL – Ozamis',
-    direccion: 'Ozamis 359 · Maipú',
-    img: tienda1,
-  },
-  {
-    id: 2,
-    nombre: 'SKOL – Centro',
-    direccion: 'San Martín 1245 · Mendoza',
-    img: tienda2,
-  },
-];
-function ServiceCard({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <Box
-      sx={{
-        backgroundColor: '#1A1A1A',
-        p: 4,
-        borderRadius: 2,
-        textAlign: 'center',
-        color: '#fff',
-        transition: '0.3s',
-        '&:hover': {
-          transform: 'translateY(-8px)',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
-        },
-      }}
-    >
-      <Typography variant="h6" sx={{fontFamily: 'Keania One', color: '#C9A24D', mb: 1 }}>
-        {title}
-      </Typography>
-      <Typography variant="body2">{description}</Typography>
-    </Box>
+
+        </Box>
+
+      {/* SOBRE SKOL */}
+      <Box
+        sx={{
+          position: 'relative',
+          height: '80vh',
+          width: '100vw',
+          marginLeft: 'calc(50% - 50vw)',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `
+              linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+              url(${nosotros})
+            `,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            zIndex: 1,
+          }}
+        />
+
+        <Box
+          sx={{
+            position: 'relative',
+            zIndex: 2,
+            maxWidth: 700,
+            px: { xs: 3, md: 10 },
+            color: '#fff',
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              mb: 3,
+              fontFamily: 'Keania One',
+              letterSpacing: 2,
+              color: '#DBD515',
+              textTransform: 'uppercase',
+            }}
+          >
+            Sobre SKOL
+          </Typography>
+
+          <Typography sx={{ lineHeight: 1.8, fontSize: '1.05rem', color: '#E0E0E0' }}>
+            En SKOL combinamos la tradición de la barbería clásica con técnicas modernas.
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* LOCALES */}
+      <Box
+          sx={{
+            py: 10,
+            backgroundColor: '#0F0F0F',
+            width: '100vw',
+            marginLeft: 'calc(50% - 50vw)',
+          }}
+        >
+          {/* TÍTULO */}
+          <Typography
+            variant="h4"
+            textAlign="center"
+            sx={{
+              color: '#DBD515',
+              fontFamily: 'Keania One',
+              letterSpacing: 2,
+              mb: 6,
+            }}
+          >
+            Nuestros Locales
+          </Typography>
+
+          {/* GRID ORDENADO */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+              },
+              gap: 4,
+              px: { xs: 2, md: 8 },
+              justifyItems: 'center',
+            }}
+          >
+            {locales.map((local) => (
+              <Card
+                key={local.id}
+                sx={{
+                  width: '100%',
+                  maxWidth: 320,
+                  borderRadius: 2.5,
+                  overflow: 'hidden',
+                  backgroundColor: '#111',
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
+                  transition: '0.35s ease',
+                  cursor: 'pointer',
+
+                  '&:hover': {
+                    transform: 'translateY(-6px)',
+                    boxShadow: '0 18px 45px rgba(219,213,21,0.35)',
+                  },
+                }}
+              >
+                <CardActionArea
+                  
+                  sx={{ position: 'relative' }}
+                  href="/login"
+                >
+                  {/* IMAGEN */}
+                  <Box
+                    sx={{
+                      height: 180,
+                      backgroundImage: `url(${local.imageUrl})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  />
+
+                  {/* OVERLAY DORADO HOVER */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      inset: 0,
+                      background:
+                        'linear-gradient(rgba(219,213,21,0.25), rgba(0,0,0,0.7))',
+                      opacity: 0,
+                      transition: '0.35s',
+                      '&:hover': {
+                        opacity: 1,
+                      },
+                    }}
+                  />
+
+                  {/* CONTENIDO */}
+                  <CardContent
+                    sx={{
+                      position: 'relative',
+                      backgroundColor: '#0F0F0F',
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontFamily: 'Keania One',
+                        color: '#DBD515',
+                        letterSpacing: 1,
+                      }}
+                    >
+                      {local.name}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: '#ccc',
+                        mt: 0.5,
+                      }}
+                    >
+                      {local.address}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            ))}
+          </Box>
+        </Box>
+
+
+    </>
   );
 }
+
+
 
 

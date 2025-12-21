@@ -1,3 +1,4 @@
+import { Location } from "src/location/entities/location.entity";
 import { Service } from "src/services/entities/service.entity";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
@@ -41,4 +42,8 @@ export class Reservation {
     
     @Column({ default: false })
     reminderSent: boolean;
+
+    @ManyToOne(() => Location)
+    location: Location;
+
 }

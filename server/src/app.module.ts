@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { MailModule } from './mail/mail.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { LocationModule } from './location/location.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ScheduleModule } from '@nestjs/schedule';
   AuthModule,
   BookingsModule,
   MailModule,
+  LocationModule,
 ],
 
   controllers: [],

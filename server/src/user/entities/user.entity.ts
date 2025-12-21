@@ -2,6 +2,7 @@ import { Role } from "src/roles/entities/role.entity";
 import { Reservation } from "src/reservation/entities/reservation.entity";
 import { BarberAvailability } from "src/barber-availability/entities/barber-availability.entity";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from "typeorm";
+import { Location } from "src/location/entities/location.entity";
 
 @Entity()
 export class User {
@@ -38,5 +39,8 @@ export class User {
   // --- Disponibilidad del peluquero ---
   @OneToMany(() => BarberAvailability, (availability) => availability.barber)
   availabilities: BarberAvailability[];
+
+  @ManyToOne(() => Location, location => location.barbers, { nullable: true })
+  location: Location;
 
 }
