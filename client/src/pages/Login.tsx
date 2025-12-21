@@ -19,23 +19,40 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const response = await api.post('/auth/login', {
-        email,
-        password,
-      });
+  try {
+    const response = await api.post('/auth/login', {
+      email,
+      password,
+    });
 
-      login(response.data);
-      navigate('/dashboard');
-    } catch {
-      alert('Credenciales inválidas');
-    } finally {
-      setLoading(false);
+    const { access_token, payload } = response.data;
+
+    login({
+      id: payload.sub,
+      email: payload.email,
+      role: payload.role,
+      access_token,
+    });
+
+    // Redirección por rol
+    if (payload.role === 'admin') {
+      navigate('/admin');
+    } else if (payload.role === 'barber') {
+      navigate('/barber');
+    } else {
+      navigate('/client');
     }
-  };
+
+  } catch {
+    alert('Credenciales inválidas');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <Box

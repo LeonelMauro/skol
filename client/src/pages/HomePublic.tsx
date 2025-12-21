@@ -170,6 +170,7 @@ export default function HomePublic() {
 
       {/* SERVICIOS */}
       <Box
+      id="servicios"
         sx={{
           py: 10,
           backgroundColor: '#0F0F0F',
@@ -245,6 +246,7 @@ export default function HomePublic() {
 
       {/* SOBRE SKOL */}
       <Box
+      id="nosotros"
         sx={{
           position: 'relative',
           height: '80vh',
@@ -299,6 +301,7 @@ export default function HomePublic() {
 
       {/* LOCALES */}
       <Box
+       id="locales"
           sx={{
             py: 10,
             backgroundColor: '#0F0F0F',

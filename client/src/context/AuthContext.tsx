@@ -1,15 +1,24 @@
 import { createContext, useContext, useState } from 'react';
 
+export type UserRole = 'client' | 'barber' | 'admin';
+
+export interface AuthUser {
+  id: number;
+  email: string;
+  role: UserRole;
+  access_token?: string;
+}
+
 interface AuthContextType {
-  user: any;
-  login: (userData: any) => void;
+  user: AuthUser | null;
+  login: (userData: AuthUser) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState(() => {
+  const [user, setUser] = useState<AuthUser | null>(() => {
     try {
       const storedUser = localStorage.getItem('user');
       return storedUser ? JSON.parse(storedUser) : null;
@@ -18,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   });
 
-  const login = (userData: any) => {
+  const login = (userData: AuthUser) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
