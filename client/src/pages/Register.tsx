@@ -68,13 +68,14 @@ export default function Register() {
         alignItems: 'center',
         justifyContent: 'center',
         px: 2,
+        pt: '72px'
       }}
     >
       <Paper
         elevation={6}
         sx={{
           width: '100%',
-          maxWidth: 420,
+          maxWidth: 382,
           p: 4,
           backgroundColor: '#000',
           color: '#fff',
