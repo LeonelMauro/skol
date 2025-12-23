@@ -11,6 +11,7 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/layout/MainLayout';
 import { Box } from '@mui/material';
+import AdminUsers from '../pages/admin/AdminUsers';
 
 export default function AppRouter() {
   return (
@@ -50,6 +51,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute roles={['admin']}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <AdminUsers />
               </ProtectedRoute>
             }
           />

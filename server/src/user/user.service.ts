@@ -132,12 +132,28 @@ export class UserService {
   }
 
   async remove(id: number) {
-    const user = await this.userRepository.findOne({
-      where: {id}
-    })
-    if(!user){
-      throw new NotFoundException('Usuario no encontrado')
+  const user = await this.userRepository.findOne({
+    where: { id },
+    relations: [
+      'reservationsAsClient',
+      'reservationsAsBarber',
+    ],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
     }
+
+    const hasReservations =
+      user.reservationsAsClient.length > 0 ||
+      user.reservationsAsBarber.length > 0;
+
+    if (hasReservations) {
+      user.isActive = false;
+      return this.userRepository.save(user);
+    }
+
     return this.userRepository.remove(user);
   }
+
 }

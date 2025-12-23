@@ -28,6 +28,9 @@ export class User {
   @ManyToOne(() => Role, (role) => role.users)
   role: Role;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   // Reservas hechas por el cliente
   @OneToMany(() => Reservation, (reservation) => reservation.client)
   reservationsAsClient: Reservation[];
