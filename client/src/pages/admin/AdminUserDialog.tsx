@@ -14,13 +14,17 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { useState, useEffect } from 'react';
 import type { User, UpdateUserPayload } from '../../types/user';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+
 
 interface Props {
   open: boolean;
   user: User | null;
   onClose: () => void;
   onSave: (data: UpdateUserPayload) => void;
-  onDelete: (id: number) => void;
   onChangePassword: (
     id: number,
     currentPassword: string,
@@ -35,12 +39,14 @@ export default function AdminUserDialog({
   user,
   onClose,
   onSave,
-  onDelete,
   onChangePassword,
 }: Props) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [currentPassword, setCurrentPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
 
   const [form, setForm] = useState({
   name: '',
@@ -50,6 +56,7 @@ export default function AdminUserDialog({
   roleId: 3, // client por defecto
 });
   
+
   const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
@@ -142,23 +149,47 @@ export default function AdminUserDialog({
         </Typography>
 
         <TextField
-        label="Contraseña actual"
-        type="password"
-        value={currentPassword}
-        onChange={(e) => setCurrentPassword(e.target.value)}
-        fullWidth
-        sx={{ mt: 1 }}
+          label="Contraseña actual"
+          type={showCurrentPassword ? 'text' : 'password'}
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          fullWidth
+          sx={{ mt: 1 }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() =>
+                    setShowCurrentPassword((prev) => !prev)
+                  }
+                >
+                  {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
-
         <TextField
-        label="Nueva contraseña"
-        type="password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-        fullWidth
-        sx={{ mt: 1 }}
+          label="Nueva contraseña"
+          type={showNewPassword ? 'text' : 'password'}
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          fullWidth
+          sx={{ mt: 1 }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() =>
+                    setShowNewPassword((prev) => !prev)
+                  }
+                >
+                  {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
-
       </DialogContent>
 
       <DialogActions
@@ -173,34 +204,20 @@ export default function AdminUserDialog({
           Cancelar
         </Button>
 
-      <Button
-        onClick={() => onSave(form)}
+     <Button
         sx={{ backgroundColor: '#DBD515', color: '#000' }}
-        >
-        Guardar
+        onClick={() => {
+          onSave(form);
+
+          if (currentPassword && newPassword) {
+            onChangePassword(user.id, currentPassword, newPassword);
+          }
+        }}
+      >
+        Guardar cambios
       </Button>
 
 
-
-
-        {currentPassword && newPassword && (
-            <Button
-                onClick={() =>
-                onChangePassword(user.id, currentPassword, newPassword)
-                }
-                sx={{ backgroundColor: '#555', color: '#fff' }}
-            >
-                Cambiar contraseña
-            </Button>
-            )}
-
-
-        <Button
-          onClick={() => onDelete(user.id)}
-          color="error"
-        >
-          Eliminar
-        </Button>
       </DialogActions>
     </Dialog>
   );

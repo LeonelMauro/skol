@@ -53,9 +53,11 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'barber')
   @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
+findAll(@Req() req) {
+  const q = req.query.q as string;
+  return this.userService.findAll(q);
+}
+
 
   // Obtener usuario por ID — admin y barber
   @UseGuards(JwtAuthGuard, RolesGuard)

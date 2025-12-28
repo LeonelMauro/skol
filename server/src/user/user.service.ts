@@ -8,6 +8,8 @@ import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateClientDto } from './dto/create-client.dto';
+import { ILike } from 'typeorm';
+
 
 
 @Injectable()
@@ -59,11 +61,21 @@ export class UserService {
 }
 
 
-  findAll() {
+  async findAll(q?: string) {
+  if (q) {
     return this.userRepository.find({
-      relations: ['role']
+      where: [
+        { name: ILike(`%${q}%`) },
+        { email: ILike(`%${q}%`) },
+      ],
+      relations: ['role'],
     });
   }
+
+  return this.userRepository.find({
+    relations: ['role'],
+  });
+}
 
   async findOne(id: number):Promise<User> {
     const user= await this.userRepository.findOne({
