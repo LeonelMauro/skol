@@ -6,21 +6,12 @@ import nosotros from '../img/nosotros.jpg';
 
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import type { Location } from '../types/location';
+import type { Service } from '../types/services';
 
 const heroImages = [hero1, hero2];
 
-export interface Service {
-  id: number;
-  name: string;
-  description: string;
-  price?: number;
-}
-export interface Location {
-  id: number;
-  name: string;
-  address: string;
-  imageUrl: string;
-}
+
 
 export default function HomePublic() {
   const [services, setServices] = useState<Service[]>([]);

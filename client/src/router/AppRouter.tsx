@@ -12,6 +12,7 @@ import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/layout/MainLayout';
 import { Box } from '@mui/material';
 import AdminUsers from '../pages/admin/AdminUsers';
+import Location from '../pages/admin/Location';
 
 export default function AppRouter() {
   return (
@@ -59,6 +60,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute roles={['admin']}>
                 <AdminUsers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/locales"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <Location />
               </ProtectedRoute>
             }
           />

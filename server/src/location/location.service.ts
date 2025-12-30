@@ -54,7 +54,8 @@ export class LocationService {
     return await this.locationRepository.save(location);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} location`;
+  async remove(id: number) {
+  const location = await this.locationRepository.delete(id);
+  return location;
   }
 }

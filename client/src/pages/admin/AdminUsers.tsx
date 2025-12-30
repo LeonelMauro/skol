@@ -14,6 +14,7 @@ import {
   DialogActions,
   Button,
   TextField,
+  InputAdornment,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -24,7 +25,7 @@ import AdminUserDialog from './AdminUserDialog';
 import { Snackbar, Alert } from '@mui/material';
 import type { User, UpdateUserPayload } from '../../types/user';
 import { TableContainer, Paper } from '@mui/material';
-
+import SearchIcon from '@mui/icons-material/Search';
 
 
 export default function AdminUsers() {
@@ -43,7 +44,7 @@ export default function AdminUsers() {
     severity: 'success',
   });
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   const showSnackbar = (
   message: string,
@@ -64,14 +65,14 @@ const [userToDelete, setUserToDelete] = useState<User | null>(null);
   setUsers(res.data);
 };
 
-useEffect(() => {
-  const timeout = setTimeout(() => {
-    fetchUsers(search);
-  }, 300); // debounce
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetchUsers(search);
+    }, 300); // debounce
 
-  return () => clearTimeout(timeout);
-}, [search]);
-  
+    return () => clearTimeout(timeout);
+  }, [search]);
+    
 
  
 
@@ -119,23 +120,74 @@ useEffect(() => {
 
 
   return (
-    <Box sx={{ pt: { xs: 8, sm: 10 } }}    >
-      <Typography
-        variant="h4"
-        mb={3}
-        sx={{ color: '#DBD515', fontFamily: 'Keania One' }}
+    <Box sx={{
+        minHeight: '100vh',
+        backgroundColor: '#f7f0f0ff',
+        width: '100vw',
+        marginLeft: 'calc(50% - 50vw)',
+        px: { xs: 2, md: 6 },
+        pt: { xs: 10, md: 12 }, // AppBar fixed
+      }}    >
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: '1fr auto',
+          },
+          alignItems: 'center',
+          mb: 3,
+          gap: 2,
+        }}
       >
-        Gestión de usuarios
-      </Typography>
-      <TextField
-        placeholder="Buscar usuario"
-        size="small"
-        sx={{ width: { xs: '100%', sm: 260 } }}
-        fullWidth
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+        {/* TÍTULO */}
+        <Typography
+          sx={{
+            gridColumn: {
+              xs: '1 / -1',
+              sm: '1 / -1',
+            },
+            textAlign: 'center',
+            color: '#DBD515',
+            fontFamily: 'Keania One',
+            fontSize: {
+              xs: '1.3rem',
+              sm: '1.6rem',
+              md: '2rem',
+            },
+          }}
+        >
+          Gestión de usuarios
+        </Typography>
 
+        {/* BUSCADOR */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: { sm: 'flex-end' },
+          }}
+        >
+          <TextField
+            size="small"
+            placeholder="Buscar por nombre o email"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{
+              width: {
+                xs: '100%',
+                sm: 260,
+              },
+            }}
+             InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+          />
+        </Box>
+      </Box>
       <TableContainer
         component={Paper}
         sx={{
@@ -147,7 +199,7 @@ useEffect(() => {
           <TableHead>
             <TableRow>
               <TableCell>Nombre</TableCell>
-              <TableCell>Email</TableCell>
+              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Email</TableCell>
               <TableCell>Rol</TableCell>
               <TableCell>Estado</TableCell>
               <TableCell align="right">Acciones</TableCell>
@@ -158,7 +210,7 @@ useEffect(() => {
             {users.map((u) => (
               <TableRow key={u.id}>
                 <TableCell>{u.name}</TableCell>
-                <TableCell>{u.email}</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{u.email}</TableCell>
                 <TableCell>{u.role.name}</TableCell>
                 <TableCell>
                   <Chip
@@ -169,25 +221,29 @@ useEffect(() => {
                 </TableCell>
 
                 <TableCell align="right">
-                  <IconButton
-                    onClick={() => {
-                      setSelectedUser(u);
-                      setOpen(true);
-                    }}
-                  >
-                    <EditIcon sx={{ color: '#DBD515' }} />
-                  </IconButton>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSelectedUser(u);
+                        setOpen(true);
+                      }}
+                    >
+                      <EditIcon sx={{ color: '#DBD515' }} />
+                    </IconButton>
 
-                  <IconButton
-                    color="error"
-                    disabled={u.id === user?.id}
-                    onClick={() => {
-                      setUserToDelete(u);
-                      setConfirmDeleteOpen(true);
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      disabled={u.id === user?.id}
+                      onClick={() => {
+                        setUserToDelete(u);
+                        setConfirmDeleteOpen(true);
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
