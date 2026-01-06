@@ -16,6 +16,14 @@ export class Service {
   @Column()
   price: number;
 
+  @Column({
+  type: 'varchar',
+  length: 30,
+  default: 'SCISSORS',
+  })
+  icon: string;
+
+
   @Column()
   duration_minutes: number;
   

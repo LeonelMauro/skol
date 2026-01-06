@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 import type { Location } from '../types/location';
 import type { Service } from '../types/services';
+import { serviceIcons } from '../utils/serviceIcons';
 
 const heroImages = [hero1, hero2];
 
@@ -192,45 +193,72 @@ export default function HomePublic() {
           px: { xs: 2, md: 10 },
         }}
       >
-        {services.map((service) => (
-          <Card
-            key={service.id}
-            sx={{
-              backgroundColor: '#1A1A1A',
-              borderRadius: 2.5,
-              transition: '0.3s',
-              '&:hover': {
-                transform: 'translateY(-6px)',
-                boxShadow: '0 12px 30px rgba(219,213,21,0.35)',
-              },
-            }}
-          >
-            <CardActionArea
-              onClick={() => window.location.href = '/login'}
-            >
-              <CardContent sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="h6"
+        {services.map((servicio) => {
+              const IconComponent =
+                serviceIcons[servicio.icon as keyof typeof serviceIcons];
+        
+              return (
+                <Card
+                  key={servicio.id}
                   sx={{
-                    fontFamily: 'Keania One',
-                    color: '#DBD515',
-                    letterSpacing: 1,
-                    mb: 1,
+                    width: '100%',
+                    maxWidth: 320,
+                    borderRadius: 2.5,
+                    overflow: 'hidden',
+                    backgroundColor: '#111',
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
+                    transition: '0.35s ease',
+                    cursor: 'pointer',
+        
+                    '&:hover': {
+                      transform: 'translateY(-6px)',
+                      boxShadow: '0 18px 45px rgba(219,213,21,0.35)',
+                    },
                   }}
                 >
-                  {service.name}
-                </Typography>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    {/* ÍCONO */}
+                    {IconComponent && (
+                        <Box
+                          sx={{
+                            width: 64,
+                            height: 64,
+                            backgroundColor: '#fff',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mb: 2,
+                            mx: 'auto',
+                          }}
+                        >
+                          <IconComponent width={32} height={32} />
+                        </Box>
+                      )}
 
-                <Typography
-                  variant="body2"
-                  sx={{ color: '#ccc' }}
-                >
-                  {service.description}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        ))}
+        
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontFamily: 'Keania One',
+                        color: '#DBD515',
+                        letterSpacing: 1,
+                        mb: 1,
+                      }}
+                    >
+                      {servicio.name}
+                    </Typography>
+        
+                    <Typography variant="body2" sx={{ color: '#ccc' }}>
+                      {servicio.description}
+                    </Typography>
+                  </CardContent>
+                  
+                
+        
+                </Card>
+              );
+            })}
       </Box>
 
         </Box>

@@ -48,6 +48,10 @@ export class ServicesService {
       service.price= dto.price
     }
 
+    if(dto.icon !== undefined){
+      service.icon= dto.icon
+    }
+
     if(dto.duration_minutes !== undefined){
       service.duration_minutes =dto.duration_minutes
     }
