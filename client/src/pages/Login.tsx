@@ -34,6 +34,7 @@ export default function Login() {
       id: payload.sub,
       email: payload.email,
       role: payload.role,
+      location: payload.location,
       access_token,
     });
 

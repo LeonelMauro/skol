@@ -254,7 +254,7 @@ export default function Services(){
             >
               {snackbar.message}
             </Alert>
-          </Snackbar>
+    </Snackbar>
           <ServiceDialog
           open={openDialog}
           onClose={() => {

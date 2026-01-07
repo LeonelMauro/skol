@@ -27,10 +27,35 @@ export class LocationService {
   findAll() {
     return this.locationRepository.find();
   }
+  
+  async getBarbers(locationId: number) {
+  const location = await this.locationRepository.findOne({
+    where: { id: locationId },
+  });
 
-  findOne(id: number) {
-    return `This action returns a #${id} location`;
+  if (!location) {
+    throw new NotFoundException('El local no existe');
   }
+
+  return this.userRepository.find({
+    where: {
+      location: { id: locationId },
+      role: { name: 'barber' },
+      isActive: true,
+    },
+    relations: ['location'],
+  });
+  }
+
+
+  async findOne(id: number) {
+  const location = await this.locationRepository.findOne({ where: { id } });
+  if (!location) {
+    throw new NotFoundException('No se encontró el local');
+  }
+  return location;
+  }
+
 
   async update(id: number, dto: UpdateLocationDto) {
     const location= await this.locationRepository.findOne({

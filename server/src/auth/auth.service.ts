@@ -16,7 +16,7 @@ export class AuthService {
   async signIn(email: string, password: string) {
     const user = await this.userRepository.findOne({
       where: { email },
-      relations: ['role'],
+      relations: ['role','location'],
     });
 
     if (!user) {
@@ -32,6 +32,12 @@ export class AuthService {
       sub: user.id,
       role: user.role.name,
       email: user.email,
+      location: user.location
+      ? {
+          id: user.location.id,
+          name: user.location.name,
+        }
+      : null,
     };
 
     return {

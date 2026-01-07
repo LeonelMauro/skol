@@ -10,10 +10,10 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/layout/MainLayout';
-import { Box } from '@mui/material';
 import AdminUsers from '../pages/admin/AdminUsers';
 import Location from '../pages/admin/Location';
 import Services from '../pages/admin/Services';
+import BarberAvailability from '../pages/admin/BarberAvailability';
 
 export default function AppRouter() {
   return (
@@ -77,6 +77,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute roles={['admin']}>
                 <Services />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/barbers"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <BarberAvailability />
               </ProtectedRoute>
             }
           />

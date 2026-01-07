@@ -17,6 +17,14 @@ export class LocationController {
     return this.locationService.create(createLocationDto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'client', 'barber')
+  @Get(':id/barbers')
+  getBarbers(@Param('id') id: string) {
+  return this.locationService.getBarbers(+id);
+  }
+
+
   @Get()
   findAll() {
     return this.locationService.findAll();

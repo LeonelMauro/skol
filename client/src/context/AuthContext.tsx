@@ -1,11 +1,12 @@
 import { createContext, useContext, useState } from 'react';
-
-export type UserRole = 'client' | 'barber' | 'admin';
+import type { UserRole } from '../types/role';
+import type { Location } from '../types/location';
 
 export interface AuthUser {
   id: number;
   email: string;
   role: UserRole;
+  location?: Location | null;
   access_token?: string;
 }
 

@@ -1,4 +1,6 @@
-export type UserRole = 'admin' | 'barber' | 'client';
+import type { UserRole } from './role';
+import type { Location } from './location';
+
 
 export interface Role {
   id: number;
@@ -21,4 +23,10 @@ export interface UpdateUserPayload {
   phone?: string;
   birthDate?: string;
   roleId?: number;
+}
+
+export interface Barber {
+  id: number;
+  name: string;
+  location?: Location | null;
 }

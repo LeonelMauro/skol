@@ -17,7 +17,7 @@ export class BarberAvailabilityService {
   ){}
 
   async create(dto: CreateBarberAvailabilityDto) {
-    const barber= await this.userRepository.findOne({ where: { id: +dto.barberId}})
+    const barber= await this.userRepository.findOne({ where: { id: +dto.barberId},relations: ['location']})
     if(!barber){
       throw new NotFoundException('No se encontro barber')
     }
@@ -29,21 +29,29 @@ export class BarberAvailabilityService {
   }
 
   findAll() {
-    return this.barberAvailRepository.find();
+    return this.barberAvailRepository.find({relations: [
+    'barber',
+    'barber.location',
+  ],});
   }
 
   async findOne(id: number) {
-    const availability = await this.barberAvailRepository.findOne({
-      where: { id },
-      relations: { barber: true }
-    });
+  const availability = await this.barberAvailRepository.findOne({
+    where: { id },
+    relations: {
+      barber: {
+        location: true,
+      },
+    },
+  });
 
-    if (!availability) {
-      throw new NotFoundException('No se encontró disponibilidad');
-    }
-
-    return availability;
+  if (!availability) {
+    throw new NotFoundException('No se encontró disponibilidad');
   }
+
+  return availability;
+}
+
 
 
   async update(id: number, dto: UpdateBarberAvailabilityDto) {
