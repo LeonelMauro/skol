@@ -101,9 +101,14 @@ useEffect(() => {
 };
 
 const removeDay = (id?: number) => {
-  setDays(days.filter(d => d.id !== id));
+  if (!id) return;
+
+  setRemovedIds(prev => [...prev, id]);
+  setDays(prev => prev.filter(d => d.id !== id));
 };
 
+
+const [removedIds, setRemovedIds] = useState<number[]>([]);
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -151,7 +156,11 @@ const removeDay = (id?: number) => {
 
         <IconButton
           color="error"
-          onClick={() => removeDay(a.id)}
+          onClick={() => {
+            if (confirm("¿Eliminar este día?")) {
+              removeDay(a.id);
+            }
+          }}
         >
           <DeleteIcon />
         </IconButton>
@@ -179,17 +188,19 @@ const removeDay = (id?: number) => {
   <DialogActions>
     <Button onClick={onClose}>Cancelar</Button>
     <Button
-  variant="contained"
-  onClick={() =>
-    onSave({
-      barberId,
-      availabilities: days,
-      locationId: selectedLocationId,
-    })
-  }
->
-  Guardar cambios
-</Button>
+      variant="contained"
+      onClick={() =>
+        onSave({
+          barberId,
+          availabilities: days,
+          locationId: selectedLocationId,
+          removedIds,
+        })
+      }
+    >
+      Guardar cambios
+    </Button>
+
 
   </DialogActions>
 </Dialog>

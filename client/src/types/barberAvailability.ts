@@ -40,6 +40,7 @@ export interface UpdateBarberSchedulePayload {
   barberId: number;
   availabilities: EditableBarberAvailability[];
   locationId: number | null;
+  removedIds?: number[];
 }
 // Lo que se usa para editar/guardar
 export interface EditableBarberAvailability {

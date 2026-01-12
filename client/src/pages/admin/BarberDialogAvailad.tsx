@@ -68,18 +68,24 @@ export default function BarberDialogAvail({
     sunday: "Domingo",
   };
 
-  const handleSubmit = () => {
-    if (!isFormValid) return;
+  const handleSubmit = async () => {
+  if (!isFormValid || !barberId) return;
 
-    form.days.forEach((day) => {
-      onSubmit({
-        barberId: form.barberId,
-        day_of_week: day,
-        start_time: form.start_time,
-        end_time: form.end_time,
-      });
+  for (const day of form.days) {
+    await onSubmit({
+      barberId,
+      day_of_week: day,
+      start_time: form.start_time,
+      end_time: form.end_time,
+      is_active: true,
     });
-  };
+  }
+
+  onClose();
+};
+
+
+
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">

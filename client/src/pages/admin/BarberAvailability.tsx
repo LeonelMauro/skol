@@ -130,39 +130,49 @@ const [selectedBarber, setSelectedBarber] = useState<{
 } | null>(null);
 
 
-   const handleSaveSchedule = async (
-  payload: UpdateBarberSchedulePayload
-) => {
-  try {
-    await Promise.all(
-      payload.availabilities.map(a =>
-        api.patch(
-          `/barber-availability/${a.id}`,
-          {
-            start_time: a.start_time,
-            end_time: a.end_time,
-            is_active: a.is_active,
-          },
-          { headers: authHeader }
-        )
-      )
-    );
+  const handleSaveSchedule = async (
+        payload: UpdateBarberSchedulePayload
+      ) => {
+        try {
+                // 1. Eliminar días
+          if (payload.removedIds?.length) {
+            await Promise.all(
+              payload.removedIds.map(id =>
+                api.delete(`/barber-availability/${id}`, {
+                  headers: authHeader,
+                })
+              )
+            );
+          }
+          await Promise.all(
+            payload.availabilities.map(a =>
+              api.patch(
+                `/barber-availability/${a.id}`,
+                {
+                  start_time: a.start_time,
+                  end_time: a.end_time,
+                  is_active: a.is_active,
+                },
+                { headers: authHeader }
+              )
+            )
+          );
 
-    showSnackbar(
-      'Disponibilidad actualizada con éxito',
-      'success'
-    );
+          showSnackbar(
+            'Disponibilidad actualizada con éxito',
+            'success'
+          );
 
-    setOpenEditDialog(false);
-    setSelectedBarber(null);
-    fechtAvailabilities();
-  } catch (error) {
-    showSnackbar(
-      'Error al actualizar disponibilidad',
-      'error'
-    );
-  }
-};
+          setOpenEditDialog(false);
+          setSelectedBarber(null);
+          fechtAvailabilities();
+        } catch (error) {
+          showSnackbar(
+            'Error al actualizar disponibilidad',
+            'error'
+          );
+        }
+      };
 
 
 
@@ -365,17 +375,18 @@ const DAY_ORDER = [
             onClose={() => setOpenCreate(false)}
             onSubmit={handleCreateAvailability}
           />
+
           {selectedBarber && (
-  <BarberDialogEditAvail
-    open={openEditDialog}
-    barberId={selectedBarber.barberId}
-    barberName={selectedBarber.name}
-    availabilities={selectedBarber.availabilities}
-    locationId={selectedBarber.locationId}
-    onClose={() => setOpenEditDialog(false)}
-    onSave={handleSaveSchedule}
-  />
-)}
+          <BarberDialogEditAvail
+            open={openEditDialog}
+            barberId={selectedBarber.barberId}
+            barberName={selectedBarber.name}
+            availabilities={selectedBarber.availabilities}
+            locationId={selectedBarber.locationId}
+            onClose={() => setOpenEditDialog(false)}
+            onSave={handleSaveSchedule}
+          />
+        )}
 
 
 

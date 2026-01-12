@@ -252,6 +252,9 @@ export default function HomePublic() {
                     <Typography variant="body2" sx={{ color: '#ccc' }}>
                       {servicio.description}
                     </Typography>
+                    <Typography variant="body2" sx={{ color: '#ccc' }}>
+                      {`$${servicio.price}`}
+                    </Typography>
                   </CardContent>
                   
                 
