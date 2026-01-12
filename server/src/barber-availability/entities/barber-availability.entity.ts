@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { User } from "src/user/entities/user.entity";
+import { DayOfWeek } from "../day-of-week.enum";
 
 @Entity()
 export class BarberAvailability {
@@ -10,8 +11,11 @@ export class BarberAvailability {
   @ManyToOne(() => User, (user) => user.availabilities, { eager: true })
   barber: User;
 
-  @Column()
-  day_of_week: string; // monday - sunday
+  @Column({
+  type: 'enum',
+  enum: DayOfWeek,
+  })
+  day_of_week: DayOfWeek;
 
   @Column()
   start_time: string; // "09:00"

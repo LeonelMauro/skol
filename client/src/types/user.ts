@@ -1,5 +1,6 @@
 import type { UserRole } from './role';
 import type { Location } from './location';
+import type { BarberAvailability } from './barberAvailability';
 
 
 export interface Role {
@@ -28,5 +29,10 @@ export interface UpdateUserPayload {
 export interface Barber {
   id: number;
   name: string;
+  email: string;
+  phone?: string;
+  birthDate: string;
+  isActive: boolean;
   location?: Location | null;
+  availabilities: BarberAvailability[];
 }

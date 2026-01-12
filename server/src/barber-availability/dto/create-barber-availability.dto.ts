@@ -1,11 +1,12 @@
-import { IsIn, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsBoolean, IsEnum, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { DayOfWeek } from "../day-of-week.enum";
 
 export class CreateBarberAvailabilityDto { 
     @IsNotEmpty()
     @IsNumber()
     barberId: number;   // Peluquero asignado
     
-    @IsIn(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'])
+    @IsEnum(DayOfWeek)
     day_of_week: string;
 
     
@@ -16,4 +17,8 @@ export class CreateBarberAvailabilityDto {
     @IsNotEmpty()
     @IsString()
     end_time: string;   // "13:00"   
+
+    @IsOptional()
+    @IsBoolean()
+    is_active?: boolean;
 }

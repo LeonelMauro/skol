@@ -2,14 +2,16 @@ import { Transform } from 'class-transformer';
 import {
   IsDateString,
   IsEmail,
+  IsInt,
   IsNotEmpty,
   IsOptional,
+  IsPositive,
   IsString,
   Matches,
   MinLength,
 } from 'class-validator';
 
-export class CreateClientDto {
+export class CreateBarberDto {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) =>
@@ -39,4 +41,8 @@ export class CreateClientDto {
   @IsNotEmpty()
   @IsDateString()
   birthDate: string;
+
+  @IsInt()
+  @IsPositive()
+  locationId: number;
 }

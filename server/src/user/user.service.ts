@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +9,8 @@ import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateClientDto } from './dto/create-client.dto';
 import { ILike } from 'typeorm';
+import { CreateBarberDto } from './dto/create-barber.dto';
+import { Location } from 'src/location/entities/location.entity';
 
 
 
@@ -19,8 +21,12 @@ export class UserService {
     private readonly roleRepository: Repository <Role>,
 
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>
   ){}
+  
   async create(Dto: CreateUserDto) {
     const role = await this.roleRepository.findOne({
       where: {id: Dto.roleId}
@@ -48,6 +54,13 @@ export class UserService {
   if (!role) {
     throw new NotFoundException('Rol cliente no encontrado');
   }
+  const existingUser = await this.userRepository.findOne({
+    where: { email: dto.email },
+  });
+
+  if (existingUser) {
+    throw new ConflictException('El email ya está registrado');
+  }
 
   const hashedPassword = await bcrypt.hash(dto.password, 10);
 
@@ -60,23 +73,68 @@ export class UserService {
   return this.userRepository.save(user);
 }
 
+async createBarber(dto: CreateBarberDto){
+  const role = await this.roleRepository.findOne({
+    where: { name: 'barber'}
+  })
+  if(!role){
+    throw new NotFoundException('No se encontro el rol')
+  }
+
+  const existingUser = await this.userRepository.findOne({
+    where: { email: dto.email },
+  });
+
+  if (existingUser) {
+    throw new ConflictException('El email ya está registrado');
+  }
+
+  const location = await this.locationRepository.findOne({
+    where: { id: dto.locationId },
+  });
+
+  if (!location) {
+    throw new NotFoundException('Local no encontrado');
+  }
+  const hashedPassword= await bcrypt.hash(dto.password,10) 
+
+  const user = await this.userRepository.create({
+    ...dto,
+    password: hashedPassword,
+    role,
+    location,
+  })
+  return this.userRepository.save(user)
+ };
+
 
   async findAll(q?: string) {
-  if (q) {
+    if (q) {
+      return this.userRepository.find({
+        where: [
+          { name: ILike(`%${q}%`) },
+          { email: ILike(`%${q}%`) },
+        ],
+        relations: ['role'],
+      });
+    }
+
     return this.userRepository.find({
-      where: [
-        { name: ILike(`%${q}%`) },
-        { email: ILike(`%${q}%`) },
-      ],
       relations: ['role'],
     });
   }
-
-  return this.userRepository.find({
-    relations: ['role'],
-  });
-}
-
+  async findAllBarbers() {
+    return this.userRepository.find({
+      where: {
+        role: { name: 'barber' },
+        isActive: true,
+      },
+      relations: ['location', 'availabilities'],
+      order: {
+        name: 'ASC',
+      },
+    });
+  }
   async findOne(id: number):Promise<User> {
     const user= await this.userRepository.findOne({
       where: {id},

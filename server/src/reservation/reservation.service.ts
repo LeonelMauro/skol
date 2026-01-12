@@ -8,6 +8,8 @@ import { Reservation } from './entities/reservation.entity';
 import { Service } from 'src/services/entities/service.entity';
 import moment from 'moment';
 import { BarberAvailability } from 'src/barber-availability/entities/barber-availability.entity';
+import { DayOfWeek } from 'src/barber-availability/day-of-week.enum';
+
 
 @Injectable()
 export class ReservationService {
@@ -37,7 +39,10 @@ export class ReservationService {
   if (!service) throw new NotFoundException('No se encontro el servicio');
 
   // --- VALIDACIÓN DEL DÍA ---
-  const dayOfWeek = moment(dto.date).format('dddd').toLowerCase(); // monday, tuesday...
+  const dayOfWeek = moment(dto.date)
+  .format('dddd')
+  .toLowerCase() as DayOfWeek;
+
 
   const availability = await this.barberAvailRepository.findOne({
     where: {

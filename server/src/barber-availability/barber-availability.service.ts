@@ -5,6 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { BarberAvailability } from './entities/barber-availability.entity';
+import { DayOfWeekES } from './day-of-week-es.enum';
+import { DayOfWeek } from '../barber-availability/day-of-week.enum';
+import { BarberAvailabilityResponseDto } from './dto/barber-availability-response.dto';
 
 @Injectable()
 export class BarberAvailabilityService {
@@ -17,23 +20,53 @@ export class BarberAvailabilityService {
   ){}
 
   async create(dto: CreateBarberAvailabilityDto) {
-    const barber= await this.userRepository.findOne({ where: { id: +dto.barberId},relations: ['location']})
-    if(!barber){
-      throw new NotFoundException('No se encontro barber')
-    }
-    const availability=  this.barberAvailRepository.create({
-      barber,
-      ... dto
-    })
-    return this.barberAvailRepository.save(availability);
+  const barber = await this.userRepository.findOne({
+    where: { id: dto.barberId },
+    relations: ['location'],
+  });
+
+  if (!barber) {
+    throw new NotFoundException('No se encontró el barber');
   }
 
-  findAll() {
-    return this.barberAvailRepository.find({relations: [
-    'barber',
-    'barber.location',
-  ],});
-  }
+  const availability = this.barberAvailRepository.create({
+    barber,
+    day_of_week: dto.day_of_week as DayOfWeek, // 👈 CAST CORRECTO
+    start_time: dto.start_time,
+    end_time: dto.end_time,
+  });
+
+  return this.barberAvailRepository.save(availability);
+}
+
+  
+async findAll(): Promise<BarberAvailabilityResponseDto[]> {
+  const data = await this.barberAvailRepository.find({
+    relations: ['barber', 'barber.location'],
+  });
+
+  return data.map(a => ({
+    id: a.id,
+    day_of_week: a.day_of_week, // se mantiene por compatibilidad
+    day_of_week_es: DayOfWeekES[a.day_of_week], // 👈 español
+    start_time: a.start_time,
+    end_time: a.end_time,
+    is_active: a.is_active,
+    barber: {
+      id: a.barber.id,
+      name: a.barber.name,
+      email: a.barber.email,
+      location: a.barber.location
+        ? {
+            id: a.barber.location.id,
+            name: a.barber.location.name,
+            address: a.barber.location.address,
+          }
+        : undefined,
+    },
+  }));
+}
+
 
   async findOne(id: number) {
   const availability = await this.barberAvailRepository.findOne({
@@ -73,9 +106,9 @@ export class BarberAvailabilityService {
     availability.barber =barber
   }
   
-  if(dto.day_of_week !== undefined){
-    availability.day_of_week= dto.day_of_week
-  }
+  if (dto.day_of_week !== undefined) {
+  availability.day_of_week = dto.day_of_week as DayOfWeek;
+}
 
   if(dto.end_time !== undefined){
     availability.end_time = dto.end_time;
@@ -83,6 +116,9 @@ export class BarberAvailabilityService {
 
   if(dto.start_time !== undefined){
     availability.start_time= dto.start_time
+  }
+  if(dto.is_active !== undefined){
+    availability.is_active= dto.is_active
   }
 
     return await this.barberAvailRepository.save(availability);

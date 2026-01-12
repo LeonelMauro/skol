@@ -17,6 +17,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateClientDto } from './dto/create-client.dto';
+import { CreateBarberDto } from './dto/create-barber.dto';
 
 @Controller('user')
 export class UserController {
@@ -33,6 +34,21 @@ export class UserController {
   /* =======================
      RUTAS PROTEGIDAS
      ======================= */
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('barbers')
+  findAllBarbers() {
+    return this.userService.findAllBarbers();
+  }
+
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')   
+  @Post('barbers')
+  createBarber(@Body() dto: CreateBarberDto) {
+    return this.userService.createBarber(dto);
+  }
 
   // Perfil del usuario autenticado
   @UseGuards(JwtAuthGuard)
@@ -53,7 +69,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'barber')
   @Get()
-findAll(@Req() req) {
+  findAll(@Req() req) {
   const q = req.query.q as string;
   return this.userService.findAll(q);
 }

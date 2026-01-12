@@ -9,6 +9,8 @@ import { CreateBookingDto } from './dto/create-booking';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { MailService } from 'src/mail/mail.service';
 import { Logger } from '@nestjs/common';
+import { DayOfWeek } from 'src/barber-availability/day-of-week.enum';
+
 
 
 @Injectable()
@@ -56,8 +58,9 @@ async findPending() {
     }
 
     const weekday = jsDate
-      .toLocaleDateString('en-US', { weekday: 'long' })
-      .toLowerCase();
+    .toLocaleDateString('en-US', { weekday: 'long' })
+    .toLowerCase() as DayOfWeek;
+
 
     // 1️⃣ Verificar barbero
     const barber = await this.userRepository.findOne({ where: { id: barberId } });
@@ -227,7 +230,8 @@ async findPending() {
     const jsDate = new Date(newDate + 'T00:00');
     const weekday = jsDate
       .toLocaleDateString('en-US', { weekday: 'long' })
-      .toLowerCase();
+      .toLowerCase() as DayOfWeek;
+
 
     const availability = await this.barberAvailabilityRepository.findOne({
       where: {
