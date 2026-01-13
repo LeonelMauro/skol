@@ -4,26 +4,30 @@ import type {
   BarberAvailability,
   BarberTableInfo,
   CreateBarberAvailabilityPayload,
-  UpdateBarberAvailabilityPayload,
   UpdateBarberSchedulePayload,
 } from '../../types/barberAvailability';
 
 
-import type { Barber } from "../../types/user";
+import type { Barber, } from "../../types/user";
 
 import {
   Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, IconButton, Chip,
   Box, Typography,
   Snackbar,
-  Alert
+  Alert,
+  Button,
+  DialogContent,
+  Dialog,
+  DialogTitle
 } from '@mui/material';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {useAuth} from '../../context/AuthContext';
 
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import BarberDialogAvail from './BarberDialogAvailad';
 import BarberDialogEditAvail from './BarberDialogEditAvail';
+import Register from '../Register';
 
 export default function BarberAvailability() {
   
@@ -103,23 +107,11 @@ export default function BarberAvailability() {
       showSnackbar("No se pudo crear la disponibilidad", "error");
     }
   }
-  //ELIMINAR
+  //CREAR BARBER
 
-  const [editing, setEditing] = useState<BarberAvailability | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
-    
-  const handleDelete = async (id: number) => {
-    try {
-      await api.delete(`/barber-availability/${id}`, { headers: authHeader });
-      showSnackbar('Se elimino la abilitacion de barbero con exito', 'success');
-      setConfirmDelete(null);
-      fechtAvailabilities();
-      } catch (error) {
-      showSnackbar('No se pudo eliminar la habilitación', 'error'); }
-      };
+  const [openCreateBarber, setOpenCreateBarber] = useState(false);
 
   //ACTUALIZAR
-
   
 const [openEditDialog, setOpenEditDialog] = useState(false);
 const [selectedBarber, setSelectedBarber] = useState<{
@@ -174,7 +166,24 @@ const [selectedBarber, setSelectedBarber] = useState<{
         }
       };
 
+  const handleUpdateBarberLocation = async (
+  barberId: number,
+  locationId: number
+) => {
+  try {
+    await api.patch(
+      `/users/${barberId}/location`,
+      { locationId },
+      { headers: authHeader }
+    );
 
+    showSnackbar('Local actualizado correctamente', 'success');
+    fechtAvailabilities();
+  } catch {
+    showSnackbar('Error al actualizar local', 'error');
+  }
+};
+   
 
   const availabilityByBarber = availabi.reduce((acc, availability) => {
   const barberId = availability.barber.id;
@@ -237,32 +246,45 @@ const DAY_ORDER = [
         Disponibilidad de barberos
       </Typography>
       <TableBody>
-  {barbersWithoutAvailability.map((barber) => (
-    <TableRow key={barber.id}>
-      <TableCell>{barber.name}</TableCell>
-
-      <TableCell colSpan={3}>
-        <Chip
-          label="Sin disponibilidad"
-          color="warning"
-          size="small"
-        />
-      </TableCell>
-
-      <TableCell align="right">
-        <IconButton
-          color="primary"
-          onClick={() => {
-            setSelectedBarberId(barber.id);
-            setOpenCreate(true);
+        <Button
+          variant="contained"
+          startIcon={<PersonAddIcon />}
+          onClick={() => setOpenCreateBarber(true)}
+          sx={{
+            backgroundColor: '#DBD515',
+            color: '#000',
+            fontWeight: 600,
+            '&:hover': { backgroundColor: '#c4bd13' },
           }}
         >
-          <EditIcon />
-        </IconButton>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
+          Crear barbero
+        </Button>
+        {barbersWithoutAvailability.map((barber) => (
+          <TableRow key={barber.id}>
+            <TableCell>{barber.name}</TableCell>
+
+            <TableCell colSpan={3}>
+              <Chip
+                label="Sin disponibilidad"
+                color="warning"
+                size="small"
+              />
+            </TableCell>
+
+            <TableCell align="right">
+              <IconButton
+                color="primary"
+                onClick={() => {
+                  setSelectedBarberId(barber.id);
+                  setOpenCreate(true);
+                }}
+              >
+                <EditIcon />
+              </IconButton>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
 
       <TableContainer component={Paper}>
         <Table size="small">
@@ -387,9 +409,26 @@ const DAY_ORDER = [
             onSave={handleSaveSchedule}
           />
         )}
+          <Dialog
+            open={openCreateBarber}
+            onClose={() => setOpenCreateBarber(false)}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>Crear barbero</DialogTitle>
 
-
-
+            <DialogContent>
+              <Register
+                mode="admin-barber"
+                onSuccess={() => {
+                  fechtBarbers();
+                  fechtAvailabilities();
+                  showSnackbar('Barbero creado correctamente', 'success');
+                  setOpenCreateBarber(false);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
     </Box>
 
     

@@ -12,6 +12,7 @@ import {
   Typography,
   Divider,
   MenuItem,
+  Select,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -21,6 +22,8 @@ import type {
   EditableBarberAvailability,
   UpdateBarberSchedulePayload,
 } from "../../types/barberAvailability";
+import api from "../../services/api";
+import type { Location } from "../../types/location";
 
 
 const DAY_LABELS: Record<string, string> = {
@@ -110,6 +113,17 @@ const removeDay = (id?: number) => {
 
 const [removedIds, setRemovedIds] = useState<number[]>([]);
 
+  const [locations, setLocations] = useState<Location[]>([]);
+
+
+useEffect(() => {
+  
+  api.get('/location') // 👈 ruta correcta
+    .then(res => {
+      setLocations(res.data);
+    })
+}, []);
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
   <DialogTitle>
@@ -168,21 +182,28 @@ const [removedIds, setRemovedIds] = useState<number[]>([]);
     ))}
 
     <Divider sx={{ my: 2 }} />
-
-    <TextField
-      select
-      label="Local"
+      <Select
+      fullWidth
+      name="locationId"
       value={selectedLocationId ?? ""}
       onChange={(e) =>
-        setSelectedLocationId(
-          e.target.value === "" ? null : Number(e.target.value)
-        )
+        setSelectedLocationId(Number(e.target.value))
       }
-      fullWidth
+      displayEmpty
+      required
+      sx={{ mt: 2, color: "#fff" }}
     >
-      <MenuItem value="">Sin local</MenuItem>
-      {/* mapear locales */}
-    </TextField>
+      <MenuItem value="">
+        <em>Seleccionar local</em>
+      </MenuItem>
+
+      {locations.map((loc) => (
+        <MenuItem key={loc.id} value={loc.id}>
+          {loc.name}, {loc.address}
+        </MenuItem>
+      ))}
+    </Select>
+
   </DialogContent>
 
   <DialogActions>

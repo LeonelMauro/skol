@@ -177,6 +177,28 @@ async createBarber(dto: CreateBarberDto){
      
     return await this.userRepository.save(user);
   }
+  
+  async updateBarberLocation(barberId: number, locationId: number) {
+  const barber = await this.userRepository.findOne({
+    where: { id: barberId },
+    relations: ['location'],
+  });
+
+  if (!barber) {
+    throw new NotFoundException('Barbero no encontrado');
+  }
+
+  const location = await this.locationRepository.findOne({
+    where: { id: locationId },
+  });
+
+  if (!location) {
+    throw new NotFoundException('Local no encontrado');
+  }
+
+  barber.location = location;
+  return this.userRepository.save(barber);
+}
 
   async changePassword( id : number , dto : ChangePasswordDto){
     const user= await this.userRepository.findOne({ where: {id}

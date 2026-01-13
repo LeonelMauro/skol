@@ -36,3 +36,12 @@ export interface Barber {
   location?: Location | null;
   availabilities: BarberAvailability[];
 }
+
+export interface CreateBarberPayload {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  birthDate: string;
+  location?: Location | null;
+}

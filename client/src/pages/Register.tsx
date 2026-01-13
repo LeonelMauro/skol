@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   TextField,
   Button,
@@ -6,11 +6,20 @@ import {
   Typography,
   Paper,
 } from '@mui/material';
+import { MenuItem, Select } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import type { Location } from '../types/location';
+type RegisterMode = 'public' | 'admin-barber';
+interface RegisterProps {
+  mode?: RegisterMode;
+  onSuccess?: () => void; 
+}
 
-export default function Register() {
+export default function Register({ mode = 'public' , onSuccess}: RegisterProps) {
+  const {user}= useAuth();
+  const authHeader = { Authorization : `Bearer ${user?.access_token}`}
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -18,10 +27,10 @@ export default function Register() {
     confirmPassword: '',
     phone: '',
     birthDate: '',
+    locationId: ''
   });
 
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,33 +38,69 @@ export default function Register() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (form.password !== form.confirmPassword) {
-      alert('Las contraseñas no coinciden');
-      return;
-    }
+  if (form.password !== form.confirmPassword) {
+    alert('Las contraseñas no coinciden');
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const response = await api.post('/user/register', {
+  try {
+    if (mode === 'admin-barber') {
+      alert('No autorizado');
+      await api.post(
+        '/user/create-barbers',
+        {
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          phone: form.phone || null,
+          birthDate: form.birthDate,
+          locationId: Number(form.locationId),
+        },
+        { headers: authHeader }
+      );
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/barbers');
+      }
+    } else {
+      await api.post('/user/register', {
         name: form.name,
         email: form.email,
         password: form.password,
         phone: form.phone || null,
         birthDate: form.birthDate,
-        
       });
 
-      login(response.data);
-      navigate('/dashboard');
-    } catch {
-      alert('Error al registrar el usuario');
-    } finally {
-      setLoading(false);
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/login');
+      }
+    
     }
-  };
+  } catch {
+    alert('Error al registrar');
+  } finally {
+    setLoading(false);
+  }
+};   
+  
+  const [locations, setLocations] = useState<Location[]>([]);
+
+ useEffect(() => {
+  if (mode !== 'admin-barber') return;
+
+  api
+    .get('/location') // 👈 ruta correcta
+    .then(res => {
+      setLocations(res.data);
+    })
+}, [mode]);
 
   return (
     <Box
@@ -173,7 +218,29 @@ export default function Register() {
             InputLabelProps={{ style: { color: '#aaa' } }}
             sx={{ input: { color: '#fff' } }}
           />
+          {mode === 'admin-barber' && (
+            <Select
+              fullWidth
+              name="locationId"
+              value={form.locationId}
+              onChange={(e) =>
+                setForm({ ...form, locationId: e.target.value })
+              }
+              displayEmpty
+              required
+              sx={{ mt: 2, color: '#fff' }}
+            >
+              <MenuItem value="">
+                <em>Seleccionar local</em>
+              </MenuItem>
 
+              {locations.map((loc) => (
+                <MenuItem key={loc.id} value={loc.id}>
+                  {loc.name} , {loc.address}
+                </MenuItem>
+              ))}
+            </Select>
+          )}
           <Button
             type="submit"
             fullWidth

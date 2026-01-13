@@ -18,6 +18,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateClientDto } from './dto/create-client.dto';
 import { CreateBarberDto } from './dto/create-barber.dto';
+import { UpdateBarberLocationDto } from './dto/update-barber-location.dto';
 
 @Controller('user')
 export class UserController {
@@ -45,7 +46,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')   
-  @Post('barbers')
+  @Post('create-barbers')
   createBarber(@Body() dto: CreateBarberDto) {
     return this.userService.createBarber(dto);
   }
@@ -97,6 +98,17 @@ export class UserController {
   changePassword(@Param('id') id: string, @Body() dto: ChangePasswordDto) {
     return this.userService.changePassword(+id, dto);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch(':id/location')
+  updateBarberLocation(
+    @Param('id') id: number,
+    @Body() dto: UpdateBarberLocationDto,
+  ) {
+    return this.userService.updateBarberLocation(id, dto.locationId);
+  }
+
 
   // Eliminar usuario — solo admin
   @UseGuards(JwtAuthGuard, RolesGuard)
