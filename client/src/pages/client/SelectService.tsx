@@ -38,7 +38,7 @@ export default function SelectService() {
   const handleNext = () => {
     if (!selectedServiceId) return;
 
-    navigate(`/reservas/${locationId}/fecha`, {
+    navigate(`/reservas/fecha`, {
       state: {
         barberId,
         serviceId: selectedServiceId,

@@ -17,6 +17,7 @@ import BarberAvailability from '../pages/admin/BarberAvailability';
 import Reserve from '../pages/client/Reserve';
 import SelectBarber from '../pages/client/SelectBarber';
 import SelectService from '../pages/client/SelectService';
+import SelectDateTime from '../pages/client/SelectDateTime';
 
 export default function AppRouter() {
   return (
@@ -60,6 +61,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute roles={['client']}>
                 <SelectService />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reservas/fecha"
+            element={
+              <ProtectedRoute roles={['client']}>
+                <SelectDateTime />
               </ProtectedRoute>
             }
           />
