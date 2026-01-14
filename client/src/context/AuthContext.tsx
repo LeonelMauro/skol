@@ -4,11 +4,13 @@ import type { Location } from '../types/location';
 
 export interface AuthUser {
   id: number;
+  name?: string;
   email: string;
   role: UserRole;
   location?: Location | null;
   access_token?: string;
 }
+
 
 interface AuthContextType {
   user: AuthUser | null;

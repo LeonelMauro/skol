@@ -62,6 +62,22 @@ export default function Header() {
   const isHome = location.pathname === '/';
   const roleMenu = user ? menuByRole[user.role] || [] : [];
 
+  const getHomeLink = () => {
+  if (!user) return '/';
+
+  switch (user.role) {
+    case 'client':
+      return '/client';
+    case 'barber':
+      return '/barber';
+    case 'admin':
+      return '/admin';
+    default:
+      return '/';
+  }
+};
+
+
   const renderButton = (label: string, link: string, onClick?: () => void) => (
     <Button
       key={label}
@@ -86,7 +102,7 @@ export default function Header() {
         <Toolbar sx={{ minHeight: 72 }}>
           {/* LOGO */}
           <Box sx={{ flex: 1 }}>
-            <ButtonBase component={RouterLink} to="/">
+            <ButtonBase component={RouterLink} to={getHomeLink()}>
               <Box component="img" src={icono} alt="SKOL" sx={{ height: 44 }} />
             </ButtonBase>
           </Box>

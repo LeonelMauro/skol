@@ -14,6 +14,9 @@ import AdminUsers from '../pages/admin/AdminUsers';
 import Location from '../pages/admin/Location';
 import Services from '../pages/admin/Services';
 import BarberAvailability from '../pages/admin/BarberAvailability';
+import Reserve from '../pages/client/Reserve';
+import SelectBarber from '../pages/client/SelectBarber';
+import SelectService from '../pages/client/SelectService';
 
 export default function AppRouter() {
   return (
@@ -33,6 +36,30 @@ export default function AppRouter() {
             element={
               <ProtectedRoute roles={['client']}>
                 <ClientDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reservas"
+            element={
+              <ProtectedRoute roles={['client']}>
+                <Reserve />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reservas/:locationId/barberos"
+            element={
+              <ProtectedRoute roles={['client']}>
+                <SelectBarber />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reservas/:locationId/servicio"
+            element={
+              <ProtectedRoute roles={['client']}>
+                <SelectService />
               </ProtectedRoute>
             }
           />

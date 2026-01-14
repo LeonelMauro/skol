@@ -44,6 +44,7 @@ export default function Login() {
     } else if (payload.role === 'barber') {
       navigate('/barber');
     } else {
+      console.log(login)
       navigate('/client');
     }
 

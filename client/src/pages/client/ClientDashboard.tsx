@@ -55,7 +55,7 @@ export default function DashboardClient() {
           mb: 1,
         }}
       >
-        Hola {user?.email}
+         Hola {user?.email.split('@')[0]}
       </Typography>
 
       <Typography sx={{ color: '#ccc', mb: 5 }}>
