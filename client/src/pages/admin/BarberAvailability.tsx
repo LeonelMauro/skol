@@ -172,7 +172,7 @@ const [selectedBarber, setSelectedBarber] = useState<{
 ) => {
   try {
     await api.patch(
-      `/users/${barberId}/location`,
+      `/user/${barberId}/location`,
       { locationId },
       { headers: authHeader }
     );
@@ -406,9 +406,12 @@ const DAY_ORDER = [
             availabilities={selectedBarber.availabilities}
             locationId={selectedBarber.locationId}
             onClose={() => setOpenEditDialog(false)}
-            onSave={handleSaveSchedule}
+            onSaveSchedule={handleSaveSchedule}
+            onSaveLocation={handleUpdateBarberLocation}
           />
         )}
+
+
           <Dialog
             open={openCreateBarber}
             onClose={() => setOpenCreateBarber(false)}

@@ -38,8 +38,8 @@ export interface UpdateBarberAvailabilityPayload {
 }
 export interface UpdateBarberSchedulePayload {
   barberId: number;
+  locationId: number;
   availabilities: EditableBarberAvailability[];
-  locationId: number | null;
   removedIds?: number[];
 }
 // Lo que se usa para editar/guardar

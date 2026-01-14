@@ -15,6 +15,8 @@ import {
   Select,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import type { SelectChangeEvent } from "@mui/material/Select";
+
 
 
 import type {
@@ -43,8 +45,10 @@ interface Props {
   availabilities: BarberAvailability[];
   locationId: number | null;
   onClose: () => void;
-  onSave: (payload: UpdateBarberSchedulePayload) => void;
+  onSaveSchedule: (payload: UpdateBarberSchedulePayload) => void;
+  onSaveLocation: (barberId: number, locationId: number) => void;
 }
+
 
 
 export default function BarberDialogEditAvail({
@@ -54,14 +58,16 @@ export default function BarberDialogEditAvail({
   availabilities,
   locationId,
   onClose,
-  onSave,
+  onSaveSchedule,
+  onSaveLocation,
 }: Props) {
 
 
   
 const [days, setDays] = useState<EditableBarberAvailability[]>([]);
-const [selectedLocationId, setSelectedLocationId] =
-  useState<number | null>(null);
+const [selectedLocationId, setSelectedLocationId] = useState<number | "">("");
+
+
 
 const DAY_ORDER = [
   'monday',
@@ -90,7 +96,8 @@ useEffect(() => {
       }));
 
     setDays(ordered);
-    setSelectedLocationId(locationId);
+    setRemovedIds([]); 
+    setSelectedLocationId(locationId ?? "");
   }
 }, [open, availabilities, locationId]);
 
@@ -113,16 +120,48 @@ const removeDay = (id?: number) => {
 
 const [removedIds, setRemovedIds] = useState<number[]>([]);
 
-  const [locations, setLocations] = useState<Location[]>([]);
+const [locations, setLocations] = useState<Location[]>([]);
+
+const handleSave = async () => {
+  if (!selectedLocationId) {
+    alert("Debe seleccionar un local");
+    return;
+  }
+
+  try {
+    await onSaveSchedule({
+      barberId,
+      locationId: selectedLocationId,
+      availabilities: days,
+      removedIds,
+    });
+
+    if (selectedLocationId !== locationId) {
+      await onSaveLocation(barberId, selectedLocationId);
+    }
+
+    onClose();
+  } catch (error) {
+    console.error(error);
+    alert("Error al guardar los cambios");
+  }
+};
+
 
 
 useEffect(() => {
-  
-  api.get('/location') // 👈 ruta correcta
-    .then(res => {
-      setLocations(res.data);
-    })
-}, []);
+  if (!open) return;
+
+  api.get('/location').then(res => {
+    setLocations(res.data);
+  });
+}, [open]);
+
+const handleLocationChange = (e: SelectChangeEvent) => {
+  const value = e.target.value;
+  setSelectedLocationId(value === "" ? "" : Number(value));
+};
+
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -182,45 +221,35 @@ useEffect(() => {
     ))}
 
     <Divider sx={{ my: 2 }} />
-      <Select
-      fullWidth
-      name="locationId"
-      value={selectedLocationId ?? ""}
-      onChange={(e) =>
-        setSelectedLocationId(Number(e.target.value))
-      }
-      displayEmpty
-      required
-      sx={{ mt: 2, color: "#fff" }}
-    >
-      <MenuItem value="">
-        <em>Seleccionar local</em>
-      </MenuItem>
+     <Select
+  fullWidth
+  value={selectedLocationId}
+  onChange={handleLocationChange}
+  displayEmpty
+  required
+>
+  <MenuItem value="">
+    <em>Seleccionar local</em>
+  </MenuItem>
 
-      {locations.map((loc) => (
-        <MenuItem key={loc.id} value={loc.id}>
-          {loc.name}, {loc.address}
-        </MenuItem>
-      ))}
-    </Select>
+  {locations.map((loc) => (
+    <MenuItem key={loc.id} value={loc.id}>
+      {loc.name}, {loc.address}
+    </MenuItem>
+  ))}
+</Select>
+
+
 
   </DialogContent>
 
   <DialogActions>
     <Button onClick={onClose}>Cancelar</Button>
-    <Button
-      variant="contained"
-      onClick={() =>
-        onSave({
-          barberId,
-          availabilities: days,
-          locationId: selectedLocationId,
-          removedIds,
-        })
-      }
-    >
+    <Button variant="contained" onClick={handleSave}>
       Guardar cambios
     </Button>
+
+
 
 
   </DialogActions>
