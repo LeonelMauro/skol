@@ -107,6 +107,7 @@ export default function SelectDateTime() {
         backgroundColor: '#0F0F0F',
         px: { xs: 2, md: 6 },
         pt: { xs: 10, md: 12 },
+        textAlign: 'center'
       }}
     >
       <Typography
@@ -129,68 +130,143 @@ export default function SelectDateTime() {
       {/* FECHA */}
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker
-          label="Fecha"
-          disablePast
-           shouldDisableDate={(date) => {
-            if (barber.mode === 'any') return false;
-            const day = date.day(); // 0–6
-            return !workingDays.includes(day);
-          }}
-          slotProps={{
-              day: {
-                sx: {
-                  '&.MuiPickersDay-root:not(.Mui-disabled)': {
-                    backgroundColor: '#1b5e20',
-                    color: '#fff',
-                  },
-                  '&.Mui-selected': {
-                    backgroundColor: '#DBD515',
-                    color: '#000',
-                  },
-                },
-              },
-            }}
+  label="Fecha del turno"
+  disablePast
+  shouldDisableDate={(date) => {
+    if (barber.mode === 'any') return false;
+    const day = date.day();
+    return !workingDays.includes(day);
+  }}
+  slotProps={{
+    textField: {
+      fullWidth: true,
+      sx: {
+        mb: 2,
+        input: { color: '#fff' },
+        label: { color: '#DBD515' },
+        '& .MuiOutlinedInput-root': {
+          backgroundColor: '#000',
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#DBD515',
+            borderWidth: 2,
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#DBD515',
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#DBD515',
+          },
+        },
+      },
+    },
 
-          onChange={(value) => {
-            setSelectedDate(value?.format('YYYY-MM-DD') ?? null);
-          }}
-        />
+    popper: {
+      sx: {
+        '& .MuiPaper-root': {
+          backgroundColor: '#0F0F0F',
+          border: '1px solid #DBD515',
+          color: '#fff',
+        },
+
+        // Header (mes / año)
+        '& .MuiPickersCalendarHeader-label': {
+          color: '#DBD515',
+          fontWeight: 'bold',
+        },
+
+        // Flechas
+        '& .MuiPickersArrowSwitcher-button': {
+          color: '#DBD515',
+        },
+      },
+    },
+
+    day: {
+      sx: {
+        '&.MuiPickersDay-root': {
+          backgroundColor: '#1c1c1c',
+          color: '#fff',
+        },
+        '&.Mui-selected': {
+          backgroundColor: '#DBD515',
+          color: '#000',
+          fontWeight: 'bold',
+        },
+        '&:hover': {
+          backgroundColor: '#333',
+        },
+        '&.Mui-disabled': {
+          color: '#555',
+        },
+      },
+    },
+  }}
+  onChange={(value) =>
+    setSelectedDate(value?.format('YYYY-MM-DD') ?? null)
+  }
+/>
+
       </LocalizationProvider>
+
 
 
       {/* HORARIOS */}
       {loadingSlots && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 ,borderColor: '#DBD515',}}>
-          <CircularProgress />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress sx={{ color: '#DBD515' }} />
         </Box>
       )}
 
       {!loadingSlots && selectedDate && slots.length === 0 && (
-        <Typography sx={{ color: '#ccc', textAlign: 'center', mt: 3 }}>
+        <Typography
+          sx={{
+            color: '#aaa',
+            mt: 3,
+            fontSize: 14,
+          }}
+        >
           No hay horarios disponibles para este día
         </Typography>
       )}
 
-      <Grid container spacing={2} sx={{ mt: 2 }}>
+      
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'repeat(3, 1fr)',
+            sm: 'repeat(4, 1fr)',
+            md: 'repeat(5, 1fr)',
+          },
+          gap: 1.5,
+          mt: 2,
+        }}
+      >
         {slots.map(time => (
-          <Grid item xs={4} sm={3} md={2} key={time}>
-            <Button
-            fullWidth
-            variant={selectedTime === time ? 'contained' : 'outlined'}
+          <Button
+            key={time}
             onClick={() => setSelectedTime(time)}
+            variant={selectedTime === time ? 'contained' : 'outlined'}
             sx={{
-                borderRadius: 2,
-                color: selectedTime === time ? '#000' : '#DBD515',
-                backgroundColor:
+              borderRadius: 2,
+              py: 1,
+              fontSize: 14,
+              fontWeight: 'bold',
+              color: selectedTime === time ? '#000' : '#DBD515',
+              backgroundColor:
                 selectedTime === time ? '#DBD515' : 'transparent',
-                fontWeight: 'bold',
+              borderColor: '#DBD515',
+              '&:hover': {
+                backgroundColor: '#DBD515',
+                color: '#000',
+              },
             }}
-            >
+          >
             {time}
-            </Button>
-          </Grid>
+          </Button>
         ))}
-      </Grid>
+      </Box>
+
 
       {/* ACCIONES */}
       <Box sx={{ mt: 5, display: 'flex', gap: 2 }}>

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardContent,
   Divider,
@@ -75,14 +74,21 @@ useEffect(() => {
 
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: '#0F0F0F',
-        px: { xs: 2, md: 6 },
-        pt: { xs: 10, md: 12 },
-      }}
-    >
+        <Box
+    sx={{
+      minHeight: '100vh',
+      backgroundColor: '#0F0F0F',
+      pt: { xs: 10, md: 12 },
+    }}
+  >
+       <Box
+    sx={{
+      maxWidth: 1200,
+      mx: 'auto',
+      px: { xs: 2, md: 4 },
+      textAlign: 'center'
+    }}
+  >
       <Typography
         variant="h4"
         sx={{
@@ -97,87 +103,105 @@ useEffect(() => {
       <Typography sx={{ color: '#ccc', mb: 3 }}>
         Seleccioná el servicio que querés reservar
       </Typography>
-
+      
       <Divider sx={{ mb: 4 }} />
 
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
-          <CircularProgress color="inherit" />
-        </Box>
-      ) : (
-        <>
-          <Grid container spacing={3}>
-            {services.map(servicio => {
-              const IconComponent = serviceIcons[servicio.icon];
-              const selected = selectedServiceId === servicio.id;
+{loading ? (
+  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+    <CircularProgress color="inherit" />
+  </Box>
+) : (
+  <Box
+    sx={{
+      display: 'grid',
+      gridTemplateColumns: {
+      xs: '1fr',
+      sm: 'repeat(auto-fit, minmax(240px, 1fr))',
+    },
+    gap: { xs: 2, sm: 3 },
+    }}
+  >
+    {services.map((servicio) => {
+      const IconComponent = serviceIcons[servicio.icon];
+      const selected = selectedServiceId === servicio.id;
 
-              return (
-                <Grid item xs={12} sm={6} md={4} key={servicio.id}>
-                  <Card
-                    onClick={() => setSelectedServiceId(servicio.id)}
-                    sx={{
-                      width: '100%',
-                      borderRadius: 2.5,
-                      backgroundColor: '#111',
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
-                      border: selected
-                        ? '2px solid #DBD515'
-                        : '1px solid #333',
-                      transition: '0.35s ease',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        transform: 'translateY(-6px)',
-                        boxShadow: '0 18px 45px rgba(219,213,21,0.35)',
-                      },
-                    }}
-                  >
-                    <CardContent sx={{ textAlign: 'center' }}>
-                      {/* ÍCONO */}
-                      {IconComponent && (
-                        <Box
-                          sx={{
-                            width: 64,
-                            height: 64,
-                            backgroundColor: '#fff',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mb: 2,
-                            mx: 'auto',
-                          }}
-                        >
-                          <IconComponent width={32} height={32} />
-                        </Box>
-                      )}
+      return (
+        <Card
+          key={servicio.id}
+          onClick={() => setSelectedServiceId(servicio.id)}
+          sx={{
+            width: '100%',
+            borderRadius: 2.5,
+            backgroundColor: '#111',
+            boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
+            border: selected
+              ? '2px solid #DBD515'
+              : '1px solid #333',
+            transition: '0.35s ease',
+            minHeight: { xs: 220, sm: 'auto' },
+            cursor: 'pointer',
 
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontFamily: 'Keania One',
-                          color: '#DBD515',
-                          mb: 1,
-                        }}
-                      >
-                        {servicio.name}
-                      </Typography>
+            '&:hover': {
+              transform: 'translateY(-6px)',
+              boxShadow: '0 18px 45px rgba(219,213,21,0.35)',
+            },
+          }}
+        >
+          <CardContent sx={{ textAlign: 'center' }}>
+            {IconComponent && (
+              <Box
+                sx={{
+                  width: { xs: 56, sm: 64 },
+                  height: { xs: 56, sm: 64 },
+                  backgroundColor: '#fff',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mb: 2,
+                  mx: 'auto',
+                }}
+              >
+                <IconComponent width={32} height={32} />
+              </Box>
+            )}
 
-                      <Typography sx={{ color: '#ccc', fontSize: 14 }}>
-                        {servicio.description}
-                      </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                fontFamily: 'Keania One',
+                color: '#DBD515',
+                mb: 1,
+              }}
+            >
+              {servicio.name}
+            </Typography>
 
-                      <Typography sx={{ color: '#ccc', mt: 1 }}>
-                        ⏱ {servicio.duration_minutes} min · ${servicio.price}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              );
-            })}
-          </Grid>
+            <Typography sx={{ color: '#ccc', fontSize: { xs: 13, sm: 14 } }}>
+              {servicio.description}
+            </Typography>
+
+            <Typography sx={{ color: '#ccc', mt: 1 }}>
+              ⏱ {servicio.duration_minutes} min · ${servicio.price}
+            </Typography>
+          </CardContent>
+        </Card>
+      );
+    })}
+  </Box>
+)}
+
+     
 
           {/* BOTONES */}
-          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+          <Box sx={{
+              mt: 4,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 2,
+              maxWidth: 600,
+              mx: 'auto',
+            }}>
             <Button
               fullWidth
               variant="outlined"
@@ -201,8 +225,6 @@ useEffect(() => {
               Continuar
             </Button>
           </Box>
-        </>
-      )}
-    </Box>
-  );
-}
+           </Box>
+  </Box>
+  )}

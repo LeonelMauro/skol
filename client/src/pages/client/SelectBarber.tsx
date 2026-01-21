@@ -9,7 +9,6 @@ import {
   CardContent,
   Avatar,
   Button,
-  Grid
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -79,16 +78,30 @@ export default function SelectBarber() {
         backgroundColor: '#0F0F0F',
         px: { xs: 2, md: 6 },
         pt: { xs: 10, md: 12 },
+        textAlign: 'center',
       }}
     >
       <Typography
         variant="h4"
-        sx={{ fontFamily: 'Keania One', color: '#DBD515', mb: 1 }}
+       sx={{
+            fontFamily: 'Keania One',
+            fontSize: { xs: 28, sm: 32, md: 36 },
+            color: '#DBD515',
+            letterSpacing: 1.5,
+            mb: 1,
+          }}
       >
         Elegir barbero
       </Typography>
 
-      <Typography sx={{ color: '#ccc', mb: 4 }}>
+      <Typography sx={{
+            color: '#aaa',
+            fontSize: { xs: 14, sm: 15 },
+            maxWidth: 420,
+            mx: 'auto',
+            lineHeight: 1.6,
+          }}
+      >
         Seleccioná quién querés que te atienda
       </Typography>
 
@@ -99,49 +112,17 @@ export default function SelectBarber() {
           <CircularProgress color="inherit" />
         </Box>
       ) : (
-        <>
-          <Grid container spacing={3}>
-            {/* OPCIÓN CUALQUIERA */}
-            <Grid xs={12} sm={6} md={4}>
-              <Card
-                onClick={() => setSelectedBarber({ mode: 'any' })}
-                sx={{
-                  cursor: 'pointer',
-                  backgroundColor: '#000',
-                  borderRadius: 3,
-                  border:
-                    selectedBarber?.mode === 'any'
-                      ? '2px solid #DBD515'
-                      : '1px solid #333',
-                }}
-              >
-                <CardActionArea>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Avatar
-                      sx={{
-                        mx: 'auto',
-                        mb: 2,
-                        bgcolor: '#DBD515',
-                        color: '#000',
-                      }}
-                    >
-                      *
-                    </Avatar>
-                    <Typography
-                      sx={{
-                        fontFamily: 'Keania One',
-                        color: '#DBD515',
-                      }}
-                    >
-                      Cualquiera disponible
-                    </Typography>
-                    <Typography sx={{ color: '#ccc', fontSize: 14 }}>
-                      Te asignamos el primero libre
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
+        <> <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(auto-fit, minmax(260px, 1fr))',
+            },
+            gap: { xs: 2, sm: 3 },
+            justifyItems: 'center',
+          }}
+        >
 
             {/* BARBEROS */}
             {barbers.map(barber => {
@@ -150,7 +131,6 @@ export default function SelectBarber() {
                 selectedBarber.barber.id === barber.id;
 
               return (
-                <Grid xs={12} sm={6} md={4} key={barber.id}>
                   <Card
                     onClick={() =>
                       setSelectedBarber({
@@ -159,38 +139,51 @@ export default function SelectBarber() {
                       })
                     }
                     sx={{
-                      cursor: 'pointer',
-                      backgroundColor: '#000',
-                      borderRadius: 3,
-                      border: selected
-                        ? '2px solid #DBD515'
-                        : '1px solid #333',
-                    }}
+                    width: '100%',
+                    maxWidth: 320,
+                    cursor: 'pointer',
+                    backgroundColor: '#000',
+                    borderRadius: 3,
+                    border: selected
+                      ? '2px solid #DBD515'
+                      : '1px solid #333',
+                    transition: '0.35s ease',
+
+                    '&:hover': {
+                      transform: 'translateY(-6px)',
+                      boxShadow: selected
+                        ? '0 0 20px rgba(219,213,21,0.4)'
+                        : '0 12px 30px rgba(0,0,0,0.6)',
+                    },
+                  }}
                   >
                     <CardActionArea>
                       <CardContent sx={{ textAlign: 'center' }}>
                         <Avatar
-                          src={barber.avatarUrl}
-                          sx={{ mx: 'auto', mb: 2 }}
-                        />
+                           sx={{
+                            mx: 'auto',
+                            mb: 1.5,
+                            width: 56,
+                            height: 56,
+                          }}
+                          />
                         <Typography
                           sx={{
-                            fontFamily: 'Keania One',
-                            color: '#DBD515',
-                          }}
+                          fontFamily: 'Keania One',
+                          color: '#DBD515',
+                          fontSize: { xs: '1.05rem', sm: '1.15rem' },
+                          letterSpacing: 1,
+                        }}
                         >
                           {barber.name}
                         </Typography>
-                        <Typography sx={{ color: '#ccc', fontSize: 14 }}>
-                          {barber.specialty}
-                        </Typography>
+                        
                       </CardContent>
                     </CardActionArea>
                   </Card>
-                </Grid>
               );
             })}
-          </Grid>
+          </Box>
 
          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
             <Button
@@ -220,7 +213,7 @@ export default function SelectBarber() {
               Continuar
             </Button>
           </Box>
-
+          
         </>
       )}
     </Box>

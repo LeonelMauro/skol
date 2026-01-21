@@ -9,6 +9,9 @@ import api from '../services/api';
 import type { Location } from '../types/location';
 import type { Service } from '../types/services';
 import { serviceIcons } from '../utils/serviceIcons';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import IconButton from '@mui/material/IconButton';
+
 
 const heroImages = [hero1, hero2];
 
@@ -20,6 +23,8 @@ export default function HomePublic() {
   const [locales, setLocales] = useState<Location[]>([]);
 
   const [current, setCurrent] = useState(0);
+
+
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -188,9 +193,10 @@ export default function HomePublic() {
         <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: 4,
-          px: { xs: 2, md: 10 },
+          px: { xs: 2, md: 8 },
+          justifyItems: 'center',
         }}
       >
         {services.map((servicio) => {
@@ -202,7 +208,6 @@ export default function HomePublic() {
                   key={servicio.id}
                   sx={{
                     width: '100%',
-                    maxWidth: 320,
                     borderRadius: 2.5,
                     overflow: 'hidden',
                     backgroundColor: '#111',
@@ -297,9 +302,10 @@ export default function HomePublic() {
           sx={{
             position: 'relative',
             zIndex: 2,
-            maxWidth: 700,
+            maxWidth: 360,
             px: { xs: 3, md: 10 },
             color: '#fff',
+            justifySelf: 'center',
           }}
         >
           <Typography
@@ -349,14 +355,11 @@ export default function HomePublic() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(3, 1fr)',
-              },
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
               gap: 4,
               px: { xs: 2, md: 8 },
               justifyItems: 'center',
+              textAlign: 'center'
             }}
           >
             {locales.map((local) => (
@@ -410,32 +413,66 @@ export default function HomePublic() {
 
                   {/* CONTENIDO */}
                   <CardContent
+                  sx={{
+                    position: 'relative',
+                    backgroundColor: '#0F0F0F',
+                    textAlign: 'center',
+                  }}
+                >
+                  {/* NOMBRE */}
+                  <Typography
                     sx={{
-                      position: 'relative',
-                      backgroundColor: '#0F0F0F',
+                      fontFamily: 'Keania One',
+                      color: '#DBD515',
+                      letterSpacing: 1,
+                      fontSize: { xs: '1.05rem', sm: '1.15rem' },
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {local.name}
+                  </Typography>
+
+                  {/* DIRECCIÓN + ICONO */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 0.5,
+                      mt: 0.75,
                     }}
                   >
                     <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontFamily: 'Keania One',
-                        color: '#DBD515',
-                        letterSpacing: 1,
-                      }}
-                    >
-                      {local.name}
-                    </Typography>
-
-                    <Typography
-                      variant="body2"
                       sx={{
                         color: '#ccc',
-                        mt: 0.5,
+                        fontSize: { xs: '0.95rem', sm: '1rem' },
+                        lineHeight: 2.4,
                       }}
                     >
                       {local.address}
                     </Typography>
-                  </CardContent>
+
+                    <IconButton
+                      size="small"
+                      component="a"
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      sx={{
+                        color: '#DBD515',
+                        p: 0.5,
+                        transform: 'translateY(-1px)',
+                        '&:hover': {
+                          color: '#fff',
+                        },
+                      }}
+                    >
+                      <LocationOnIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </CardContent>
+
                 </CardActionArea>
               </Card>
             ))}
