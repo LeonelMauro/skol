@@ -19,6 +19,7 @@ import SelectBarber from '../pages/client/SelectBarber';
 import SelectService from '../pages/client/SelectService';
 import SelectDateTime from '../pages/client/SelectDateTime';
 import ConfirmReservation from '../pages/client/ConfirmReservation';
+import MyReservations from '../pages/client/MyReservations';
 
 export default function AppRouter() {
   return (
@@ -78,6 +79,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute roles={['client']}>
                 <ConfirmReservation />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/mis-reservas"
+            element={
+              <ProtectedRoute roles={['client']}>
+                <MyReservations />
               </ProtectedRoute>
             }
           />

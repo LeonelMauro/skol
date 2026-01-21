@@ -8,10 +8,11 @@ import { Service } from 'src/services/entities/service.entity';
 import { Reservation } from 'src/reservation/entities/reservation.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { BookingsReminderService } from './bookings-reminder.service';
+import { Location } from 'src/location/entities/location.entity';
 
 @Module({
   imports:[
-    TypeOrmModule.forFeature([User,BarberAvailability,Service,Reservation,]),MailModule
+    TypeOrmModule.forFeature([User,BarberAvailability,Service,Reservation,Location]),MailModule
   ],
   controllers: [BookingsController],
   providers: [BookingsService,BookingsReminderService],

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
-  Divider,
   Button,
   CircularProgress,
   Alert,
@@ -62,6 +61,7 @@ if (!state) return null;
         clientId: user?.id,
         barberId, // puede ser undefined
         serviceId: service.id,
+        locationId: location.id,
         date,
         time,
       },

@@ -10,6 +10,7 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 import { MailService } from 'src/mail/mail.service';
 import { Logger } from '@nestjs/common';
 import { DayOfWeek } from 'src/barber-availability/day-of-week.enum';
+import { Location } from 'src/location/entities/location.entity';
 
 
 
@@ -30,13 +31,17 @@ export class BookingsService {
     @InjectRepository(Service)
     private readonly serviceRepository: Repository<Service>,
 
+
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>,
+
     private readonly mailService: MailService,
 
 
   ) {}
   async findAll() {
   return this.reservationRepository.find({
-    relations: ['client', 'barber', 'service'],
+    relations: ['client', 'barber', 'service', 'location'],
     order: { date: 'ASC', time: 'ASC' },
   });
 }
@@ -145,6 +150,15 @@ async findPending() {
   });
   if (!service) throw new NotFoundException('Servicio no encontrado');
 
+  const location = await this.locationRepository.findOne({
+    where: { id: dto.locationId },
+  });
+  if (!location) {
+  throw new NotFoundException('Local no encontrado');
+}
+
+
+
   let barber: User;
 
 if (dto.barberId) {
@@ -205,6 +219,7 @@ if (dto.barberId) {
     client,
     barber,
     service,
+    location,
     date: dto.date,
     time: dto.time,
     status: ReservationStatus.PENDING,
@@ -375,6 +390,7 @@ private buildClientCreatedTemplate(reservation: Reservation): string {
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
+      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
     </p>
   `;
 }
@@ -388,6 +404,7 @@ private buildBarberCreatedTemplate(reservation: Reservation): string {
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
+      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
     </p>
   `;
 }
@@ -425,6 +442,7 @@ private buildClientConfirmedTemplate(reservation: Reservation): string {
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
+      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
     </p>
   `;
 }
@@ -437,6 +455,7 @@ private buildBarberConfirmedTemplate(reservation: Reservation): string {
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
+      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
     </p>
   `;
 }
@@ -473,6 +492,7 @@ private buildClientCanceledTemplate(reservation: Reservation): string {
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
+      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
     </p>
   `;
 }
@@ -485,6 +505,7 @@ private buildBarberCanceledTemplate(reservation: Reservation): string {
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
+      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
     </p>
   `;
 }
@@ -542,6 +563,19 @@ private async getAnyAvailableBarber(
     'No hay barberos libres en ese horario',
   );
 }
+async findMyReservations(clientId: number) {
+  return this.reservationRepository.find({
+    where: {
+      client: { id: clientId },
+    },
+    relations: ['barber', 'service', 'location'],
+    order: {
+      date: 'ASC',
+      time: 'ASC',
+    },
+  });
+}
+
 
 
 }

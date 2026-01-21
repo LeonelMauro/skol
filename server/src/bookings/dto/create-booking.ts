@@ -13,6 +13,9 @@ export class CreateBookingDto {
   @IsDateString()
   date: string; // yyyy-mm-dd
 
+  @IsNumber()
+  locationId: number; 
+
   @Matches(/^\d{2}:\d{2}$/, { message: "El formato de hora debe ser HH:MM" })
   time: string;
 }

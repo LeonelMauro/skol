@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking';
 import { UpdateBookingDto } from './dto/update-booking.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
 @Controller('bookings')
@@ -45,5 +46,11 @@ export class BookingsController {
   canceled(@Param('id') id: number){
     return this.bookingsService.canceledReservation(id)
   }
+  @UseGuards(JwtAuthGuard)
+  @Get('my')
+  getMyReservations(@Req() req) {
+    return this.bookingsService.findMyReservations(req.user.sub);
+  }
+
 
 }
