@@ -2,46 +2,74 @@ import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
-  Grid,
+  Divider,
+  CircularProgress,
   Card,
   CardActionArea,
   CardContent,
+  Avatar,
   Button,
-  Divider,
-  CircularProgress,
+  Grid
 } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import type { Barber } from '../../types/user';
+import type { Location } from '../../types/location';
 import { useAuth } from '../../context/AuthContext';
 
-export default function SelectBarber() {
-  const { locationId } = useParams();
-  const navigate = useNavigate();
+type SelectedBarber =
+  | { mode: 'any' }
+  | { mode: 'specific'; barber: Barber };
 
-  const [barbers, setBarbers] = useState<Barber[]>([]);
-  const [selectedBarberId, setSelectedBarberId] = useState<number | 'any' | null>(null);
-  const [loading, setLoading] = useState(false);
-   //User authorization
-      const {user}= useAuth();
-      const authHeader={
-        Authorization: `Bearer ${user?.access_token}`
-      }
+export default function SelectBarber() {
+  const navigate = useNavigate();
+  const locationRouter = useLocation();
+  const { user } = useAuth();
+
+  const state = locationRouter.state as
+    | { location: Location }
+    | undefined;
 
   useEffect(() => {
-    setLoading(true);
-    api
-      .get(`/location/${locationId}/barbers`,{ headers: authHeader })
-      .then(res => setBarbers(res.data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
-  }, [locationId]);
+    if (!state?.location) {
+      navigate('/reservas', { replace: true });
+    }
+  }, [state, navigate]);
+
+  if (!state) return null;
+
+  const { location } = state;
+
+  const [barbers, setBarbers] = useState<Barber[]>([]);
+  const [selectedBarber, setSelectedBarber] =
+    useState<SelectedBarber | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+  setLoading(true);
+
+  api
+    .get(`/location/${location.id}/barbers`, {
+      headers: {
+        Authorization: `Bearer ${user?.access_token}`,
+      },
+    })
+    .then(res => setBarbers(res.data))
+    .catch(console.error)
+    .finally(() => setLoading(false));
+}, [location.id, user?.access_token]);
+
 
   const handleNext = () => {
-    if (!selectedBarberId) return;
-    navigate(`/reservas/${locationId}/servicio`, {
-      state: { barberId: selectedBarberId },
-    });
+    if (!selectedBarber) return;
+
+    navigate(`/reservas/${location.id}/servicio`, {
+  state: {
+    location,
+    barber: selectedBarber,
+  },
+});
+
   };
 
   return (
@@ -55,17 +83,13 @@ export default function SelectBarber() {
     >
       <Typography
         variant="h4"
-        sx={{
-          fontFamily: 'Keania One',
-          color: '#DBD515',
-          mb: 1,
-        }}
+        sx={{ fontFamily: 'Keania One', color: '#DBD515', mb: 1 }}
       >
         Elegir barbero
       </Typography>
 
-      <Typography sx={{ color: '#ccc', mb: 3 }}>
-        ¿Con quién querés atenderte?
+      <Typography sx={{ color: '#ccc', mb: 4 }}>
+        Seleccioná quién querés que te atienda
       </Typography>
 
       <Divider sx={{ mb: 4 }} />
@@ -78,32 +102,41 @@ export default function SelectBarber() {
         <>
           <Grid container spacing={3}>
             {/* OPCIÓN CUALQUIERA */}
-            <Grid item xs={12}>
+            <Grid xs={12} sm={6} md={4}>
               <Card
-                onClick={() => setSelectedBarberId('any')}
+                onClick={() => setSelectedBarber({ mode: 'any' })}
                 sx={{
+                  cursor: 'pointer',
                   backgroundColor: '#000',
                   borderRadius: 3,
                   border:
-                    selectedBarberId === 'any'
+                    selectedBarber?.mode === 'any'
                       ? '2px solid #DBD515'
-                      : '1px dashed #555',
-                  transition: '0.3s',
+                      : '1px solid #333',
                 }}
               >
                 <CardActionArea>
                   <CardContent sx={{ textAlign: 'center' }}>
+                    <Avatar
+                      sx={{
+                        mx: 'auto',
+                        mb: 2,
+                        bgcolor: '#DBD515',
+                        color: '#000',
+                      }}
+                    >
+                      *
+                    </Avatar>
                     <Typography
                       sx={{
                         fontFamily: 'Keania One',
                         color: '#DBD515',
-                        mb: 0.5,
                       }}
                     >
                       Cualquiera disponible
                     </Typography>
                     <Typography sx={{ color: '#ccc', fontSize: 14 }}>
-                      Asignamos el primer barbero libre
+                      Te asignamos el primero libre
                     </Typography>
                   </CardContent>
                 </CardActionArea>
@@ -112,38 +145,34 @@ export default function SelectBarber() {
 
             {/* BARBEROS */}
             {barbers.map(barber => {
-              const selected = selectedBarberId === barber.id;
+              const selected =
+                selectedBarber?.mode === 'specific' &&
+                selectedBarber.barber.id === barber.id;
 
               return (
-                <Grid item xs={12} sm={6} md={4} key={barber.id}>
+                <Grid xs={12} sm={6} md={4} key={barber.id}>
                   <Card
-                    onClick={() => setSelectedBarberId(barber.id)}
+                    onClick={() =>
+                      setSelectedBarber({
+                        mode: 'specific',
+                        barber,
+                      })
+                    }
                     sx={{
+                      cursor: 'pointer',
                       backgroundColor: '#000',
                       borderRadius: 3,
                       border: selected
                         ? '2px solid #DBD515'
                         : '1px solid #333',
-                      transition: '0.3s',
-                      '&:hover': {
-                        transform: 'translateY(-4px)',
-                      },
                     }}
                   >
                     <CardActionArea>
                       <CardContent sx={{ textAlign: 'center' }}>
-                        {/* Placeholder foto */}
-                        <Box
-                          sx={{
-                            width: 80,
-                            height: 80,
-                            borderRadius: '50%',
-                            backgroundColor: '#222',
-                            mx: 'auto',
-                            mb: 2,
-                          }}
+                        <Avatar
+                          src={barber.avatarUrl}
+                          sx={{ mx: 'auto', mb: 2 }}
                         />
-
                         <Typography
                           sx={{
                             fontFamily: 'Keania One',
@@ -152,9 +181,8 @@ export default function SelectBarber() {
                         >
                           {barber.name}
                         </Typography>
-
                         <Typography sx={{ color: '#ccc', fontSize: 14 }}>
-                          {barber.specialty || 'Barbero profesional'}
+                          {barber.specialty}
                         </Typography>
                       </CardContent>
                     </CardActionArea>
@@ -164,15 +192,18 @@ export default function SelectBarber() {
             })}
           </Grid>
 
-          {/* BOTONES */}
-          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+         <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
             <Button
               fullWidth
               variant="outlined"
-              sx={{ color: '#fff', borderColor: '#555' }}
-              onClick={() => navigate(-1)}
+              sx={{
+                color: '#fff',
+                borderColor: '#555',
+                fontWeight: 'bold',
+              }}
+              onClick={() => navigate('/reservas')}
             >
-              Atrás
+              Volver
             </Button>
 
             <Button
@@ -183,12 +214,13 @@ export default function SelectBarber() {
                 color: '#000',
                 fontWeight: 'bold',
               }}
-              disabled={!selectedBarberId}
+              disabled={!selectedBarber}
               onClick={handleNext}
             >
               Continuar
             </Button>
           </Box>
+
         </>
       )}
     </Box>

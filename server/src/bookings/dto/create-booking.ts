@@ -10,9 +10,6 @@ export class CreateBookingDto {
   @IsNumber()
   serviceId: number;
 
-  @IsNumber()
-  barberAvailability: number;
-
   @IsDateString()
   date: string; // yyyy-mm-dd
 

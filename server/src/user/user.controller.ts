@@ -117,4 +117,9 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
+  @Get(':id/working-days')
+  getBarberWorkingDays(@Param('id') id: number) {
+    return this.userService.getBarberWorkingDays(id);
+  }
+
 }

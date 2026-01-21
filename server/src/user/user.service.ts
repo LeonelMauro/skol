@@ -247,5 +247,36 @@ async createBarber(dto: CreateBarberDto){
 
     return this.userRepository.remove(user);
   }
+  async getBarberWorkingDays(barberId: number) {
+  const barber = await this.userRepository.findOne({
+    where: {
+      id: barberId,
+      role: { name: 'barber' },
+      isActive: true,
+    },
+    relations: ['availabilities'],
+  });
+
+  if (!barber) {
+    throw new NotFoundException('Barbero no encontrado');
+  }
+
+  const dayMap: Record<string, number> = {
+    sunday: 0,
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+  };
+
+  const workingDays = barber.availabilities
+    .filter(a => a.is_active)
+    .map(a => dayMap[a.day_of_week]);
+
+  return { workingDays };
+}
+
 
 }

@@ -32,9 +32,19 @@ export default function Reserve() {
   }, []);
 
   const handleNext = () => {
-    if (!selectedLocationId) return;
-    navigate(`/reservas/${selectedLocationId}/barberos`);
-  };
+  const selectedLocation = locations.find(
+    loc => loc.id === selectedLocationId
+  );
+
+  if (!selectedLocation) return;
+
+  navigate('/reservas/barberos', {
+    state: {
+      location: selectedLocation,
+    },
+  });
+};
+
 
   return (
     <Box

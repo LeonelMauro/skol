@@ -9,42 +9,70 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { serviceIcons } from '../../utils/serviceIcons';
 import type { Service } from '../../types/services';
+import type { Location } from '../../types/location';
+import type { Barber } from '../../types/user';
+
+type SelectedBarber =
+  | { mode: 'any' }
+  | { mode: 'specific'; barber: Barber };
+
 
 export default function SelectService() {
-  const navigate = useNavigate();
-  const { locationId } = useParams();
-  const { state } = useLocation();
 
-  const barberId = state?.barberId;
+  const navigate = useNavigate();
+  const locationRouter = useLocation();
+  const state = locationRouter.state as
+  | { location: Location; barber: SelectedBarber }
+  | undefined;
+
 
   const [services, setServices] = useState<Service[]>([]);
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+  if (!state) {
+    navigate('/reservas', { replace: true });
+  }
+}, [state, navigate]);
 
-    api
-      .get('/services')
-      .then(res => setServices(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+if (!state) return null;
+
+const { location, barber } = state;
+
+useEffect(() => {
+  setLoading(true);
+
+  api
+    .get<Service[]>('/services', {
+      params: { locationId: location.id },
+    })
+    .then(res => setServices(res.data))
+    .catch(console.error)
+    .finally(() => setLoading(false));
+}, [location.id]);
+
 
   const handleNext = () => {
-    if (!selectedServiceId) return;
+  const selectedService = services.find(
+    s => s.id === selectedServiceId
+  );
 
-    navigate(`/reservas/fecha`, {
-      state: {
-        barberId,
-        serviceId: selectedServiceId,
-      },
-    });
-  };
+  if (!selectedService) return;
+
+  navigate('/reservas/fecha', {
+    state: {
+      location,
+      barber,
+      service: selectedService,
+    },
+  });
+};
+
 
   return (
     <Box
@@ -167,7 +195,7 @@ export default function SelectService() {
                 color: '#000',
                 fontWeight: 'bold',
               }}
-              disabled={!selectedServiceId}
+              disabled={!selectedServiceId || services.length === 0}
               onClick={handleNext}
             >
               Continuar

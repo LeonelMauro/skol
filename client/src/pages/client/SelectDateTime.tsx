@@ -11,20 +11,49 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import type { Location } from '../../types/location';
+import type { Service } from '../../types/services';
+import type { Barber } from '../../types/user';
+import { DatePicker } from '@mui/x-date-pickers';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 interface AvailableSlotsResponse {
   availableSlots: string[];
 }
+type SelectedBarber =
+  | { mode: 'any' }
+  | { mode: 'specific'; barber: Barber };
 
 export default function SelectDateTime() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const routerLocation = useLocation();
   const { user } = useAuth();
+  const [workingDays, setWorkingDays] = useState<number[]>([]);
 
-  const { barberId, serviceId } = location.state as {
-    barberId: number;
-    serviceId: number;
-  };
+
+  const state = routerLocation.state as
+    | {
+        location: Location;
+        barber: SelectedBarber;
+        service: Service;
+      }
+    | undefined;
+
+  // GUARD
+  useEffect(() => {
+    if (!state) {
+      navigate('/reservas', { replace: true });
+    }
+  }, [state, navigate]);
+
+  if (!state) return null;
+
+  // ⬇️ A PARTIR DE ACÁ state ES SEGURO
+  const { location, barber, service } = state;
+
+  const barberId =
+    barber.mode === 'specific' ? barber.barber.id : undefined;
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [slots, setSlots] = useState<string[]>([]);
@@ -34,6 +63,15 @@ export default function SelectDateTime() {
   const authHeader = {
     Authorization: `Bearer ${user?.access_token}`,
   };
+  useEffect(() => {
+  if (barber.mode !== 'specific') return;
+
+  api
+    .get(`/user/${barber.barber.id}/working-days`)
+    .then(res => setWorkingDays(res.data.workingDays))
+    .catch(() => setWorkingDays([]));
+}, [barber]);
+
 
   useEffect(() => {
     if (!selectedDate) return;
@@ -41,23 +79,28 @@ export default function SelectDateTime() {
     setLoadingSlots(true);
     setSelectedTime(null);
 
-      api.get<AvailableSlotsResponse>(
-        `/bookings/barbers/${barberId}/available-slots`,
+    api
+      .get<AvailableSlotsResponse>(
+        barberId
+          ? `/bookings/barbers/${barberId}/available-slots`
+          : `/bookings/available-slots`,
         {
-            params: {
-            serviceId,
+          params: {
             date: selectedDate,
-            },
-            headers: authHeader,
+            serviceId: service.id,
+            locationId: location.id,
+          },
+          headers: authHeader,
         }
-        )
-
+      )
       .then(res => setSlots(res.data.availableSlots))
       .catch(() => setSlots([]))
       .finally(() => setLoadingSlots(false));
-  }, [selectedDate]);
+  }, [selectedDate, barberId, service.id, location.id]);
 
   return (
+    // JSX (el que ya tenés está bien)
+
     <Box
       sx={{
         minHeight: '100vh',
@@ -84,20 +127,36 @@ export default function SelectDateTime() {
       <Divider sx={{ mb: 4 ,borderColor: '#DBD515',}} />
 
       {/* FECHA */}
-      <TextField
-        type="date"
-        fullWidth
-        value={selectedDate || ''}
-        onChange={e => setSelectedDate(e.target.value)}
-        inputProps={{
-          min: new Date().toISOString().split('T')[0],
-        }}
-        sx={{
-          input: { color: '#fff' },
-          label: { color: '#ccc' },
-          mb: 4,
-        }}
-      />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker
+          label="Fecha"
+          disablePast
+           shouldDisableDate={(date) => {
+            if (barber.mode === 'any') return false;
+            const day = date.day(); // 0–6
+            return !workingDays.includes(day);
+          }}
+          slotProps={{
+              day: {
+                sx: {
+                  '&.MuiPickersDay-root:not(.Mui-disabled)': {
+                    backgroundColor: '#1b5e20',
+                    color: '#fff',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: '#DBD515',
+                    color: '#000',
+                  },
+                },
+              },
+            }}
+
+          onChange={(value) => {
+            setSelectedDate(value?.format('YYYY-MM-DD') ?? null);
+          }}
+        />
+      </LocalizationProvider>
+
 
       {/* HORARIOS */}
       {loadingSlots && (
@@ -137,9 +196,9 @@ export default function SelectDateTime() {
       <Box sx={{ mt: 5, display: 'flex', gap: 2 }}>
         <Button 
         fullWidth
-        variant="outlined"
-        sx={{ color: '#fff', borderColor: '#555' }}
-        onClick={() => navigate(-1)}
+              variant="outlined"
+              sx={{ color: '#fff', borderColor: '#555' }}
+              onClick={() => navigate(-1)}
         >
           Atrás
         </Button>
@@ -155,13 +214,14 @@ export default function SelectDateTime() {
           }}
           onClick={() =>
             navigate('/reserve/confirm', {
-              state: {
-                barberId,
-                serviceId,
+               state: {
+                location,
+                barber,
+                service,
                 date: selectedDate,
                 time: selectedTime,
               },
-            })
+              })
           }
         >
           Continuar

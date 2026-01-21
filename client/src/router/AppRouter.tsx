@@ -18,6 +18,7 @@ import Reserve from '../pages/client/Reserve';
 import SelectBarber from '../pages/client/SelectBarber';
 import SelectService from '../pages/client/SelectService';
 import SelectDateTime from '../pages/client/SelectDateTime';
+import ConfirmReservation from '../pages/client/ConfirmReservation';
 
 export default function AppRouter() {
   return (
@@ -49,7 +50,7 @@ export default function AppRouter() {
             }
           />
           <Route
-            path="/reservas/:locationId/barberos"
+            path="/reservas/barberos"
             element={
               <ProtectedRoute roles={['client']}>
                 <SelectBarber />
@@ -72,6 +73,15 @@ export default function AppRouter() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/reserve/confirm"
+            element={
+              <ProtectedRoute roles={['client']}>
+                <ConfirmReservation />
+              </ProtectedRoute>
+            }
+          />
+
 
           {/* BARBER */}
           <Route

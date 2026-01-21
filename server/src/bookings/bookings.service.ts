@@ -82,8 +82,9 @@ async findPending() {
     });
 
     if (!availability) {
-      throw new NotFoundException(`El barbero no trabaja el día ${weekday}`);
-    }
+  throw new NotFoundException(`El barbero no trabaja el día ${weekday}`);
+}
+
 
     // 4️⃣ Crear horarios disponibles
     const slots = this.generateTimeSlots(
@@ -132,73 +133,90 @@ async findPending() {
     return result;
   }
 
-  async create(dto:CreateBookingDto){
-    const barber = await this.userRepository.findOne({where: {id: dto.barberId}})
-    if(!barber){ throw new NotFoundException('No se encontró el barbero')}
-   
-    const service = await this.serviceRepository.findOne({ where: {id : dto.serviceId}})
-    if(!service){ throw new NotFoundException('No se encontró el servicio')}
+  async create(dto: CreateBookingDto) {
 
-    const client= await this.userRepository.findOne({where: {id: dto.clientId}})
-    if(!client){ throw new NotFoundException('No se encontró el cliente')}
-    
-    const availability= await this.barberAvailabilityRepository.findOne({
-      where: {id: dto.barberAvailability, barber:{id: dto.barberId}}})
-    if(!availability){ throw new NotFoundException('No se encontró la disponibilidad seleccionada para este barbero')}
-    
-    // 5️⃣ Validar que el día coincida
-    const jsDate = new Date(dto.date + 'T00:00:00')
-    if (isNaN(jsDate.getTime())) {
-      throw new BadRequestException('Fecha inválida. Formato esperado: YYYY-MM-DD');
-    };
-    
-    // Validar fecha
-    const weekday = jsDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-   
-  
-    if (weekday !== availability.day_of_week) {
-      throw new NotFoundException(
-        `El barbero no trabaja ese día. Día correcto: ${availability.day_of_week}`
-      );
-    }
+  const client = await this.userRepository.findOne({
+    where: { id: dto.clientId },
+  });
+  if (!client) throw new NotFoundException('Cliente no encontrado');
 
-    // 6️⃣ Validar horario dentro del rango disponible
-    const start = availability.start_time; // "09:00"
-    const end = availability.end_time;     // "13:00"
+  const service = await this.serviceRepository.findOne({
+    where: { id: dto.serviceId },
+  });
+  if (!service) throw new NotFoundException('Servicio no encontrado');
 
-    if (dto.time < start || dto.time >= end) {
-      throw new NotFoundException(
-        `El horario ${dto.time} está fuera del rango permitido (${start} - ${end})`
-      );
-    }
+  let barber: User;
 
-    // 7️⃣ Validar que el horario NO esté ocupado
-    const existingReservation = await this.reservationRepository.findOne({
-      where: { barber: { id: dto.barberId },date: dto.date,time: dto.time }
-    });
+if (dto.barberId) {
+  const foundBarber = await this.userRepository.findOne({
+    where: { id: dto.barberId },
+  });
 
-    if (existingReservation) {
-      throw new NotFoundException("Ese horario ya está reservado");
-    }
+  if (!foundBarber) {
+    throw new NotFoundException('Barbero no encontrado');
+  }
 
-    // 8️⃣ Crear reserva
-    const newReservation = this.reservationRepository.create({
-      client,
-      barber,
-      service,
+  barber = foundBarber; // ✅ ahora TS sabe que es User
+} else {
+  barber = await this.getAnyAvailableBarber(dto);
+}
+
+  const jsDate = new Date(dto.date + 'T00:00:00');
+  if (isNaN(jsDate.getTime())) {
+    throw new BadRequestException('Fecha inválida');
+  }
+
+  const weekday = jsDate
+    .toLocaleDateString('en-US', { weekday: 'long' })
+    .toLowerCase() as DayOfWeek;
+
+  const availability = await this.barberAvailabilityRepository.findOne({
+    where: {
+      barber: { id: barber.id },
+      day_of_week: weekday,
+      is_active: true,
+    },
+  });
+
+  if (!availability) {
+    throw new BadRequestException('El barbero no trabaja ese día');
+  }
+
+  if (
+    dto.time < availability.start_time ||
+    dto.time >= availability.end_time
+  ) {
+    throw new BadRequestException('Horario fuera de rango');
+  }
+
+  const exists = await this.reservationRepository.findOne({
+    where: {
+      barber: { id: barber.id },
       date: dto.date,
       time: dto.time,
-      status: ReservationStatus.PENDING
-    });
+    },
+  });
 
-    const savedReservation = await this.reservationRepository.save(newReservation);
-
-    
-    this.sendReservationCreatedEmails(savedReservation);
-
-    return savedReservation;
-
+  if (exists) {
+    throw new BadRequestException('Horario no disponible');
   }
+
+  const reservation = this.reservationRepository.create({
+    client,
+    barber,
+    service,
+    date: dto.date,
+    time: dto.time,
+    status: ReservationStatus.PENDING,
+  });
+
+  const saved = await this.reservationRepository.save(reservation);
+
+  this.sendReservationCreatedEmails(saved);
+
+  return saved;
+}
+
 
     async update(id: number, dto: UpdateBookingDto) {
     // 1️⃣ Buscar reserva existente
@@ -470,5 +488,60 @@ private buildBarberCanceledTemplate(reservation: Reservation): string {
     </p>
   `;
 }
+private async getAnyAvailableBarber(
+  dto: CreateBookingDto,
+): Promise<User> {
+
+  const jsDate = new Date(dto.date + 'T00:00:00');
+  const weekday = jsDate
+    .toLocaleDateString('en-US', { weekday: 'long' })
+    .toLowerCase() as DayOfWeek;
+
+  // 1️⃣ Buscar disponibilidades activas ese día
+  const availabilities = await this.barberAvailabilityRepository.find({
+    where: {
+      day_of_week: weekday,
+      is_active: true,
+    },
+    relations: ['barber'],
+  });
+
+  if (!availabilities.length) {
+    throw new BadRequestException(
+      'No hay barberos disponibles ese día',
+    );
+  }
+
+  // 2️⃣ Filtrar por rango horario
+  const validAvailabilities = availabilities.filter(a =>
+    dto.time >= a.start_time && dto.time < a.end_time,
+  );
+
+  if (!validAvailabilities.length) {
+    throw new BadRequestException(
+      'No hay barberos disponibles en ese horario',
+    );
+  }
+
+  // 3️⃣ Excluir barberos ya reservados
+  for (const availability of validAvailabilities) {
+    const exists = await this.reservationRepository.findOne({
+      where: {
+        barber: { id: availability.barber.id },
+        date: dto.date,
+        time: dto.time,
+      },
+    });
+
+    if (!exists) {
+      return availability.barber;
+    }
+  }
+
+  throw new BadRequestException(
+    'No hay barberos libres en ese horario',
+  );
+}
+
 
 }
