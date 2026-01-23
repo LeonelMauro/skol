@@ -1,7 +1,6 @@
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardActionArea,
   CardContent,
@@ -20,17 +19,17 @@ export default function DashboardBarber() {
   const actions = [
     {
       label: 'Agenda',
-      icon: <EventNoteIcon sx={{ fontSize: 42 }} />,
+      icon: <EventNoteIcon />,
       path: '/agenda',
     },
     {
       label: 'Turnos de hoy',
-      icon: <TodayIcon sx={{ fontSize: 42 }} />,
+      icon: <TodayIcon />,
       path: '/turnos',
     },
     {
       label: 'Mi perfil',
-      icon: <PersonIcon sx={{ fontSize: 42 }} />,
+      icon: <PersonIcon />,
       path: '/perfil',
     },
   ];
@@ -40,10 +39,8 @@ export default function DashboardBarber() {
       sx={{
         minHeight: '100vh',
         backgroundColor: '#0F0F0F',
-        width: '100vw',
-        marginLeft: 'calc(50% - 50vw)',
         px: { xs: 2, md: 6 },
-        pt: { xs: 10, md: 12 }, // espacio AppBar fixed
+        pt: { xs: 10, md: 12 },
       }}
     >
       {/* BIENVENIDA */}
@@ -58,49 +55,74 @@ export default function DashboardBarber() {
         Panel de Barbería
       </Typography>
 
-      <Typography sx={{ color: '#ccc', mb: 5 }}>
+      <Typography sx={{ color: '#ccc', mb: 4 }}>
         Bienvenido {user?.email}
       </Typography>
 
       {/* ACCIONES */}
-      <Grid container spacing={3}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'repeat(auto-fit, minmax(160px, 1fr))',
+            sm: 'repeat(auto-fit, minmax(200px, 1fr))',
+            md: 'repeat(auto-fit, minmax(220px, 1fr))',
+          },
+          gap: { xs: 2, sm: 3 },
+          maxWidth: 900,
+          mx: 'auto',
+        }}
+      >
         {actions.map((action) => (
-          <Grid item xs={12} sm={6} md={4} key={action.label}>
-            <Card
-              sx={{
-                backgroundColor: '#000',
-                borderRadius: 3,
-                transition: '0.3s',
-                '&:hover': {
-                  transform: 'translateY(-6px)',
-                  boxShadow: '0 10px 30px rgba(219,213,21,0.25)',
-                },
-              }}
+          <Card
+            key={action.label}
+            sx={{
+              backgroundColor: '#000',
+              borderRadius: 2.5,
+              height: { xs: 140, sm: 170, md: 190 },
+              transition: '0.3s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(219,213,21,0.25)',
+              },
+            }}
+          >
+            <CardActionArea
+              onClick={() => navigate(action.path)}
+              sx={{ height: '100%' }}
             >
-              <CardActionArea
-                onClick={() => navigate(action.path)}
-                sx={{ py: 5 }}
+              <CardContent
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  p: { xs: 2, sm: 3 },
+                }}
               >
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Box sx={{ color: '#DBD515', mb: 2 }}>
-                    {action.icon}
-                  </Box>
+                <Box sx={{ color: '#DBD515', mb: { xs: 1, sm: 1.5 } }}>
+                  {action.icon &&
+                    // achicamos iconos en mobile
+                    // sin usar React global
+                    action.icon}
+                </Box>
 
-                  <Typography
-                    sx={{
-                      fontFamily: 'Keania One',
-                      color: '#fff',
-                      letterSpacing: 1,
-                    }}
-                  >
-                    {action.label}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Grid>
+                <Typography
+                  sx={{
+                    fontFamily: 'Keania One',
+                    color: '#fff',
+                    letterSpacing: 1,
+                    fontSize: { xs: 13, sm: 14, md: 15 },
+                  }}
+                >
+                  {action.label}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 }
