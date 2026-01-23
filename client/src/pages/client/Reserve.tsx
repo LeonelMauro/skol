@@ -100,12 +100,12 @@ export default function Reserve() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(auto-fit, minmax(260px, 1fr))',
-                textAlign: 'center'
+             gridTemplateColumns: {
+                xs: 'repeat(auto-fit, minmax(150px, 1fr))',
+                sm: 'repeat(auto-fit, minmax(220px, 1fr))',
+                md: 'repeat(auto-fit, minmax(260px, 1fr))',
               },
-              gap: { xs: 2, sm: 3 },
+              gap: { xs: 1.5, sm: 3 },
             }}
           >
             {locations.map((loc) => {
@@ -118,17 +118,14 @@ export default function Reserve() {
                   sx={{
                     cursor: 'pointer',
                     backgroundColor: '#000',
-                    borderRadius: 3,
-                    border: selected
-                      ? '2px solid #DBD515'
-                      : '1px solid #333',
-                    transition: '0.3s',
-
+                    borderRadius: 2.5,
+                    border: selected ? '2px solid #DBD515' : '1px solid #333',
+                    transition: '0.25s',
                     '&:hover': {
-                      transform: 'translateY(-4px)',
+                      transform: 'translateY(-3px)',
                       boxShadow: selected
-                        ? '0 0 20px rgba(219,213,21,0.4)'
-                        : '0 10px 25px rgba(0,0,0,0.6)',
+                        ? '0 0 16px rgba(219,213,21,0.35)'
+                        : '0 6px 18px rgba(0,0,0,0.6)',
                     },
                   }}
                 >
@@ -138,20 +135,20 @@ export default function Reserve() {
                     image={loc.imageUrl}
                     alt={loc.name}
                     sx={{
-                      height: { xs: 130, sm: 140 },
+                      height: { xs: 85, sm: 120, md: 140 },
                       objectFit: 'cover',
                     }}
                   />
 
 
-                    <CardContent  sx={{ py: 1.5 }}>
+                    <CardContent sx={{ py: 1.2 }}>
                       <Typography
                         sx={{
                       fontFamily: 'Keania One',
                       color: '#DBD515',
                       letterSpacing: 1,
-                      fontSize: { xs: '1.05rem', sm: '1.15rem' },
-                      lineHeight: 1.3,
+                      fontSize: { xs: '0.85rem', sm: '1.05rem' },
+                      lineHeight: 1.2,
                     }}
                       >
                         {loc.name}
@@ -159,8 +156,8 @@ export default function Reserve() {
 
                       <Typography sx={{
                         color: '#ccc',
-                        fontSize: { xs: '0.95rem', sm: '1rem' },
-                        lineHeight: 2.4,
+                        fontSize: { xs: '0.75rem', sm: '0.95rem' },
+                        lineHeight: 1.4,
                       }}>
                         {loc.address}
                       </Typography>
@@ -194,11 +191,11 @@ export default function Reserve() {
             fullWidth
             variant="contained"
             sx={{
-              mt: 4,
+              mt: 3,
               backgroundColor: '#DBD515',
               color: '#000',
               fontWeight: 'bold',
-              maxWidth: 300,
+              maxWidth: 280,
               mx: 'auto',
               display: 'block',
             }}
