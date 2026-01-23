@@ -5,15 +5,20 @@ import {
   Box,
   Typography,
   Paper,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -57,24 +62,26 @@ export default function Login() {
 
 
   return (
-    <Box
+  <Box
       sx={{
         minHeight: '100vh',
         backgroundColor: '#0F0F0F',
         display: 'flex',
-        width: '100vw',
-        marginLeft: 'calc(50% - 50vw)',
-        alignItems: 'center',
+        width: '100%',
         justifyContent: 'center',
-        px: 2,
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        pt: { xs: 10, sm: 0 }, // espacio real debajo del header
+        px: { xs: 2, sm: 0 },
       }}
     >
+
+
       <Paper
         elevation={6}
         sx={{
           width: '100%',
-          maxWidth: 380,
-          p: 4,
+          maxWidth: { xs: 300, sm: 360, md: 380 },
+          p: { xs: 2.5, sm: 3.5, md: 4 },
           backgroundColor: '#000',
           color: '#fff',
           borderRadius: 3,
@@ -84,11 +91,12 @@ export default function Login() {
         <Typography
           variant="h4"
           textAlign="center"
-          sx={{
+           sx={{
             fontFamily: 'Keania One',
             color: '#DBD515',
             letterSpacing: 2,
-            mb: 3,
+            mb: 2.5,
+            fontSize: { xs: '1.7rem', sm: '2.1rem' },
           }}
         >
           Ingresar
@@ -98,11 +106,12 @@ export default function Login() {
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
             label="Email"
-            variant="outlined"
             fullWidth
+            size="small"
+            margin="normal"
+            variant="outlined"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            margin="normal"
             autoComplete="email"
             InputLabelProps={{ style: { color: '#aaa' } }}
             sx={{
@@ -112,18 +121,33 @@ export default function Login() {
 
           <TextField
             label="Contraseña"
-            type="password"
-            variant="outlined"
+            type={showPassword ? 'text' : 'password'}
             fullWidth
+            size="small"
+            margin="normal"
+            variant="outlined"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            margin="normal"
             autoComplete="current-password"
             InputLabelProps={{ style: { color: '#aaa' } }}
             sx={{
               input: { color: '#fff' },
             }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                    sx={{ color: '#aaa' }}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
+
 
           {/* BOTÓN LOGIN */}
           <Button
@@ -132,7 +156,7 @@ export default function Login() {
             disabled={loading}
             sx={{
               mt: 3,
-              py: 1.3,
+              py: { xs: 1.1, sm: 1.3 },
               backgroundColor: '#DBD515',
               color: '#000',
               fontWeight: 600,

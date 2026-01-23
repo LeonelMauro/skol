@@ -193,7 +193,10 @@ export default function HomePublic() {
         <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: {
+            xs: 'repeat(auto-fit, minmax(220px, 1fr))',
+            sm: 'repeat(auto-fit, minmax(260px, 1fr))',
+          },
           gap: 4,
           px: { xs: 2, md: 8 },
           justifyItems: 'center',
@@ -207,10 +210,11 @@ export default function HomePublic() {
                 <Card
                   key={servicio.id}
                   sx={{
-                    width: '100%',
-                    borderRadius: 2.5,
-                    overflow: 'hidden',
+                    maxWidth: { xs: 260, sm: 300 },
+                    borderRadius: 2,
                     backgroundColor: '#111',
+                    width: '100%',
+                    overflow: 'hidden',
                     boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
                     transition: '0.35s ease',
                     cursor: 'pointer',
@@ -247,17 +251,23 @@ export default function HomePublic() {
                       sx={{
                         fontFamily: 'Keania One',
                         color: '#DBD515',
+                        fontSize: { xs: '1rem', sm: '1.15rem' },
                         letterSpacing: 1,
-                        mb: 1,
                       }}
                     >
                       {servicio.name}
                     </Typography>
         
-                    <Typography variant="body2" sx={{ color: '#ccc' }}>
+                    <Typography variant="body2" sx={{
+                        color: '#ccc',
+                        fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                      }}>
                       {servicio.description}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#ccc' }}>
+                    <Typography variant="body2" sx={{
+                        color: '#ccc',
+                        fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                      }}>
                       {`$${servicio.price}`}
                     </Typography>
                   </CardContent>
@@ -367,7 +377,7 @@ export default function HomePublic() {
                 key={local.id}
                 sx={{
                   width: '100%',
-                  maxWidth: 320,
+                  maxWidth: { xs: 260, sm: 300, md: 320 },
                   borderRadius: 2.5,
                   overflow: 'hidden',
                   backgroundColor: '#111',
@@ -389,11 +399,11 @@ export default function HomePublic() {
                   {/* IMAGEN */}
                   <Box
                     sx={{
-                      height: 180,
-                      backgroundImage: `url(${local.imageUrl})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
+                    height: { xs: 150, sm: 180 },
+                    backgroundImage: `url(${local.imageUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
                   />
 
                   {/* OVERLAY DORADO HOVER */}
