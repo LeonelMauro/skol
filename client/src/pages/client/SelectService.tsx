@@ -115,10 +115,12 @@ useEffect(() => {
     sx={{
       display: 'grid',
       gridTemplateColumns: {
-      xs: '1fr',
-      sm: 'repeat(auto-fit, minmax(240px, 1fr))',
-    },
-    gap: { xs: 2, sm: 3 },
+        xs: 'repeat(auto-fit, minmax(150px, 1fr))',
+        sm: 'repeat(auto-fit, minmax(220px, 1fr))',
+        md: 'repeat(auto-fit, minmax(260px, 1fr))',
+      },
+      gap: { xs: 1.5, sm: 3 },
+
     }}
   >
     {services.map((servicio) => {
@@ -131,38 +133,41 @@ useEffect(() => {
           onClick={() => setSelectedServiceId(servicio.id)}
           sx={{
             width: '100%',
-            borderRadius: 2.5,
+            borderRadius: 2,
             backgroundColor: '#111',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
-            border: selected
-              ? '2px solid #DBD515'
-              : '1px solid #333',
-            transition: '0.35s ease',
-            minHeight: { xs: 220, sm: 'auto' },
+            border: selected ? '2px solid #DBD515' : '1px solid #333',
+            transition: '0.25s',
             cursor: 'pointer',
 
             '&:hover': {
-              transform: 'translateY(-6px)',
-              boxShadow: '0 18px 45px rgba(219,213,21,0.35)',
+              transform: { sm: 'translateY(-4px)' },
+              boxShadow: '0 12px 28px rgba(219,213,21,0.25)',
             },
           }}
         >
-          <CardContent sx={{ textAlign: 'center' }}>
+          <CardContent 
+           sx={{
+            textAlign: 'center',
+            py: { xs: 1.2, sm: 2 },
+            px: { xs: 1, sm: 2 },
+          }}
+          >
             {IconComponent && (
               <Box
                 sx={{
-                  width: { xs: 56, sm: 64 },
-                  height: { xs: 56, sm: 64 },
+                  width: { xs: 40, sm: 56 },
+                  height: { xs: 40, sm: 56 },
                   backgroundColor: '#fff',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  mb: 2,
+                  mb: { xs: 1, sm: 2 },
                   mx: 'auto',
                 }}
+
               >
-                <IconComponent width={32} height={32} />
+                <IconComponent width={22} height={22} />
               </Box>
             )}
 
@@ -171,17 +176,29 @@ useEffect(() => {
               sx={{
                 fontFamily: 'Keania One',
                 color: '#DBD515',
-                mb: 1,
+                fontSize: { xs: 13, sm: 15 },
+                lineHeight: 1.2,
+                mb: 0.5,
               }}
             >
               {servicio.name}
             </Typography>
 
-            <Typography sx={{ color: '#ccc', fontSize: { xs: 13, sm: 14 } }}>
+            <Typography 
+            sx={{
+              color: '#ccc',
+              fontSize: { xs: 11, sm: 13 },
+              lineHeight: 1.3,
+            }}
+            >
               {servicio.description}
             </Typography>
 
-            <Typography sx={{ color: '#ccc', mt: 1 }}>
+            <Typography sx={{
+              color: '#aaa',
+              fontSize: { xs: 11, sm: 13 },
+              mt: 0.5,
+            }}>
               ⏱ {servicio.duration_minutes} min · ${servicio.price}
             </Typography>
           </CardContent>
