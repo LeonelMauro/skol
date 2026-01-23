@@ -3,8 +3,6 @@ import {
   Box,
   Typography,
   Divider,
-  TextField,
-  Grid,
   Button,
   CircularProgress,
 } from '@mui/material';
@@ -14,9 +12,11 @@ import { useAuth } from '../../context/AuthContext';
 import type { Location } from '../../types/location';
 import type { Service } from '../../types/services';
 import type { Barber } from '../../types/user';
-import { DatePicker } from '@mui/x-date-pickers';
+import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
 
 interface AvailableSlotsResponse {
   availableSlots: string[];
@@ -128,85 +128,83 @@ export default function SelectDateTime() {
       <Divider sx={{ mb: 4 ,borderColor: '#DBD515',}} />
 
       {/* FECHA */}
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DatePicker
-  label="Fecha del turno"
-  disablePast
-  shouldDisableDate={(date) => {
-    if (barber.mode === 'any') return false;
-    const day = date.day();
-    return !workingDays.includes(day);
-  }}
-  slotProps={{
-    textField: {
-      fullWidth: true,
-      sx: {
-        mb: 2,
-        input: { color: '#fff' },
-        label: { color: '#DBD515' },
-        '& .MuiOutlinedInput-root': {
-          backgroundColor: '#000',
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#DBD515',
-            borderWidth: 2,
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      mt: 2,
+    }}
+  >
+    <StaticDatePicker
+      disablePast
+      displayStaticWrapperAs="desktop"
+      value={selectedDate ? dayjs(selectedDate) : null}
+      onChange={(value) =>
+        setSelectedDate(value?.format('YYYY-MM-DD') ?? null)
+      }
+      shouldDisableDate={(date) => {
+        if (barber.mode === 'any') return false;
+        const day = date.day();
+        return !workingDays.includes(day);
+      }}
+      slotProps={{
+        actionBar: {
+          actions: [], // ❌ sin OK / Cancelar
+        },
+        day: {
+          sx: {
+            width: 34,
+            height: 34,
+            fontSize: 12,
+            '&.MuiPickersDay-root': {
+              backgroundColor: '#BDBDBD',
+              color: '#000',
+            },
+            '&.Mui-selected': {
+              backgroundColor: '#DBD515',
+              color: '#000',
+              fontWeight: 'bold',
+            },
+            '&:hover': {
+              backgroundColor: '#AFAFAF',
+            },
+            '&.Mui-disabled': {
+              color: '#777',
+            },
           },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#DBD515',
+        },
+        calendarHeader: {
+          sx: {
+            minHeight: 36,
+            '& .MuiPickersCalendarHeader-label': {
+              fontSize: 13,
+              fontWeight: 'bold',
+              color: '#000',
+            },
+            '& .MuiPickersArrowSwitcher-button': {
+              color: '#000',
+              p: 0.5,
+            },
           },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#DBD515',
-          },
         },
-      },
-    },
-
-    popper: {
-      sx: {
-        '& .MuiPaper-root': {
-          backgroundColor: '#0F0F0F',
-          border: '1px solid #DBD515',
-          color: '#fff',
-        },
-
-        // Header (mes / año)
-        '& .MuiPickersCalendarHeader-label': {
-          color: '#DBD515',
-          fontWeight: 'bold',
-        },
-
-        // Flechas
-        '& .MuiPickersArrowSwitcher-button': {
-          color: '#DBD515',
-        },
-      },
-    },
-
-    day: {
-      sx: {
-        '&.MuiPickersDay-root': {
-          backgroundColor: '#1c1c1c',
-          color: '#fff',
-        },
-        '&.Mui-selected': {
-          backgroundColor: '#DBD515',
+      }}
+      sx={{
+        backgroundColor: '#BDBDBD',
+        borderRadius: 2,
+        p: 1,
+        width: 280,          // 👈 más chico
+        '& .MuiDayCalendar-weekDayLabel': {
+          fontSize: 11,
           color: '#000',
-          fontWeight: 'bold',
         },
-        '&:hover': {
-          backgroundColor: '#333',
-        },
-        '&.Mui-disabled': {
-          color: '#555',
-        },
-      },
-    },
-  }}
-  onChange={(value) =>
-    setSelectedDate(value?.format('YYYY-MM-DD') ?? null)
-  }
-/>
+      }}
+    />
+  </Box>
+</LocalizationProvider>
 
-      </LocalizationProvider>
+
+
 
 
 
