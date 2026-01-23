@@ -1,7 +1,6 @@
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardActionArea,
   CardContent,
@@ -40,10 +39,9 @@ export default function DashboardClient() {
       sx={{
         minHeight: '100vh',
         backgroundColor: '#0F0F0F',
-        width: '100vw',
-        marginLeft: 'calc(50% - 50vw)',
         px: { xs: 2, md: 6 },
-        pt: { xs: 10, md: 12 }, // espacio para AppBar fixed
+        pt: { xs: 10, md: 12 },
+        textAlign: 'center',
       }}
     >
       {/* BIENVENIDA */}
@@ -55,7 +53,7 @@ export default function DashboardClient() {
           mb: 1,
         }}
       >
-         Hola {user?.email.split('@')[0]}
+        Hola {user?.email.split('@')[0]}
       </Typography>
 
       <Typography sx={{ color: '#ccc', mb: 5 }}>
@@ -63,44 +61,66 @@ export default function DashboardClient() {
       </Typography>
 
       {/* ACCIONES */}
-      <Grid container spacing={3}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'repeat(auto-fit, minmax(160px, 1fr))',
+            sm: 'repeat(auto-fit, minmax(200px, 1fr))',
+            md: 'repeat(auto-fit, minmax(220px, 1fr))',
+          },
+          gap: { xs: 2, sm: 3 },
+          maxWidth: 900,
+          mx: 'auto',
+        }}
+      >
         {actions.map((action) => (
-          <Grid item xs={12} sm={6} md={4} key={action.label}>
-            <Card
-              sx={{
-                backgroundColor: '#000',
-                borderRadius: 3,
-                transition: '0.3s',
-                '&:hover': {
-                  transform: 'translateY(-6px)',
-                  boxShadow: '0 10px 30px rgba(219,213,21,0.25)',
-                },
-              }}
+          <Card
+            sx={{
+              backgroundColor: '#000',
+              borderRadius: 2.5,
+              height: { xs: 140, sm: 170, md: 190 },
+              transition: '0.3s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 24px rgba(219,213,21,0.25)',
+              },
+            }}
+          >
+            <CardActionArea
+              onClick={() => navigate(action.path)}
+              sx={{ height: '100%' }}
             >
-              <CardActionArea
-                onClick={() => navigate(action.path)}
-                sx={{ py: 5 }}
+              <CardContent
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
               >
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Box sx={{ color: '#DBD515', mb: 2 }}>
-                    {action.icon}
-                  </Box>
+                <Box sx={{ color: '#DBD515', mb: 1.5,  fontSize: { xs: 32, sm: 38, md: 42 } }}>
+                  {action.icon}
+                </Box>
 
-                  <Typography
-                    sx={{
-                      fontFamily: 'Keania One',
-                      color: '#fff',
-                      letterSpacing: 1,
-                    }}
-                  >
-                    {action.label}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Grid>
+                <Typography
+                  sx={{
+                fontFamily: 'Keania One',
+                color: '#fff',
+                letterSpacing: 1,
+                fontSize: { xs: 13, sm: 14, md: 15 },
+              }}
+                >
+                  {action.label}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
         ))}
-      </Grid>
+      </Box>
+
+
     </Box>
   );
 }
