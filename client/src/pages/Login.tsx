@@ -70,7 +70,7 @@ export default function Login() {
         width: '100%',
         justifyContent: 'center',
         alignItems: { xs: 'flex-start', sm: 'center' },
-        pt: { xs: 10, sm: 0 }, // espacio real debajo del header
+        pt: { xs: '88px', sm: '104px' },
         px: { xs: 2, sm: 0 },
       }}
     >
@@ -80,10 +80,9 @@ export default function Login() {
         elevation={6}
         sx={{
           width: '100%',
-          maxWidth: { xs: 300, sm: 360, md: 380 },
-          p: { xs: 2.5, sm: 3.5, md: 4 },
+          maxWidth: { xs: 320, sm: 380 },
+          p: { xs: 2.5, sm: 4 },
           backgroundColor: '#000',
-          color: '#fff',
           borderRadius: 3,
         }}
       >
@@ -172,7 +171,7 @@ export default function Login() {
         {/* REGISTRO */}
         <Typography
           textAlign="center"
-          sx={{ mt: 3, fontSize: '0.9rem' }}
+          sx={{ mt: 3, fontSize: '0.9rem' ,color: '#ffffffff',}}
         >
           ¿No tenés cuenta?{' '}
           <Box

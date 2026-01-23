@@ -1,31 +1,25 @@
-import { Container, Toolbar } from '@mui/material';
+import { Toolbar } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import Header from './Header';
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const location = useLocation();
 
-  // Rutas full-screen (NO deben tener spacer ni Container)
   const noSpacingRoutes = ['/', '/login', '/register'];
-
-  const hasSpacing = !noSpacingRoutes.some((route) =>
-    location.pathname.startsWith(route)
-  );
+  const hasSpacing = !noSpacingRoutes.includes(location.pathname);
 
   return (
     <>
       <Header />
 
-      {/* Spacer SOLO para páginas internas */}
-      {hasSpacing && <Toolbar />}
+      {/* Spacer exacto al Header */}
+      {hasSpacing && <Toolbar sx={{ minHeight: 72 }} />}
 
-      {hasSpacing ? (
-        <Container sx={{ mt: 4 }}>
-          {children}
-        </Container>
-      ) : (
-        children
-      )}
+      {children}
     </>
   );
 }

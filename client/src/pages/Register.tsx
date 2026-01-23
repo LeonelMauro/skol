@@ -11,6 +11,11 @@ import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import type { Location } from '../types/location';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
 type RegisterMode = 'public' | 'admin-barber';
 interface RegisterProps {
   mode?: RegisterMode;
@@ -32,6 +37,9 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
 
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -105,25 +113,22 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        backgroundColor: '#0F0F0F',
-        width: '100vw',
-        marginLeft: 'calc(50% - 50vw)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: 2,
-        pt: '72px'
-      }}
+      minHeight: '100vh',
+      backgroundColor: '#0F0F0F',
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+      pt: { xs: '88px', sm: '104px' },
+      px: { xs: 1.5, sm: 0 },
+    }}
     >
       <Paper
         elevation={6}
-        sx={{
+         sx={{
           width: '100%',
-          maxWidth: 382,
-          p: 4,
+          maxWidth: { xs: 320, sm: 380 },
+          p: { xs: 2.5, sm: 4 },
           backgroundColor: '#000',
-          color: '#fff',
           borderRadius: 3,
         }}
       >
@@ -133,8 +138,9 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
           sx={{
             fontFamily: 'Keania One',
             color: '#DBD515',
-            letterSpacing: 2,
-            mb: 3,
+            letterSpacing: 1.5,
+            fontSize: { xs: '1.6rem', sm: '2rem' },
+            mb: { xs: 2, sm: 3 },
           }}
         >
           Crear cuenta
@@ -144,6 +150,7 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
           <TextField
             label="Nombre completo"
             name="name"
+            size="small"
             fullWidth
             margin="normal"
             value={form.name}
@@ -158,6 +165,7 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
             name="email"
             type="email"
             fullWidth
+            size="small"
             margin="normal"
             value={form.email}
             onChange={handleChange}
@@ -169,6 +177,7 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
           <TextField
             label="Teléfono"
             name="phone"
+            size="small"
             fullWidth
             margin="normal"
             value={form.phone}
@@ -182,6 +191,7 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
             name="birthDate"
             type="date"
             fullWidth
+            size="small"
             margin="normal"
             value={form.birthDate}
             onChange={handleChange}
@@ -196,28 +206,58 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
           <TextField
             label="Contraseña"
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             fullWidth
+            size="small"
             margin="normal"
             value={form.password}
             onChange={handleChange}
             required
             InputLabelProps={{ style: { color: '#aaa' } }}
             sx={{ input: { color: '#fff' } }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                    sx={{ color: '#aaa' }}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
+
 
           <TextField
             label="Confirmar contraseña"
             name="confirmPassword"
-            type="password"
+            type={showConfirmPassword ? 'text' : 'password'}
             fullWidth
+            size="small"
             margin="normal"
             value={form.confirmPassword}
             onChange={handleChange}
             required
             InputLabelProps={{ style: { color: '#aaa' } }}
             sx={{ input: { color: '#fff' } }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    edge="end"
+                    sx={{ color: '#aaa' }}
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
+
           {mode === 'admin-barber' && (
             <Select
               fullWidth
@@ -247,12 +287,13 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
             disabled={loading}
             sx={{
               mt: 3,
-              py: 1.3,
               backgroundColor: '#DBD515',
               color: '#000',
               fontWeight: 600,
               '&:hover': {
                 backgroundColor: '#c4bd13',
+                mt: 3,
+               py: { xs: 1.1, sm: 1.3 },
               },
             }}
           >
@@ -260,7 +301,11 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
           </Button>
         </Box>
 
-        <Typography textAlign="center" sx={{ mt: 3, fontSize: '0.9rem' }}>
+        <Typography textAlign="center" 
+          sx={{
+              mt: 2.5,
+              fontSize: { xs: '0.85rem', sm: '0.9rem',color: '#ffffffff' },
+            }}>
           ¿Ya tenés cuenta?{' '}
           <Box
             component={RouterLink}
