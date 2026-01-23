@@ -41,9 +41,9 @@ export default function DashboardBarber() {
         backgroundColor: '#0F0F0F',
         px: { xs: 2, md: 6 },
         pt: { xs: 10, md: 12 },
+        textAlign: 'center',
       }}
     >
-      {/* BIENVENIDA */}
       <Typography
         variant="h4"
         sx={{
@@ -55,11 +55,10 @@ export default function DashboardBarber() {
         Panel de Barbería
       </Typography>
 
-      <Typography sx={{ color: '#ccc', mb: 4 }}>
-        Bienvenido {user?.email}
+      <Typography sx={{ color: '#ccc', mb: 5 }}>
+        Bienvenido {user?.email.split('@')[0]}
       </Typography>
 
-      {/* ACCIONES */}
       <Box
         sx={{
           display: 'grid',
@@ -98,14 +97,16 @@ export default function DashboardBarber() {
                   flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  p: { xs: 2, sm: 3 },
                 }}
               >
-                <Box sx={{ color: '#DBD515', mb: { xs: 1, sm: 1.5 } }}>
-                  {action.icon &&
-                    // achicamos iconos en mobile
-                    // sin usar React global
-                    action.icon}
+                <Box
+                  sx={{
+                    color: '#DBD515',
+                    mb: 1.5,
+                    fontSize: { xs: 32, sm: 38, md: 42 },
+                  }}
+                >
+                  {action.icon}
                 </Box>
 
                 <Typography
