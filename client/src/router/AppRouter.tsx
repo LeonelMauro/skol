@@ -20,6 +20,7 @@ import SelectService from '../pages/client/SelectService';
 import SelectDateTime from '../pages/client/SelectDateTime';
 import ConfirmReservation from '../pages/client/ConfirmReservation';
 import MyReservations from '../pages/client/MyReservations';
+import ReservationsBarber from '../pages/barber/TodayBookings';
 
 export default function AppRouter() {
   return (
@@ -101,6 +102,15 @@ export default function AppRouter() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/turnos"
+            element={
+              <ProtectedRoute roles={['barber']}>
+                <ReservationsBarber />
+              </ProtectedRoute>
+            }
+          />
+
 
           {/* ADMIN */}
           <Route

@@ -313,7 +313,7 @@ if (dto.barberId) {
     async confirmReservation(reservationId: number) {
     const reservation = await this.reservationRepository.findOne({
       where: { id: reservationId },
-      relations: ['client', 'barber', 'service'],
+      relations: ['client', 'barber', 'service','location'],
     });
 
     if (!reservation) {
@@ -338,7 +338,7 @@ if (dto.barberId) {
   async canceledReservation(reservationId: number) {
   const reservation = await this.reservationRepository.findOne({
     where: { id: reservationId },
-    relations: ['client', 'barber', 'service'],
+    relations: ['client', 'barber', 'service','location'],
   });
 
   if (!reservation) {
@@ -576,6 +576,66 @@ async findMyReservations(clientId: number) {
   });
 }
 
+async completeReservation(reservationId: number) {
+  const reservation = await this.reservationRepository.findOne({
+    where: { id: reservationId },
+    relations: ['client', 'barber', 'service', 'location'],
+  });
+
+  if (!reservation) {
+    throw new NotFoundException('No se encontró la reserva');
+  }
+
+  if (reservation.status === ReservationStatus.COMPLETED) {
+    throw new BadRequestException('La reserva ya fue marcada como atendida');
+  }
+
+  if (reservation.status !== ReservationStatus.CONFIRMED) {
+    throw new BadRequestException(
+      'Solo se pueden completar reservas confirmadas',
+    );
+  }
+
+  reservation.status = ReservationStatus.COMPLETED;
+  reservation.completedAt = new Date();
+
+  const saved = await this.reservationRepository.save(reservation);
+
+  return saved;
+}
+async markNoShow(reservationId: number) {
+  const reservation = await this.reservationRepository.findOne({
+    where: { id: reservationId },
+  });
+
+  if (!reservation) {
+    throw new NotFoundException('No se encontró la reserva');
+  }
+
+  if (reservation.status !== ReservationStatus.CONFIRMED) {
+    throw new BadRequestException(
+      'Solo se puede marcar no-show una reserva confirmada',
+    );
+  }
+
+  reservation.status = ReservationStatus.NO_SHOW;
+
+  return this.reservationRepository.save(reservation);
+}
+async getTodayBookingsForBarber(barberId: number) {
+  const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+
+  return this.reservationRepository.find({
+    where: {
+      barber: { id: barberId },
+      date: today,
+    },
+    relations: ['client', 'service', 'location'],
+    order: {
+      time: 'ASC',
+    },
+  });
+}
 
 
 }

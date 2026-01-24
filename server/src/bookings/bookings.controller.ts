@@ -51,6 +51,20 @@ export class BookingsController {
   getMyReservations(@Req() req) {
     return this.bookingsService.findMyReservations(req.user.sub);
   }
+  @Post(':id/complete')
+  complete(@Param('id') id: number) {
+    return this.bookingsService.completeReservation(id);
+  }
+  @Post(':id/no-show')
+  noShow(@Param('id') id: number) {
+    return this.bookingsService.markNoShow(id);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Get('barber/today')
+  getTodayBookingsForBarber(@Req() req) {
+    return this.bookingsService.getTodayBookingsForBarber(req.user.sub);
+  }
+
 
 
 }

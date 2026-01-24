@@ -4,12 +4,12 @@ import { User } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 export enum ReservationStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  CANCELED = 'canceled',
-  NO_SHOW = 'no_show',
+  PENDING = 'pending',        // creado, sin confirmar
+  CONFIRMED = 'confirmed',    // confirmado por barbería
+  COMPLETED = 'completed',    // atendido / cobrado ✅
+  NO_SHOW = 'no_show',        // no se presentó ❌
+  CANCELED = 'canceled',      // cancelado ❌
 }
-
 
 @Entity()
 export class Reservation {
@@ -31,6 +31,9 @@ export class Reservation {
 
     @Column()
     time: string; // hh:mm
+
+    @Column({ type: 'timestamp', nullable: true })
+    completedAt: Date;
 
 
     @Column({
