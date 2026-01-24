@@ -35,6 +35,10 @@ export default function MyReservations() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const pendingReservations = reservations.filter(r => r.status === 'pending');
+  const otherReservations = reservations.filter(r => r.status !== 'pending');
+
+
   useEffect(() => {
     api
       .get('/bookings/my', {
@@ -45,6 +49,29 @@ export default function MyReservations() {
       .then(res => setReservations(res.data))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleCancel = async (reservationId: number) => {
+  try {
+    const res = await api.post(
+      `/bookings/${reservationId}/canceled`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${user?.access_token}`,
+        },
+      }
+    );
+
+    setReservations(prev =>
+      prev.map(r =>
+        r.id === reservationId ? res.data : r
+      )
+    );
+  } catch (error) {
+    console.error('Error cancelando la reserva', error);
+  }
+};
+
 
   if (loading) {
     return (
@@ -63,57 +90,190 @@ export default function MyReservations() {
   }
 
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
-      <Typography variant="h5" sx={{ color: '#fff', mb: 3 }}>
+  <Box
+    sx={{
+      textAlign: 'center',
+      minHeight: '100vh',
+      backgroundColor: '#0F0F0F',
+      pt: { xs: 2, md: 4 },
+    }}
+  >
+    <Box
+      sx={{
+        width: {
+          xs: '92%',
+          sm: 480,
+        },
+        mx: 'auto',
+        px: { xs: 1.5, sm: 0 },
+      }}
+    >
+      <Typography
+        variant="h5"
+        align="center"
+        sx={{
+          color: '#DBD515',
+          mb: { xs: 2, sm: 3 },
+          fontWeight: 600,
+          letterSpacing: 0.5,
+        }}
+      >
         Mis reservas
       </Typography>
 
       <Stack spacing={2}>
-        {reservations.map(r => {
+        {/* PENDIENTES */}
+        {pendingReservations.length > 0 && (
+          <Typography
+            variant="overline"
+            align="center"
+            sx={{
+              color: '#DBD515',
+              mt: 2,
+              mb: 1,
+              letterSpacing: 1,
+            }}
+          >
+            Reservas pendientes
+          </Typography>
+        )}
+
+        {pendingReservations.map((r) => {
           const status = statusConfig[r.status];
+          const isCancelable = r.status === 'pending';
+
 
           return (
-            <Card key={r.id} sx={{ backgroundColor: '#111', border: '1px solid #333' }}>
-              <CardContent>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography sx={{ color: '#fff', fontWeight: 'bold' }}>
+            <Card
+              key={r.id}
+              sx={{
+                backgroundColor: '#111',
+                border: { xs: '1px solid #222', sm: '1px solid #333' },
+                borderRadius: 2,
+                width: {
+                xs: '92%',
+                sm: 480,
+              },
+                mx: 'auto',
+                opacity: isCancelable ? 1 : 0.75,
+              }}
+            >
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  justifyContent="space-between"
+                  alignItems={{ xs: 'center', sm: 'center' }}
+                  spacing={0.5}
+                >
+                  <Typography
+                    sx={{
+                    color: '#fff',
+                    fontWeight: 600,
+                    fontSize: { xs: 14, sm: 16 },
+                    textAlign: { xs: 'center', sm: 'left' },
+                  }}
+                  >
                     {r.date} · {r.time}
                   </Typography>
 
-                  <Chip
-                    label={status.label}
-                    color={status.color}
-                    size="small"
-                  />
+                  <Chip label={status.label} color={status.color} size="small" />
                 </Stack>
 
-                <Typography sx={{ color: '#ccc', mt: 1 }}>
-                  ✂️ {r.service.name} · ${r.service.price}
-                </Typography>
+                <Stack
+                  spacing={0.5}
+                  sx={{ mt: 1 }}
+                  alignItems={{ xs: 'center', sm: 'flex-start' }}
+                >
+                  <Typography sx={{ color: '#ccc', fontSize: 13 }}>
+                    ✂️ {r.service.name} · ${r.service.price}
+                  </Typography>
 
-                <Typography sx={{ color: '#ccc' }}>
-                  💈 Barbero: {r.barber.name}
-                </Typography>
+                  <Typography sx={{ color: '#ccc', fontSize: 13 }}>
+                    💈 Barbero: {r.barber.name}
+                  </Typography>
 
-                <Typography sx={{ color: '#777', fontSize: 14 }}>
-                  📍 {r.location.name} – {r.location.address}
-                </Typography>
+                  <Typography sx={{ color: '#888', fontSize: 12 }}>
+                    📍 {r.location.name} – {r.location.address}
+                  </Typography>
+                </Stack>
 
-                {r.status === 'pending' && (
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    sx={{ mt: 2 }}
-                  >
-                    Cancelar reserva
-                  </Button>
-                )}
+                {isCancelable && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  sx={{
+                    mt: 2,
+                    px: 3,
+                    alignSelf: { xs: 'center', sm: 'flex-start' },
+                  }}
+                  onClick={() => handleCancel(r.id)}
+                >
+                  Cancelar reserva
+                </Button>
+              )}
               </CardContent>
             </Card>
           );
         })}
+
+        {/* HISTORIAL */}
+        {otherReservations.length > 0 && (
+          <Typography
+            variant="overline"
+            align="center"
+            sx={{
+              color: '#888',
+              mt: 4,
+              mb: 1,
+              letterSpacing: 1,
+            }}
+          >
+            Historial
+          </Typography>
+        )}
+
+        {otherReservations.map((r) => {
+      const status = statusConfig[r.status];
+
+      return (
+        <Card
+          key={r.id}
+          sx={{
+            backgroundColor: '#111',
+            border: { xs: '1px solid #222', sm: '1px solid #333' },
+            borderRadius: 2,
+            width: {
+            xs: '92%',
+            sm: 480,
+          },
+            mx: 'auto',
+          }}
+        >
+          <CardContent sx={{ p: { xs: 1.5, sm: 3 } }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Typography sx={{ color: '#fff', fontSize: 14 }}>
+                {r.date} · {r.time}
+              </Typography>
+
+              <Chip label={status.label} color={status.color} size="small" />
+            </Stack>
+
+            <Typography sx={{ color: '#ccc', mt: 1, fontSize: 13 }}>
+              ✂️ {r.service.name} · ${r.service.price}
+            </Typography>
+          </CardContent>
+        </Card>
+      );
+    })}
+
       </Stack>
     </Box>
-  );
+  </Box>
+);
+
 }
