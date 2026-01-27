@@ -4,21 +4,31 @@ import {
   Typography,
   Card,
   CardContent,
-  Chip,
   CircularProgress,
   Button,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from '@mui/material';
+
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import HistoryIcon from '@mui/icons-material/History';
+import IconButton from '@mui/material/IconButton';
+import Slide from '@mui/material/Slide';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
+
 
 type TodayBooking = {
   id: number;
+  date: string;
   time: string;
   status: 'pending' | 'confirmed' | 'canceled' | 'no_show' | 'completed';
   client: { name: string };
   service: { name: string; price: number };
-  location: { name: string };
+  location: { name: string; address: string };
 };
 
 
@@ -42,6 +52,8 @@ export default function ReservationsBarber() {
   const activeReservations = sortedReservations.filter(
     r => r.status === 'pending' || r.status === 'confirmed'
   );
+  const canHaveActions = (status: TodayBooking['status']) =>
+  status !== 'completed' && status !== 'canceled';
 
   const historyReservations = sortedReservations.filter(
     r =>
@@ -50,13 +62,13 @@ export default function ReservationsBarber() {
       r.status === 'no_show'
   );
 
-
-  
-
+  const [selectedReservation, setSelectedReservation] = useState<TodayBooking | null>(null);
   
   const [processingId, setProcessingId] = useState<number | null>(null);
 
+  const [showHistory, setShowHistory] = useState(false);
 
+  
 
 
   useEffect(() => {
@@ -89,6 +101,9 @@ export default function ReservationsBarber() {
   } finally {
     setProcessingId(null);
   }
+};
+  const handleViewDetail = (reservation: TodayBooking) => {
+  setSelectedReservation(reservation);
 };
 
 
@@ -152,7 +167,34 @@ export default function ReservationsBarber() {
     setProcessingId(null);
   }
 };
+  const hasTurnStarted = (date: string, time: string) => {
+  const now = new Date();
 
+  const turnDate = new Date(date);
+  const [hours, minutes] = time.split(':').map(Number);
+
+  turnDate.setHours(hours, minutes, 0, 0);
+
+  return now >= turnDate;
+};
+
+
+const today = new Date().toISOString().split('T')[0];
+
+const todayHistory: TodayBooking[] = historyReservations.filter(
+  r => r.date === today
+);
+
+const metrics = {
+  total: todayHistory.length,
+  completed: todayHistory.filter(r => r.status === 'completed').length,
+  noShow: todayHistory.filter(r => r.status === 'no_show').length,
+  canceled: todayHistory.filter(r => r.status === 'canceled').length,
+};
+
+const dailyRevenue = todayHistory
+  .filter(r => r.status === 'completed')
+  .reduce((total, r) => total + r.service.price, 0);
 
 
   if (loading) {
@@ -170,6 +212,25 @@ export default function ReservationsBarber() {
       </Typography>
     );
   }
+  const Metric = ({ label, value, color = '#ccc' }: any) => (
+  <Box
+    sx={{
+      backgroundColor: '#111',
+      border: '1px solid #222',
+      borderRadius: 1.5,
+      py: 1,
+      textAlign: 'center',
+    }}
+  >
+    <Typography sx={{ fontSize: 11, color: '#777' }}>
+      {label}
+    </Typography>
+    <Typography sx={{ fontSize: 16, fontWeight: 600, color }}>
+      {value}
+    </Typography>
+  </Box>
+);
+
 
   return (
   <Box
@@ -202,10 +263,16 @@ export default function ReservationsBarber() {
       >
         Mis reservas
       </Typography>
+       <IconButton
+        onClick={() => setShowHistory(true)}
+        sx={{ color: '#DBD515' }}
+      >
+        <HistoryIcon />
+      </IconButton>
 
       {activeReservations.map((r) => (
         <Card key={r.id} sx={{ 
-          backgroundColor: '#111',
+                      backgroundColor: '#111',
                       border: { xs: '1px solid #222', sm: '1px solid #333' },
                       borderRadius: 2,
                       width: {
@@ -227,52 +294,248 @@ export default function ReservationsBarber() {
             <Typography sx={{ color: '#888', fontSize: 12, mt: 0.5 }}>
               📍 {r.location.name}
             </Typography>
-
             
-            {r.status === 'pending' && (
-              <Stack direction="row" spacing={1} mt={2}>
-                <Button size="small"
-                disabled={processingId === r.id}
-                onClick={() => handleConfirm(r.id)}>
-                  Confirmar
-                </Button>
-                <Button
-                  size="small"
-                  color="error"
-                  variant="outlined"
-                  disabled={processingId === r.id}
-                  onClick={() => handleCancel(r.id)}
-                >
-                  Cancelar
-                </Button>
-              </Stack>
+            {canHaveActions(r.status) && (
+            <Stack direction="row" spacing={1} mt={2}>
+              <Button
+                size="small"
+                color="success"
+                variant="outlined"
+                onClick={() => handleViewDetail(r)}
+              >
+                Ver detalle
+              </Button>
+
+              {r.status === 'pending' && (
+                <>
+                  <Button
+                    size="small"
+                    color="success"
+                    variant="outlined"
+                    disabled={processingId === r.id}
+                    onClick={() => handleConfirm(r.id)}
+                  >
+                    Confirmar
+                  </Button>
+
+                  <Button
+                    size="small"
+                    color="error"
+                    variant="outlined"
+                    disabled={processingId === r.id}
+                    onClick={() => handleCancel(r.id)}
+                  >
+                    Cancelar
+                  </Button>
+                </>
+              )}
+
+              {r.status === 'confirmed' && (() => {
+                const turnStarted = hasTurnStarted(r.date, r.time);
+
+                return (
+                  <>
+                    {!turnStarted && (
+                      <Typography variant="caption" color="text.secondary">
+                        El turno aún no comenzó
+                      </Typography>
+                    )}
+
+                    {turnStarted && (
+                      <>
+                        <Button
+                          size="small"
+                          color="success"
+                          disabled={processingId === r.id}
+                          onClick={() => handleComplete(r.id)}
+                        >
+                          Atendido
+                        </Button>
+
+                        <Button
+                          size="small"
+                          color="warning"
+                          disabled={processingId === r.id}
+                          onClick={() => handleNoShow(r.id)}
+                        >
+                          No asistió
+                        </Button>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
+
+            </Stack>
             )}
 
-            {r.status === 'confirmed' && (
-              <Stack direction="row" spacing={1} mt={2}>
-                <Button
-                  size="small"
-                  color="success"
-                  onClick={() => handleComplete(r.id)}
-                >
-                  Atendido
-                </Button>
-                <Button
-                  size="small"
-                  color="warning"
-                  onClick={() => handleNoShow(r.id)}
-                >
-                  No asistió
-                </Button>
-              </Stack>
-            )}
 
           </CardContent>
         </Card>
       ))}
+      <Slide direction="right" in={showHistory} mountOnEnter unmountOnExit>
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100vh',
+            backgroundColor: '#0F0F0F',
+            zIndex: 1300,
+            p: 2,
+          }}
+        >
+          {/* Header historial */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: { xs: 'center', sm: 'flex-start' },
+              position: 'relative',
+              mb: { xs: 2, sm: 3 },
+            }}
+          >
+            <IconButton
+              onClick={() => setShowHistory(false)}
+              sx={{
+                color: '#DBD515',
+                position: { xs: 'absolute', sm: 'relative' },
+                left: { xs: 0, sm: 'auto' },
+              }}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+
+            <Typography
+              variant="h6"
+              sx={{
+                color: '#DBD515',
+                fontSize: { xs: 18, sm: 22 },
+                fontWeight: 600,
+                textAlign: 'center',
+              }}
+            >
+              Historial de hoy
+            </Typography>
+          </Box>
 
 
-       
+
+          {/* Métricas */}
+          
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: '1fr 1fr',
+                  sm: 'repeat(5, 1fr)',
+                },
+                gap: { xs: 1, sm: 2 },
+                mb: { xs: 3, sm: 4 },
+                maxWidth: 900,
+                mx: 'auto',
+              }}
+            >
+              <Metric label="Total" value={metrics.total} />
+              <Metric label="Atendidos" value={metrics.completed} color="success.main" />
+              <Metric label="No asistió" value={metrics.noShow} color="warning.main" />
+              <Metric label="Cancelados" value={metrics.canceled} color="error.main" />
+              <Metric label="💰 Hoy" value={`$${dailyRevenue}`} />
+            </Box>
+
+          {/* Historial */}
+          <Stack
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
+            {todayHistory.map(r => (
+              <Card
+                key={r.id}
+                sx={{
+                  backgroundColor: '#111',
+                  border: '1px solid #222',
+                  borderRadius: 2,
+                  width: { xs: '100%', sm: 520 },
+                }}
+              >
+                <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
+                  {/* Línea principal */}
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography
+                      sx={{
+                        color: '#fff',
+                        fontSize: { xs: 14, sm: 16 },
+                        fontWeight: 600,
+                      }}
+                    >
+                      {r.time}
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        fontSize: { xs: 11, sm: 12 },
+                        color: '#fff',
+                      }}
+                    >
+                      {statusConfig[r.status].label}
+                    </Typography>
+                  </Stack>
+
+                  {/* Cliente */}
+                  <Typography sx={{ color: '#ccc', fontSize: { xs: 13, sm: 14 } }}>
+                    👤 {r.client.name}
+                  </Typography>
+
+                  {/* Servicio */}
+                  <Typography sx={{ color: '#888', fontSize: { xs: 12, sm: 13 } }}>
+                    ✂️ {r.service.name} · ${r.service.price}
+                  </Typography>                  
+                  <Typography sx={{ color: '#888', fontSize: 12 }}>
+                    📍 {r.location.name} – {r.location.address}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
+          </Stack>
+        </Box>
+      </Slide>
+   
+    </Box>
+    <Box
+      sx={{
+        backgroundColor: '#111',
+                      border: { xs: '1px solid #222', sm: '1px solid #333' },
+                      borderRadius: 2,
+                      width: {
+                      xs: '92%',
+                      sm: 480,
+                    },
+                      mx: 'auto'
+      }}
+    >
+    <Dialog
+      open={Boolean(selectedReservation)}
+      onClose={() => setSelectedReservation(null)}
+      fullWidth
+      maxWidth="sm"
+      
+    >
+      <DialogTitle  sx={{ textAlign:'center'}}>Detalle del turno</DialogTitle>
+
+      {selectedReservation && (
+        <DialogContent sx={{ textAlign:'center'}} dividers>
+          <Typography><b>Cliente:</b> {selectedReservation.client.name}</Typography>
+          <Typography><b>Hora:</b> {selectedReservation.time}</Typography>
+          <Typography><b>Servicio:</b> {selectedReservation.service.name}</Typography>
+          <Typography><b>Precio:</b> ${selectedReservation.service.price}</Typography>
+          <Typography><b>Local:</b> {selectedReservation.location.name}</Typography>
+          <Typography><b>Estado:</b> {selectedReservation.status}</Typography>
+        </DialogContent>
+      )}
+    </Dialog>
     </Box>
   </Box>
 );

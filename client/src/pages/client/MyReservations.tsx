@@ -27,6 +27,8 @@ const statusConfig = {
   confirmed: { label: 'Confirmada', color: 'success' },
   canceled: { label: 'Cancelada', color: 'error' },
   no_show: { label: 'No asististe', color: 'default' },
+  completed:{ label: 'Atendido',    color: 'success' },
+
 } as const;
 
 export default function MyReservations() {
