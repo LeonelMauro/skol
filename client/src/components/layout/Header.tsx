@@ -41,6 +41,8 @@ const menuByRole = {
     { label: 'Agenda', link: '/agenda' },
     { label: 'Turnos', link: '/turnos' },
     { label: 'Perfil', link: '/perfil' },
+    { label: 'Historial', link: '/metricas' },
+
   ],
   admin: [
     { label: 'Usuarios', link: '/admin/users' },

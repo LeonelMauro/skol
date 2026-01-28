@@ -64,7 +64,11 @@ export class BookingsController {
   getTodayBookingsForBarber(@Req() req) {
     return this.bookingsService.getTodayBookingsForBarber(req.user.sub);
   }
-
+  @UseGuards(JwtAuthGuard)
+  @Get('barber/history')
+  getBarberHistory(@Req() req) {
+    return this.bookingsService.getBarberHistory(req.user.sub);
+  }
 
 
 }

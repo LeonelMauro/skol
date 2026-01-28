@@ -18,18 +18,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import IconButton from '@mui/material/IconButton';
 import Slide from '@mui/material/Slide';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
-
-
-type TodayBooking = {
-  id: number;
-  date: string;
-  time: string;
-  status: 'pending' | 'confirmed' | 'canceled' | 'no_show' | 'completed';
-  client: { name: string };
-  service: { name: string; price: number };
-  location: { name: string; address: string };
-};
+import type { TodayBooking } from '../../types/booking';
 
 
 const statusConfig = {
@@ -206,12 +195,45 @@ const dailyRevenue = todayHistory
   }
 
   if (!reservations.length) {
-    return (
-      <Typography sx={{ color: '#aaa', textAlign: 'center', mt: 4 }}>
-        Todavía no tenés reservas realizadas.
-      </Typography>
-    );
-  }
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0F0F0F',
+        px: 2,
+      }}
+      
+    >
+      <Stack spacing={1} alignItems="center">
+        <Typography
+          sx={{
+            color: '#DBD515',
+            fontSize: { xs: 16, sm: 18 },
+            fontWeight: 600,
+          }}
+        >
+          No tenés turnos para hoy
+        </Typography>
+
+        <Typography
+          sx={{
+            color: '#aaa',
+            fontSize: { xs: 13, sm: 14 },
+            textAlign: 'center',
+            maxWidth: 320,
+          }}
+        >
+          Cuando tengas reservas asignadas, aparecerán acá para que puedas
+          gestionarlas.
+        </Typography>
+      </Stack>
+    </Box>
+  );
+}
+
   const Metric = ({ label, value, color = '#ccc' }: any) => (
   <Box
     sx={{

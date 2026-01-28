@@ -4,7 +4,7 @@ import { BarberAvailability } from 'src/barber-availability/entities/barber-avai
 import { Reservation,ReservationStatus} from 'src/reservation/entities/reservation.entity';
 import { Service } from 'src/services/entities/service.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { MailService } from 'src/mail/mail.service';
@@ -636,6 +636,17 @@ async getTodayBookingsForBarber(barberId: number) {
     },
   });
 }
+getBarberHistory(barberId: number) {
+  return this.reservationRepository.find({
+    where: {
+      barber: { id: barberId },
+      status: In(['completed', 'canceled', 'no_show']),
+    },
+    relations: ['client', 'service', 'location'],
+    order: { date: 'DESC', time: 'DESC' },
+  });
+}
+
 
 
 }

@@ -21,6 +21,7 @@ import SelectDateTime from '../pages/client/SelectDateTime';
 import ConfirmReservation from '../pages/client/ConfirmReservation';
 import MyReservations from '../pages/client/MyReservations';
 import ReservationsBarber from '../pages/barber/TodayBookings';
+import BarberHistoryPanel from '../pages/barber/BarberHistoryPanel';
 
 export default function AppRouter() {
   return (
@@ -107,6 +108,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute roles={['barber']}>
                 <ReservationsBarber />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/metricas"
+            element={
+              <ProtectedRoute roles={['barber']}>
+                <BarberHistoryPanel />
               </ProtectedRoute>
             }
           />
