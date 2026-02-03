@@ -11,6 +11,7 @@ import { BookingsModule } from './bookings/bookings.module';
 import { MailModule } from './mail/mail.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LocationModule } from './location/location.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { LocationModule } from './location/location.module';
   BookingsModule,
   MailModule,
   LocationModule,
+  StatsModule,
 ],
 
   controllers: [],

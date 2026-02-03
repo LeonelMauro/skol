@@ -67,7 +67,12 @@ export default function HomePublic() {
       <Box
         sx={{
           position: 'relative',
-          height: '90vh',
+          height: {
+            xs: '65vh',   // mobile
+            sm: '75vh',   // tablets
+            md: '90vh',   // desktop
+          },
+
           width: '100vw',
           marginLeft: 'calc(50% - 50vw)',
           overflow: 'hidden',
@@ -81,11 +86,19 @@ export default function HomePublic() {
               position: 'absolute',
               inset: 0,
               backgroundImage: `
-                linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
+                linear-gradient(
+                  rgba(0,0,0,0.55),
+                  rgba(0,0,0,0.65)
+                ),
                 url(${img})
               `,
+
               backgroundSize: 'cover',
-              backgroundPosition: 'center',
+              backgroundPosition: {
+                xs: 'center top',
+                md: 'center',
+              },
+
               transition: 'opacity 1.2s ease-in-out',
               opacity: index === current ? 1 : 0,
               zIndex: 1,
@@ -107,60 +120,86 @@ export default function HomePublic() {
         >
           <Box>
             <Typography
-              sx={{
+              sx={(theme) => ({
                 fontFamily: '"Keania One"',
-                fontSize: { xs: '4.5rem', md: '6.5rem' },
+                fontSize: {
+                  xs: '3.2rem',
+                  sm: '4.5rem',
+                  md: '6.5rem',
+                },
                 color: '#DBD515',
-                letterSpacing: '6px',
+                letterSpacing: {
+                  xs: '2px',
+                  sm: '4px',
+                  md: '6px',
+                },
                 textTransform: 'uppercase',
-                textShadow: `
-                  -2px -2px 0 rgba(0,0,0,0.2),
-                   2px -2px 0 rgba(0,0,0,0.2),
-                  -2px  2px 0 rgba(0,0,0,0.2),
-                   2px  2px 0 rgba(0,0,0,0.2),
+                lineHeight: 1,
+                textShadow: '0 2px 8px rgba(0,0,0,0.7)', // mobile default
 
-                  -4px -4px 0 rgba(0,0,0,0.2),
-                   4px -4px 0 rgba(0,0,0,0.2),
-                  -4px  4px 0 rgba(0,0,0,0.2),
-                   4px  4px 0 rgba(0,0,0,0.2),
-
-                  -6px -6px 0 rgba(0,0,0,1),
-                   6px -6px 0 rgba(0,0,0,1),
-                  -6px  6px 0 rgba(0,0,0,1),
-                   6px  6px 0 rgba(0,0,0,1)
-                `,
-              }}
+                [theme.breakpoints.up('md')]: {
+                  textShadow: `
+                    -2px -2px 0 rgba(0,0,0,0.2),
+                    2px -2px 0 rgba(0,0,0,0.2),
+                    -2px  2px 0 rgba(0,0,0,0.2),
+                    2px  2px 0 rgba(0,0,0,0.2),
+                    -6px -6px 0 rgba(0,0,0,1),
+                    6px -6px 0 rgba(0,0,0,1),
+                    -6px  6px 0 rgba(0,0,0,1),
+                    6px  6px 0 rgba(0,0,0,1)
+                  `,
+                },
+              })}
             >
               SKOL
             </Typography>
-
             <Typography
-              sx={{
+              sx={(theme) => ({
                 fontFamily: 'Keania One',
-                fontSize: { xs: '1.6rem', md: '2.2rem' },
+                fontSize: {
+                  xs: '1.1rem',
+                  sm: '1.6rem',
+                  md: '2.2rem',
+                },
                 color: '#DBD515',
-                letterSpacing: '4px',
+                letterSpacing: {
+                  xs: '2px',
+                  md: '4px',
+                },
                 textTransform: 'uppercase',
-                mt: -1,
-              }}
+                mt: { xs: 0.5, md: -1 },
+                textShadow: '0 1px 4px rgba(0,0,0,0.6)',
+
+                [theme.breakpoints.up('md')]: {
+                  textShadow: 'none',
+                },
+              })}
             >
               SALÓN DE CABALLEROS
             </Typography>
 
+
+
             <Button
               variant="contained"
+              href="/login"
               sx={{
-                mt: 5,
-                px: 5,
+                mt: { xs: 3, md: 5 },
+                px: { xs: 3, md: 5 },
+                py: { xs: 1, md: 1.4 },
+                fontSize: { xs: '0.9rem', md: '1rem' },
                 backgroundColor: '#DBD515',
                 color: '#000',
-                fontWeight: 600,
-                '&:hover': { backgroundColor: '#c4bd13' },
+                fontWeight: 700,
+                borderRadius: 2,
+                '&:hover': {
+                  backgroundColor: '#c4bd13',
+                },
               }}
-              href="/login"
             >
               Reservar turno
             </Button>
+
           </Box>
         </Box>
       </Box>
@@ -177,10 +216,11 @@ export default function HomePublic() {
       >
         {/* TÍTULO */}
         <Typography
-          variant="h4"
+          variant="h2"
           textAlign="center"
           sx={{
-            fontFamily: 'Keania One',
+            fontFamily: 'Kaushan Script, cursive',
+            fontWeight: 700,          // 👈 negrita
             color: '#DBD515',
             letterSpacing: 2,
             mb: 6,
@@ -189,17 +229,18 @@ export default function HomePublic() {
           Servicios
         </Typography>
 
+
         {/* GRID ORDENADO */}
         <Box
         sx={{
           display: 'grid',
           gridTemplateColumns: {
-            xs: 'repeat(auto-fit, minmax(220px, 1fr))',
-            sm: 'repeat(auto-fit, minmax(260px, 1fr))',
+            xs: 'repeat(auto-fit, minmax(150px, 1fr))',
+          sm: 'repeat(auto-fit, minmax(220px, 1fr))',
+          md: 'repeat(auto-fit, minmax(260px, 1fr))',
           },
-          gap: 4,
-          px: { xs: 2, md: 8 },
-          justifyItems: 'center',
+          gap: { xs: 1.5, sm: 3 },
+         
         }}
       >
         {services.map((servicio) => {
@@ -264,12 +305,7 @@ export default function HomePublic() {
                       }}>
                       {servicio.description}
                     </Typography>
-                    <Typography variant="body2" sx={{
-                        color: '#ccc',
-                        fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                      }}>
-                      {`$${servicio.price}`}
-                    </Typography>
+                    
                   </CardContent>
                   
                 
@@ -349,14 +385,15 @@ export default function HomePublic() {
         >
           {/* TÍTULO */}
           <Typography
-            variant="h4"
+            variant="h2"
             textAlign="center"
             sx={{
-              color: '#DBD515',
-              fontFamily: 'Keania One',
-              letterSpacing: 2,
-              mb: 6,
-            }}
+            fontFamily: 'Kaushan Script, cursive',
+            fontWeight: 700,          // 👈 negrita
+            color: '#DBD515',
+            letterSpacing: 2,
+            mb: 6,
+          }}
           >
             Nuestros Locales
           </Typography>
@@ -493,7 +530,3 @@ export default function HomePublic() {
     </>
   );
 }
-
-
-
-

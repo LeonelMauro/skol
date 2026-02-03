@@ -62,7 +62,10 @@ export default function Header() {
   const location = useLocation();
 
   const isHome = location.pathname === '/';
-  const roleMenu = user ? menuByRole[user.role] || [] : [];
+  const roleMenu = user && menuByRole[user.role]
+  ? menuByRole[user.role]
+  : [];
+
 
   const getHomeLink = () => {
   if (!user) return '/';
