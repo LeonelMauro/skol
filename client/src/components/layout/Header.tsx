@@ -92,11 +92,11 @@ export default function Header() {
     onClick={onClick}
     sx={{
       fontFamily: 'Inter, sans-serif',
-      fontSize: 14,
+      fontSize: 11,
       fontWeight: 700,          // ✅ negrita
-      letterSpacing: '0.04em',
+      letterSpacing: '0.06em',
       color: '#EAEAEA',
-      px: 1.5,
+      px: 1,
       minWidth: 'auto',
       position: 'relative',
       backgroundColor: 'transparent',
@@ -124,6 +124,25 @@ export default function Header() {
     {label.toLowerCase()}
   </Button>
 );
+const socialIconStyles = {
+  color: '#575757ff',
+  transition: 'color 0.25s ease, transform 0.25s ease',
+  '&:hover': {
+    transform: 'scale(1.1)',
+  },
+};
+
+const facebookHover = {
+  '&:hover': {
+    color: '#1877F2', // Facebook blue
+  },
+};
+
+const instagramHover = {
+  '&:hover': {
+    color: '#E1306C', // Instagram pink
+  },
+};
 
 
 
@@ -133,15 +152,15 @@ export default function Header() {
         position="fixed"
         elevation={0}
         sx={{
-          backgroundColor: 'rgba(10,10,10,0.85)',
-          backdropFilter: 'blur(8px)',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          backgroundColor: 'rgba(10,10,10,0.75)',
+          backdropFilter: 'blur(10px)',
         }}
+
       >
         <Toolbar
           sx={{
-            minHeight: 72,
-            px: { xs: 2, md: 6 },
+            minHeight: 60,
+            px: { xs: 2, md: 4 },
             display: 'flex',
             justifyContent: 'space-between',
           }}
@@ -162,7 +181,7 @@ export default function Header() {
               src={icono}
               alt="Logo"
               sx={{
-                height: 36,
+                height: 30,
                 display: 'block',
               }}
             />
@@ -189,15 +208,21 @@ export default function Header() {
           <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             {!isMobile && (
               <>
-                <IconButton sx={{ color: '#DBD515' }}><FacebookIcon /></IconButton>
-                <IconButton sx={{ color: '#DBD515' }}><InstagramIcon /></IconButton>
+                <IconButton sx={{ ...socialIconStyles, ...facebookHover }}>
+                  <FacebookIcon />
+                </IconButton>
+
+                <IconButton sx={{ ...socialIconStyles, ...instagramHover }}>
+                  <InstagramIcon />
+                </IconButton>
+
 
                 {!user ? (
-                  <IconButton component={RouterLink} to="/login" sx={{ color: '#DBD515' }}>
+                  <IconButton component={RouterLink} to="/login" sx={{ color: '#747171ff' }}>
                     <PersonOutlineIcon />
                   </IconButton>
                 ) : (
-                  <IconButton onClick={logout} sx={{ color: '#DBD515' }}>
+                  <IconButton onClick={logout} sx={{ color: '#575757ff' }}>
                     <LogoutIcon />
                   </IconButton>
                 )}
@@ -211,11 +236,11 @@ export default function Header() {
                 width: 40,
                 height: 40,
                 borderRadius: 2, // cuadrado redondeado
-                border: '1px solid rgba(219,213,21,0.4)',
-                color: '#DBD515',
-                backgroundColor: 'rgba(219,213,21,0.08)',
+                border: '1px solid rgba(202, 202, 197, 0.4)',
+                color: '#575757ff',
+                backgroundColor: 'rgba(170, 170, 170, 0.08)',
                 '&:hover': {
-                  backgroundColor: 'rgba(219,213,21,0.15)',
+                  backgroundColor: 'rgba(240, 240, 240, 0.15)',
                 },
               }}
             >
@@ -242,42 +267,44 @@ export default function Header() {
         }}
       >
         {user && (
-  <Box
-    sx={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      px: 2,
-      py: 2,
-      borderBottom: '1px solid #222',
-    }}
-  >
-    {/* Redes */}
-    <Box>
-      <IconButton sx={{ color: '#DBD515' }}>
-        <FacebookIcon />
-      </IconButton>
-      <IconButton sx={{ color: '#DBD515' }}>
-        <InstagramIcon />
-      </IconButton>
-    </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              px: 2,
+              py: 2,
+              borderBottom: '1px solid #222',
+            }}
+          >
+            {/* Redes */}
+            <Box>
+              <IconButton sx={{ ...socialIconStyles, ...facebookHover }}>
+                <FacebookIcon />
+              </IconButton>
 
-    {/* Dashboard */}
-    <IconButton
-      component={RouterLink}
-      to={getHomeLink()}
-      sx={{
-        width: 36,
-        height: 36,
-        borderRadius: 2,
-        border: '1px solid rgba(219,213,21,0.4)',
-        color: '#DBD515',
-      }}
-    >
-      <PersonOutlineIcon />
-    </IconButton>
-  </Box>
-)}
+              <IconButton sx={{ ...socialIconStyles, ...instagramHover }}>
+                <InstagramIcon />
+              </IconButton>
+
+            </Box>
+
+            {/* Dashboard */}
+            <IconButton
+              component={RouterLink}
+              to={getHomeLink()}
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 2,
+                border: '1px solid rgba(248, 248, 245, 0.4)',
+                color: '#ebebebff',
+              }}
+            >
+              <PersonOutlineIcon />
+            </IconButton>
+          </Box>
+        )}
 
 
         <Box sx={{ width: 260, height: '100%', backgroundColor: '#000', color: '#fff' }}>
@@ -291,7 +318,7 @@ export default function Header() {
                   onClick={() => setOpen(false)}
                 >
                   <ListItemText
-                    primary={item.label.toUpperCase()}
+                    primary={item.label}
                     primaryTypographyProps={{
                       fontSize: 13,
                       letterSpacing: '0.15em',
@@ -318,7 +345,7 @@ export default function Header() {
                 >
 
                   <ListItemText
-                  primary={item.label.toLowerCase()}
+                  primary={item.label}
                   primaryTypographyProps={{
                     fontFamily: 'Inter, sans-serif',
                     fontSize: 14,
@@ -336,11 +363,21 @@ export default function Header() {
 
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
             {!user ? (
-              <IconButton component={RouterLink} to="/login" sx={{ color: '#DBD515' }}>
+              <Box>
+              <IconButton sx={{ ...socialIconStyles, ...facebookHover }}>
+                <FacebookIcon />
+              </IconButton>
+
+              <IconButton sx={{ ...socialIconStyles, ...instagramHover }}>
+                <InstagramIcon />
+              </IconButton>
+
+              <IconButton component={RouterLink} to="/login" sx={{ color: '#575757ff' }}>
                 <PersonOutlineIcon />
               </IconButton>
+              </Box>
             ) : (
-              <IconButton onClick={logout} sx={{ color: '#DBD515' }}>
+              <IconButton onClick={logout} sx={{ color: '#575757ff' }}>
                 <LogoutIcon />
               </IconButton>
             )}
