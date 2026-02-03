@@ -84,33 +84,91 @@ export default function Header() {
 
 
   const renderButton = (label: string, link: string, onClick?: () => void) => (
-    <Button
-      key={label}
-      component={link.startsWith('#') ? 'a' : RouterLink}
-      href={link.startsWith('#') ? (isHome ? link : `/${link}`) : undefined}
-      to={!link.startsWith('#') ? link : undefined}
-      onClick={onClick}
-      sx={{
-        fontFamily: 'Keania One',
-        color: '#fff',
-        letterSpacing: 1,
-        '&:hover': { color: '#DBD515' },
-      }}
-    >
-      {label}
-    </Button>
-  );
+  <Button
+    key={label}
+    component={link.startsWith('#') ? 'a' : RouterLink}
+    href={link.startsWith('#') ? (isHome ? link : `/${link}`) : undefined}
+    to={!link.startsWith('#') ? link : undefined}
+    onClick={onClick}
+    sx={{
+      fontFamily: 'Inter, sans-serif',
+      fontSize: 14,
+      fontWeight: 700,          // ✅ negrita
+      letterSpacing: '0.04em',
+      color: '#EAEAEA',
+      px: 1.5,
+      minWidth: 'auto',
+      position: 'relative',
+      backgroundColor: 'transparent',
+
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        bottom: -6,
+        left: 0,
+        width: '0%',
+        height: '2px',
+        backgroundColor: '#DBD515',
+        transition: 'width 0.3s ease',
+      },
+
+      '&:hover': {
+        backgroundColor: 'transparent',
+        color: '#DBD515',
+        '&::after': {
+          width: '100%',
+        },
+      },
+    }}
+  >
+    {label.toLowerCase()}
+  </Button>
+);
+
+
 
   return (
     <>
-      <AppBar position="fixed" sx={{ backgroundColor: '#000' }}>
-        <Toolbar sx={{ minHeight: 72 }}>
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          backgroundColor: 'rgba(10,10,10,0.85)',
+          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        <Toolbar
+          sx={{
+            minHeight: 72,
+            px: { xs: 2, md: 6 },
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
+
           {/* LOGO */}
-          <Box sx={{ flex: 1 }}>
-            <ButtonBase component={RouterLink} to={getHomeLink()}>
-              <Box component="img" src={icono} alt="SKOL" sx={{ height: 44 }} />
-            </ButtonBase>
-          </Box>
+          <ButtonBase
+            component={RouterLink}
+            to={getHomeLink()}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+            }}
+          >
+            <Box
+              component="img"
+              src={icono}
+              alt="Logo"
+              sx={{
+                height: 36,
+                display: 'block',
+              }}
+            />
+          </ButtonBase>
+
+
 
           {/* MENÚ DESKTOP */}
           {!isMobile && (
@@ -146,17 +204,82 @@ export default function Header() {
               </>
             )}
 
-            {isMobile && (
-              <IconButton onClick={() => setOpen(true)} sx={{ color: '#DBD515' }}>
-                <MenuIcon />
-              </IconButton>
-            )}
+            {isMobile &&(
+            <IconButton
+              onClick={() => setOpen(true)}
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2, // cuadrado redondeado
+                border: '1px solid rgba(219,213,21,0.4)',
+                color: '#DBD515',
+                backgroundColor: 'rgba(219,213,21,0.08)',
+                '&:hover': {
+                  backgroundColor: 'rgba(219,213,21,0.15)',
+                },
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+
           </Box>
         </Toolbar>
       </AppBar>
 
       {/* DRAWER MOBILE */}
-      <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={() => setOpen(false)}
+        PaperProps={{
+          sx: {
+            width: 280,
+            height: '100%',
+            backgroundColor: '#0B0B0B',
+            borderRadius: '16px 0 0 16px',
+          },
+        }}
+      >
+        {user && (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      px: 2,
+      py: 2,
+      borderBottom: '1px solid #222',
+    }}
+  >
+    {/* Redes */}
+    <Box>
+      <IconButton sx={{ color: '#DBD515' }}>
+        <FacebookIcon />
+      </IconButton>
+      <IconButton sx={{ color: '#DBD515' }}>
+        <InstagramIcon />
+      </IconButton>
+    </Box>
+
+    {/* Dashboard */}
+    <IconButton
+      component={RouterLink}
+      to={getHomeLink()}
+      sx={{
+        width: 36,
+        height: 36,
+        borderRadius: 2,
+        border: '1px solid rgba(219,213,21,0.4)',
+        color: '#DBD515',
+      }}
+    >
+      <PersonOutlineIcon />
+    </IconButton>
+  </Box>
+)}
+
+
         <Box sx={{ width: 260, height: '100%', backgroundColor: '#000', color: '#fff' }}>
           <List>
             {!user &&
@@ -168,8 +291,12 @@ export default function Header() {
                   onClick={() => setOpen(false)}
                 >
                   <ListItemText
-                    primary={item.label}
-                    primaryTypographyProps={{ fontFamily: 'Keania One' }}
+                    primary={item.label.toUpperCase()}
+                    primaryTypographyProps={{
+                      fontSize: 13,
+                      letterSpacing: '0.15em',
+                      fontWeight: 500,
+                    }}
                   />
                 </ListItemButton>
               ))}
@@ -181,11 +308,26 @@ export default function Header() {
                   component={RouterLink}
                   to={item.link}
                   onClick={() => setOpen(false)}
+                  sx={{
+                    mx: 1,
+                    borderRadius: 1,
+                    '&:hover': {
+                      backgroundColor: 'rgba(219,213,21,0.08)',
+                    },
+                  }}
                 >
+
                   <ListItemText
-                    primary={item.label}
-                    primaryTypographyProps={{ fontFamily: 'Keania One' }}
-                  />
+                  primary={item.label.toLowerCase()}
+                  primaryTypographyProps={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: 14,
+                    fontWeight: 700,     // 🔥 igual al header
+                    letterSpacing: '0.04em',
+                    color: '#EAEAEA',
+                  }}
+                />
+
                 </ListItemButton>
               ))}
           </List>

@@ -219,7 +219,7 @@ export default function HomePublic() {
           variant="h2"
           textAlign="center"
           sx={{
-            fontFamily: 'Kaushan Script, cursive',
+            fontFamily: 'Kaushan Script',
             fontWeight: 700,          // 👈 negrita
             color: '#DBD515',
             letterSpacing: 2,

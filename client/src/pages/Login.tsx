@@ -38,6 +38,7 @@ export default function Login() {
     login({
       id: payload.sub,
       email: payload.email,
+      name: payload.name,
       role: payload.role,
       location: payload.location,
       access_token,
