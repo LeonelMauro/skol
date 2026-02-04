@@ -215,100 +215,126 @@ export default function HomePublic() {
         }}
       >
         {/* TÍTULO */}
+        <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
         <Typography
-          variant="h2"
-          textAlign="center"
           sx={{
-            fontFamily: 'Kaushan Script',
-            fontWeight: 700,          // 👈 negrita
+            fontFamily: 'Keania One',
+            fontSize: { xs: 28, sm: 32, md: 36 },
             color: '#DBD515',
-            letterSpacing: 2,
-            mb: 6,
+            letterSpacing: 1.5,
+            mb: 1,
           }}
         >
-          Servicios
+          Reservar turno
         </Typography>
+
+        <Typography
+          sx={{
+            color: '#aaa',
+            fontSize: { xs: 14, sm: 15 },
+            maxWidth: 420,
+            mx: 'auto',
+            lineHeight: 1.6,
+          }}
+        >
+          El mejor desempeño
+        </Typography>
+      </Box>
 
 
         {/* GRID ORDENADO */}
         <Box
         sx={{
+          maxWidth: 1200,
+          mx: 'auto',
+          px: { xs: 2, md: 4 },
           display: 'grid',
           gridTemplateColumns: {
             xs: 'repeat(auto-fit, minmax(150px, 1fr))',
-          sm: 'repeat(auto-fit, minmax(220px, 1fr))',
-          md: 'repeat(auto-fit, minmax(260px, 1fr))',
+            sm: 'repeat(auto-fit, minmax(220px, 1fr))',
+            md: 'repeat(auto-fit, minmax(260px, 1fr))',
           },
           gap: { xs: 1.5, sm: 3 },
-         
         }}
       >
+
+
         {services.map((servicio) => {
               const IconComponent =
                 serviceIcons[servicio.icon as keyof typeof serviceIcons];
         
               return (
                 <Card
-                  key={servicio.id}
-                  sx={{
-                    maxWidth: { xs: 260, sm: 300 },
-                    borderRadius: 2,
-                    backgroundColor: '#111',
-                    width: '100%',
-                    overflow: 'hidden',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
-                    transition: '0.35s ease',
-                    cursor: 'pointer',
-        
-                    '&:hover': {
-                      transform: 'translateY(-6px)',
-                      boxShadow: '0 18px 45px rgba(219,213,21,0.35)',
-                    },
-                  }}
-                >
-                  <CardContent sx={{ textAlign: 'center' }}>
+                    key={servicio.id}
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      borderRadius: 2,
+                      backgroundColor: '#111',
+                      border: '1px solid #333',
+                      transition: '0.25s',
+                      cursor: 'pointer',
+
+                      '&:hover': {
+                        transform: { sm: 'translateY(-4px)' },
+                        boxShadow: '0 12px 28px rgba(219,213,21,0.25)',
+                      },
+                    }}
+                  >
+
+
+                  <CardContent
+                    sx={{
+                      textAlign: 'center',
+                      py: { xs: 1.2, sm: 2 },
+                      px: { xs: 1, sm: 2 },
+                      flexGrow: 1,
+                    }}
+                  >
+
                     {/* ÍCONO */}
                     {IconComponent && (
-                        <Box
-                          sx={{
-                            width: 64,
-                            height: 64,
-                            backgroundColor: '#fff',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mb: 2,
-                            mx: 'auto',
-                          }}
-                        >
-                          <IconComponent width={32} height={32} />
-                        </Box>
-                      )}
-
-        
-                    <Typography
-                      variant="h6"
+                    <Box
                       sx={{
-                        fontFamily: 'Keania One',
-                        color: '#DBD515',
-                        fontSize: { xs: '1rem', sm: '1.15rem' },
-                        letterSpacing: 1,
+                        width: { xs: 40, sm: 56 },
+                        height: { xs: 40, sm: 56 },
+                        backgroundColor: '#fff',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: { xs: 1, sm: 2 },
+                        mx: 'auto',
                       }}
                     >
-                      {servicio.name}
-                    </Typography>
-        
-                    <Typography variant="body2" sx={{
+                      <IconComponent width={22} height={22} />
+                    </Box>
+                  )}
+
+                    <Typography
+                    sx={{
+                      fontFamily: 'Keania One',
+                      color: '#DBD515',
+                      fontSize: { xs: 13, sm: 15 },
+                      lineHeight: 1.2,
+                      mb: 0.5,
+                    }}
+                  >
+                    {servicio.name}
+                  </Typography>
+
+                    <Typography
+                      sx={{
                         color: '#ccc',
-                        fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                      }}>
+                        fontSize: { xs: 11, sm: 13 },
+                        lineHeight: 1.3,
+                      }}
+                    >
                       {servicio.description}
                     </Typography>
-                    
-                  </CardContent>
-                  
-                
+
+                  </CardContent>                        
         
                 </Card>
               );
@@ -384,96 +410,102 @@ export default function HomePublic() {
           }}
         >
           {/* TÍTULO */}
-          <Typography
-            variant="h2"
-            textAlign="center"
-            sx={{
-            fontFamily: 'Kaushan Script, cursive',
-            fontWeight: 700,          // 👈 negrita
-            color: '#DBD515',
-            letterSpacing: 2,
-            mb: 6,
-          }}
-          >
-            Nuestros Locales
-          </Typography>
+          <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
+            <Typography
+              sx={{
+                fontFamily: 'Keania One',
+                fontSize: { xs: 28, sm: 32, md: 36 },
+                color: '#DBD515',
+                letterSpacing: 1.5,
+                mb: 1,
+              }}
+            >
+              Nuestros locales
+            </Typography>
+
+            <Typography
+              sx={{
+                color: '#aaa',
+                fontSize: { xs: 14, sm: 15 },
+                maxWidth: 420,
+                mx: 'auto',
+                lineHeight: 1.6,
+              }}
+            >
+              Elegí el local más cercano para reservar tu turno
+            </Typography>
+          </Box>
+
 
           {/* GRID ORDENADO */}
           <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: 4,
-              px: { xs: 2, md: 8 },
-              justifyItems: 'center',
-              textAlign: 'center'
-            }}
-          >
+          sx={{
+            maxWidth: 1050,
+            mx: 'auto',
+            px: { xs: 2, md: 4 },
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: 'repeat(auto-fit, 170px)',
+              sm: 'repeat(auto-fit, 200px)',
+              md: 'repeat(auto-fit, 225px)',
+            },
+            justifyContent: 'center',   // centra la grilla
+            gap: { xs: 1.75, sm: 3 },
+          }}
+        >
+
+
             {locales.map((local) => (
               <Card
-                key={local.id}
-                sx={{
-                  width: '100%',
-                  maxWidth: { xs: 260, sm: 300, md: 320 },
-                  borderRadius: 2.5,
-                  overflow: 'hidden',
-                  backgroundColor: '#111',
-                  boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
-                  transition: '0.35s ease',
-                  cursor: 'pointer',
+              sx={{
+                borderRadius: 2,
+                backgroundColor: '#111',
+                border: '1px solid rgba(255,255,255,0.06)',
+                overflow: 'hidden',
+                transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+                cursor: 'pointer',
 
-                  '&:hover': {
-                    transform: 'translateY(-6px)',
-                    boxShadow: '0 18px 45px rgba(219,213,21,0.35)',
-                  },
-                }}
-              >
-                <CardActionArea
-                  
-                  sx={{ position: 'relative' }}
-                  href="/login"
-                >
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  borderColor: 'rgba(219,213,21,0.15)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.55)',
+                },
+              }}
+            >
+
+              
+                <CardActionArea href="/login" sx={{ height: '100%' }}>
                   {/* IMAGEN */}
                   <Box
-                    sx={{
-                    height: { xs: 150, sm: 180 },
+                  sx={{
+                    height: 110, // antes 100
                     backgroundImage: `url(${local.imageUrl})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                   }}
-                  />
+                />
 
-                  {/* OVERLAY DORADO HOVER */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      inset: 0,
-                      background:
-                        'linear-gradient(rgba(219,213,21,0.25), rgba(0,0,0,0.7))',
-                      opacity: 0,
-                      transition: '0.35s',
-                      '&:hover': {
-                        opacity: 1,
-                      },
-                    }}
-                  />
+
+
 
                   {/* CONTENIDO */}
                   <CardContent
                   sx={{
-                    position: 'relative',
-                    backgroundColor: '#0F0F0F',
                     textAlign: 'center',
+                    py: { xs: 1.25, sm: 1.75 }, // antes 1 / 1.5
+                    px: { xs: 1.25, sm: 1.75 },
                   }}
                 >
+
+           
                   {/* NOMBRE */}
                   <Typography
                     sx={{
                       fontFamily: 'Keania One',
                       color: '#DBD515',
-                      letterSpacing: 1,
-                      fontSize: { xs: '1.05rem', sm: '1.15rem' },
-                      lineHeight: 1.3,
+                      fontSize: { xs: 12, sm: 18 },
+                      lineHeight: 1.2,
+                      mb: 0.25,
                     }}
                   >
                     {local.name}
@@ -481,43 +513,46 @@ export default function HomePublic() {
 
                   {/* DIRECCIÓN + ICONO */}
                   <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 0.4,
+                  }}
+                >
+                  <Typography
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 0.5,
-                      mt: 0.75,
+                      color: '#bbb',
+                      fontSize: { xs: 10.5, sm: 14 },
+                      lineHeight: 1.25,
                     }}
                   >
-                    <Typography
-                      sx={{
-                        color: '#ccc',
-                        fontSize: { xs: '0.95rem', sm: '1rem' },
-                        lineHeight: 2.4,
-                      }}
-                    >
-                      {local.address}
-                    </Typography>
+                    {local.address}
+                  </Typography>
 
-                    <IconButton
-                      size="small"
-                      component="a"
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      sx={{
-                        color: '#DBD515',
-                        p: 0.5,
-                        transform: 'translateY(-1px)',
-                        '&:hover': {
-                          color: '#fff',
-                        },
-                      }}
-                    >
-                      <LocationOnIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
+                  <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address)}`,
+                      '_blank',
+                      'noopener,noreferrer'
+                    );
+                  }}
+                  sx={{
+                    color: 'rgba(219,213,21,0.5)',
+                    p: 0.25,
+                    '&:hover': {
+                      color: 'rgba(219,213,21,0.85)',
+                    },
+                  }}
+                >
+                  <LocationOnIcon sx={{ fontSize: 20 }} />
+                </IconButton>
+
+                </Box>
+
                 </CardContent>
 
                 </CardActionArea>
