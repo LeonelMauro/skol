@@ -72,31 +72,92 @@ export default function SelectDateTime() {
     .catch(() => setWorkingDays([]));
 }, [barber]);
 
+  // ⬇️ Filtra los horarios que ya pasaron si es el día actual
+useEffect(() => {
+  if (!selectedDate) return;
+
+  setLoadingSlots(true);
+  setSelectedTime(null);
+
+  api
+    .get<AvailableSlotsResponse>(
+      barberId
+        ? `/bookings/barbers/${barberId}/available-slots`
+        : `/bookings/available-slots`,
+      {
+        params: {
+          date: selectedDate,
+          serviceId: service.id,
+          locationId: location.id,
+        },
+        headers: authHeader,
+      }
+    )
+    .then(res => {
+      let available = res.data.availableSlots;
+
+      // Si la fecha es hoy, eliminar horarios que ya pasaron
+      const today = dayjs().format('YYYY-MM-DD');
+      if (selectedDate === today) {
+        const nowHour = dayjs().hour();
+        const nowMinute = dayjs().minute();
+
+        available = available.filter(time => {
+          const [hourStr, minuteStr] = time.split(':');
+          const hour = parseInt(hourStr);
+          const minute = parseInt(minuteStr);
+          return hour > nowHour || (hour === nowHour && minute > nowMinute);
+        });
+      }
+
+      setSlots(available);
+    })
+    .catch(() => setSlots([]))
+    .finally(() => setLoadingSlots(false));
+}, [selectedDate, barberId, service.id, location.id]);
+
+
 
   useEffect(() => {
-    if (!selectedDate) return;
+  if (!selectedDate) return;
 
-    setLoadingSlots(true);
-    setSelectedTime(null);
+  setLoadingSlots(true);
+  setSelectedTime(null);
 
-    api
-      .get<AvailableSlotsResponse>(
-        barberId
-          ? `/bookings/barbers/${barberId}/available-slots`
-          : `/bookings/available-slots`,
-        {
-          params: {
-            date: selectedDate,
-            serviceId: service.id,
-            locationId: location.id,
-          },
-          headers: authHeader,
-        }
-      )
-      .then(res => setSlots(res.data.availableSlots))
-      .catch(() => setSlots([]))
-      .finally(() => setLoadingSlots(false));
-  }, [selectedDate, barberId, service.id, location.id]);
+  api
+    .get<AvailableSlotsResponse>(
+      barberId
+        ? `/bookings/barbers/${barberId}/available-slots`
+        : `/bookings/available-slots`,
+      {
+        params: {
+          date: selectedDate,
+          serviceId: service.id,
+          locationId: location.id,
+        },
+        headers: authHeader,
+      }
+    )
+    .then(res => {
+      let available = res.data.availableSlots;
+
+      // Filtrar horarios que ya pasaron si es el día actual
+      if (selectedDate === dayjs().format('YYYY-MM-DD')) {
+        const now = dayjs();
+        available = available.filter(time => {
+          const [hourStr, minuteStr] = time.split(':');
+          const slotTime = dayjs()
+            .hour(parseInt(hourStr))
+            .minute(parseInt(minuteStr));
+          return slotTime.isAfter(now);
+        });
+      }
+
+      setSlots(available);
+    })
+    .catch(() => setSlots([]))
+    .finally(() => setLoadingSlots(false));
+}, [selectedDate, barberId, service.id, location.id]);
 
   return (
     // JSX (el que ya tenés está bien)
@@ -137,21 +198,20 @@ export default function SelectDateTime() {
     }}
   >
     <StaticDatePicker
-      disablePast
       displayStaticWrapperAs="desktop"
       value={selectedDate ? dayjs(selectedDate) : null}
       onChange={(value) =>
         setSelectedDate(value?.format('YYYY-MM-DD') ?? null)
       }
+      minDate={dayjs().startOf('day')} // Bloquea fechas pasadas
+      maxDate={dayjs().add(1, 'month').endOf('month')} // Solo hasta fin del mes siguiente
       shouldDisableDate={(date) => {
         if (barber.mode === 'any') return false;
         const day = date.day();
         return !workingDays.includes(day);
       }}
       slotProps={{
-        actionBar: {
-          actions: [], // ❌ sin OK / Cancelar
-        },
+        actionBar: { actions: [] }, // sin OK/Cancelar
         day: {
           sx: {
             width: 34,
@@ -193,13 +253,14 @@ export default function SelectDateTime() {
         backgroundColor: '#BDBDBD',
         borderRadius: 2,
         p: 1,
-        width: 280,          // 👈 más chico
+        width: 280,
         '& .MuiDayCalendar-weekDayLabel': {
           fontSize: 11,
           color: '#000',
         },
       }}
     />
+
   </Box>
 </LocalizationProvider>
 
