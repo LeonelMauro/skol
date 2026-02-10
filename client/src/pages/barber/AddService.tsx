@@ -14,6 +14,8 @@ import { serviceIcons } from '../../utils/serviceIcons';
 import type { Service } from '../../types/services';
 
 export default function AddService() {
+
+
   const navigate = useNavigate();
 
   const [services, setServices] = useState<Service[]>([]);
@@ -29,16 +31,16 @@ export default function AddService() {
   }, []);
 
   const handleNext = () => {
-    const selectedService = services.find(s => s.id === selectedServiceId);
-    if (!selectedService) return;
+  const selectedService = services.find(s => s.id === selectedServiceId);
+  if (!selectedService) return;
 
-    // 👉 acá después podés:
-    // - ir a carga directa
-    // - abrir modal
-    // - asociar al barbero
-    // - etc
-    console.log('Servicio seleccionado:', selectedService);
-  };
+  navigate('/add-service/client', {
+    state: {
+      service: selectedService,
+    },
+  });
+};
+
 
   return (
     <Box
@@ -109,12 +111,16 @@ export default function AddService() {
                     },
                   }}
                 >
-                  <CardContent sx={{ textAlign: 'center' }}>
+                  <CardContent sx={{
+                    textAlign: 'center',
+                    py: { xs: 1.2, sm: 2 },
+                    px: { xs: 1, sm: 2 },
+                  }}>
                     {IconComponent && (
                       <Box
                         sx={{
-                          width: 56,
-                          height: 56,
+                          width: { xs: 40, sm: 56 },
+                          height: { xs: 40, sm: 56 },
                           backgroundColor: '#fff',
                           borderRadius: '50%',
                           display: 'flex',
@@ -132,19 +138,22 @@ export default function AddService() {
                       sx={{
                         fontFamily: 'Keania One',
                         color: '#DBD515',
-                        fontSize: 15,
+                        fontSize: { xs: 13, sm: 15 },
+                        lineHeight: 1.2,
                         mb: 0.5,
                       }}
                     >
                       {servicio.name}
                     </Typography>
 
-                    <Typography sx={{ color: '#ccc', fontSize: 13 }}>
-                      {servicio.description}
-                    </Typography>
+                    
 
-                    <Typography sx={{ color: '#aaa', fontSize: 13, mt: 0.5 }}>
-                      ⏱ {servicio.duration_minutes} min · ${servicio.price}
+                    <Typography sx={{
+                      color: '#aaa',
+                      fontSize: { xs: 11, sm: 13 },
+                      mt: 0.5,
+                    }}>
+                       ${servicio.price}
                     </Typography>
                   </CardContent>
                 </Card>

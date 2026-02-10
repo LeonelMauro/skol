@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -30,6 +31,14 @@ export class UserController {
   @Post('register')
   createClient(@Body() dto: CreateClientDto) {
     return this.userService.createClient(dto);
+  }
+  @Get('search')
+  async searchClients(@Query('q') q: string) {
+    return this.userService.findAllClient(q);
+  }
+  @Get(':id/working-days')
+  getBarberWorkingDays(@Param('id') id: number) {
+    return this.userService.getBarberWorkingDays(id);
   }
 
   /* =======================
@@ -117,9 +126,8 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
-  @Get(':id/working-days')
-  getBarberWorkingDays(@Param('id') id: number) {
-    return this.userService.getBarberWorkingDays(id);
-  }
+  
 
+  
+  
 }

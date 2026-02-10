@@ -23,6 +23,7 @@ import MyReservations from '../pages/client/MyReservations';
 import ReservationsBarber from '../pages/barber/TodayBookings';
 import BarberHistoryPanel from '../pages/barber/BarberHistoryPanel';
 import AddService from '../pages/barber/AddService';
+import SelectClient from '../pages/barber/SelectClient';
 
 export default function AppRouter() {
   return (
@@ -128,6 +129,15 @@ export default function AppRouter() {
               </ProtectedRoute>
             }
           />
+          <Route
+          path="/add-service/client"
+          element={
+            <ProtectedRoute roles={['barber']}>
+              <SelectClient />
+            </ProtectedRoute>
+          }
+        />
+
 
 
           {/* ADMIN */}

@@ -42,6 +42,7 @@ const menuByRole = {
     { label: 'Turnos', link: '/turnos' },
     { label: 'Perfil', link: '/perfil' },
     { label: 'Historial', link: '/metricas' },
+    { label: 'Servicios', link: '/servicios' },
 
   ],
   admin: [

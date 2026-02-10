@@ -277,6 +277,20 @@ async createBarber(dto: CreateBarberDto){
 
   return { workingDays };
 }
+async findAllClient(q?: string) {
+  const where = q
+    ? [
+        { name: ILike(`%${q}%`), role: { id: 3 } }, 
+        { email: ILike(`%${q}%`), role: { id: 3 } },
+      ]
+    : { role: { id: 3 } };
+
+  return this.userRepository.find({
+    where,
+    relations: ['role'],
+  });
+}
+
 
 
 }
