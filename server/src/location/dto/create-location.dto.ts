@@ -13,6 +13,10 @@ export class CreateLocationDto {
   @IsString()
   phone: string;
 
+  @IsOptional()
+  @IsString()
+  department: string;
+
   @IsNotEmpty({ message: 'La imagen es obligatoria' })
   @IsString()
   imageUrl: string;

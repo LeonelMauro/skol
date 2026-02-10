@@ -17,6 +17,9 @@ export class Location {
   @Column({ nullable: true })
   phone: string;
 
+  @Column({ nullable: true })
+  department: string; // NUEVO: para mayor precisión en la ubicación
+
   @Column({ default: true })
   is_active: boolean;
 

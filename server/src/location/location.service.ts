@@ -76,6 +76,9 @@ export class LocationService {
     if(dto.phone !==undefined){
       location.phone=dto.phone
     }
+    if(dto.department !==undefined){
+      location.department=dto.department
+    }
     return await this.locationRepository.save(location);
   }
 

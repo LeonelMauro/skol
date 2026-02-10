@@ -5,6 +5,7 @@ export interface Location{
     phone: string;
     is_active: boolean;
     imageUrl: string; // URL de la imagen
+    department:string
 }
 
 export interface CreateLocationPayload{
@@ -12,4 +13,6 @@ export interface CreateLocationPayload{
     address:string;
     phone:string;
     imageUrl:string
+    department:string
+
 }

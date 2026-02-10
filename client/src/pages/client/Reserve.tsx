@@ -163,22 +163,26 @@ export default function Reserve() {
                       </Typography>
                       <IconButton
                       size="small"
-                      component="a"
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.address)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const fullAddress = `${loc.address}${loc.department ? ', ' + loc.department : ''}`;
+                        window.open(
+                          `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`,
+                          '_blank',
+                          'noopener,noreferrer'
+                        );
+                      }}
                       sx={{
-                        color: '#DBD515',
-                        p: 0.5,
-                        transform: 'translateY(-1px)',
+                        color: 'rgba(219,213,21,0.5)',
+                        p: 0.25,
                         '&:hover': {
-                          color: '#fff',
+                          color: 'rgba(219,213,21,0.85)',
                         },
                       }}
                     >
-                      <LocationOnIcon fontSize="small" />
+                      <LocationOnIcon sx={{ fontSize: 20 }} />
                     </IconButton>
+
                     </CardContent>
                   </CardActionArea>
                 </Card>

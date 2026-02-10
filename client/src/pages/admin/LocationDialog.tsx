@@ -19,7 +19,8 @@ export default function LocationDialog({
         name: '',
         address: '',
         phone: '',
-        imageUrl: ''
+        imageUrl: '',
+        department:''
     })
      useEffect(() => {
     if (initialData) {
@@ -28,6 +29,7 @@ export default function LocationDialog({
         address: initialData.address,
         phone: initialData.phone,
         imageUrl: initialData.imageUrl,
+        department: initialData.department,
       });
     } else {
       setForm({
@@ -35,6 +37,7 @@ export default function LocationDialog({
         address: '',
         phone: '',
         imageUrl: '',
+        department:'',
       });
     }
    
@@ -112,6 +115,15 @@ export default function LocationDialog({
           onChange={handleChange('phone')}
           sx={{ mt: 2 }}
         />
+        <TextField
+        label="Departamento"
+        fullWidth
+        value={form.department}
+        onChange={handleChange('department')}
+        sx={{ mt: 2 }}
+
+      />
+
 
         <TextField
           label="URL de imagen"

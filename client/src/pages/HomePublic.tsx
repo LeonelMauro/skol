@@ -527,15 +527,16 @@ export default function HomePublic() {
                       lineHeight: 1.25,
                     }}
                   >
-                    {local.address}
+                     {local.address}{local.department ? ', ' + local.department : ''}
                   </Typography>
 
                   <IconButton
                   size="small"
                   onClick={(e) => {
                     e.stopPropagation();
+                    const fullAddress = `${local.address}${local.department ? ', ' + local.department : ''}`;
                     window.open(
-                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address)}`,
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`,
                       '_blank',
                       'noopener,noreferrer'
                     );
@@ -550,6 +551,7 @@ export default function HomePublic() {
                 >
                   <LocationOnIcon sx={{ fontSize: 20 }} />
                 </IconButton>
+
 
                 </Box>
 
