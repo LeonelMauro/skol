@@ -11,6 +11,9 @@ import { useAuth } from '../../context/AuthContext';
 import TodayIcon from '@mui/icons-material/Today';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import PersonIcon from '@mui/icons-material/Person';
+import HistoryIcon from '@mui/icons-material/History';
+import ContentCutIcon from '@mui/icons-material/ContentCut';
+
 
 export default function DashboardBarber() {
   const navigate = useNavigate();
@@ -32,6 +35,16 @@ export default function DashboardBarber() {
       icon: <PersonIcon />,
       path: '/perfil',
     },
+    {
+    label: 'Historial',
+    icon: <HistoryIcon />,
+    path: '/metricas',
+  },
+  {
+    label: 'Servicios',
+    icon: <ContentCutIcon />,
+    path: '/servicios',
+  },
   ];
 
   return (
