@@ -2,7 +2,7 @@ import {useAuth} from '../../context/AuthContext';
 import api from '../../services/api';
 import {  useEffect, useState } from 'react';
 import type { Service } from '../../types/services';
-import { Alert, Box, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle,  IconButton,  Snackbar, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle,  Divider,  IconButton,  Snackbar, Typography } from '@mui/material';
 import { serviceIcons } from '../../utils/serviceIcons';
 import ServiceDialog from './ServiceDialog';
 import AddIcon from '@mui/icons-material/Add';
@@ -105,200 +105,226 @@ export default function Services(){
 
   return(
     <Box
-    sx={{
+  sx={{
     minHeight: '100vh',
-    backgroundColor: '#696161ff',
-    width: '100vw',
-    marginLeft: 'calc(50% - 50vw)',
-    px: { xs: 2, md: 6 },
-    pt: { xs: 10, md: 12 }, // AppBar fixed
-      }}
-    >
+    backgroundColor: '#0F0F0F',
+    pt: { xs: 10, md: 12 },
+  }}
+>
+  {/* CONTENEDOR CENTRAL */}
+  <Box
+    sx={{
+      maxWidth: 1200,
+      mx: 'auto',
+      px: { xs: 2, md: 4 },
+      textAlign: 'center',
+    }}
+  >
+    {/* TÍTULO */}
     <Typography
-      variant="h2"
-      textAlign= 'center'
+      variant="h4"
       sx={{
-        color: '#DBD515',
         fontFamily: 'Keania One',
-        }}
+        color: '#DBD515',
+        mb: 1,
+      }}
     >
       Servicios
     </Typography>
+
+    {/* SUBTÍTULO */}
+    <Typography sx={{ color: '#ccc', mb: 3 }}>
+      Administración de servicios disponibles
+    </Typography>
+
+    <Divider sx={{ mb: 4 }} />
+
+    {/* GRID DE SERVICIOS */}
     <Box
-    sx={{ 
-      display: 'grid',
-      gridTemplateColumns: {
-      xs: '1fr',
-      sm: 'repeat(2, 1fr)',
-      md: 'repeat(3, 1fr)',
-      },
-      gap: 4,
-      px: { xs: 2, md: 8 },
-      justifyItems: 'center',
-      }}            
-    >
-      {services.map((servicio) => {
-      const IconComponent =
-        serviceIcons[servicio.icon as keyof typeof serviceIcons];
-
-      return (
-        <Card
-          key={servicio.id}
-          sx={{
-            width: '100%',
-            maxWidth: 320,
-            borderRadius: 2.5,
-            overflow: 'hidden',
-            backgroundColor: '#111',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
-            transition: '0.35s ease',
-            cursor: 'pointer',
-
-            '&:hover': {
-              transform: 'translateY(-6px)',
-              boxShadow: '0 18px 45px rgba(219,213,21,0.35)',
-            },
-          }}
-        >
-          <CardContent sx={{ textAlign: 'center' }}>
-            {/* ÍCONO */}
-            {IconComponent && (
-            <Box
-              sx={{
-                width: 64,
-                height: 64,
-                backgroundColor: '#fff',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mb: 2,
-                mx: 'auto',
-              }}
-            >
-              <IconComponent width={32} height={32} />
-            </Box>
-          )}
-
-
-            <Typography
-              variant="h6"
-              sx={{
-                fontFamily: 'Keania One',
-                color: '#DBD515',
-                letterSpacing: 1,
-                mb: 1,
-              }}
-            >
-              {servicio.name}
-            </Typography>
-
-            <Typography variant="body2" sx={{ color: '#ccc' }}>
-              {servicio.description}
-            </Typography>
-          </CardContent>
-          {user?.role === 'admin' && (
-          <Box display="flex" justifyContent="center" gap={1} mt={1}>
-            <IconButton
-              sx={{ color: '#DBD515' }}
-              onClick={() => {
-                setEditingService(servicio);
-                setOpenDialog(true);
-              }}
-            >
-              <EditIcon />
-            </IconButton>
-
-            <IconButton
-              color="error"
-              onClick={() => {
-                setServiceToDelete(servicio);
-                setConfirmDeleteOpen(true);
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        )}
-
-        </Card>
-      );
-    })}
-    {user?.role === 'admin' && (
-  <Box textAlign="center" mb={4}>
-    <Button
-      startIcon={<AddIcon />}
-      variant="contained"
-      sx={{ backgroundColor: '#DBD515', color: '#000' }}
-      onClick={() => {
-        setEditingService(null);
-        setOpenDialog(true);
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: 'repeat(auto-fit, minmax(150px, 1fr))',
+          sm: 'repeat(auto-fit, minmax(220px, 1fr))',
+          md: 'repeat(auto-fit, minmax(260px, 1fr))',
+        },
+        gap: { xs: 1.5, sm: 3 },
       }}
     >
-      Nuevo servicio
-    </Button>
-  </Box>
-)}
+      {services.map((servicio) => {
+        const IconComponent =
+          serviceIcons[servicio.icon as keyof typeof serviceIcons];
 
+        return (
+          <Card
+            key={servicio.id}
+            sx={{
+              width: '100%',
+              borderRadius: 2,
+              backgroundColor: '#111',
+              transition: '0.25s',
+              cursor: 'pointer',
 
-    </Box>
-
-    <Snackbar
-            open={snackbar.open}
-            autoHideDuration={4000}
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
-          >
-            <Alert
-              severity={snackbar.severity}
-              onClose={() => setSnackbar({ ...snackbar, open: false })}
-            >
-              {snackbar.message}
-            </Alert>
-    </Snackbar>
-          <ServiceDialog
-          open={openDialog}
-          onClose={() => {
-            setOpenDialog(false);
-            setEditingService(null);
-          }}
-          initialData={editingService}
-          
-          onSubmit={editingService ? handleUpdateService : handleCreateService}
-        />
-    <Dialog
-        open={confirmDeleteOpen}
-        onClose={() => setConfirmDeleteOpen(false)}
-      >
-        <DialogTitle>Confirmar eliminación</DialogTitle>
-
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro que deseas eliminar el servicio{' '}
-            <strong>{serviceToDelete?.name}</strong>?
-            <br />
-            Esta acción no se puede deshacer.
-          </Typography>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={() => setConfirmDeleteOpen(false)}>
-            Cancelar
-          </Button>
-
-          <Button
-            color="error"
-            startIcon={<DeleteIcon />}
-            onClick={() => {
-              if (serviceToDelete) {
-                handleDelete(serviceToDelete.id);
-              }
+              '&:hover': {
+                transform: { sm: 'translateY(-4px)' },
+                boxShadow: '0 12px 28px rgba(219,213,21,0.25)',
+              },
             }}
           >
-            Eliminar
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <CardContent
+              sx={{
+                textAlign: 'center',
+                py: { xs: 1.2, sm: 2 },
+                px: { xs: 1, sm: 2 },
+              }}
+            >
+              {IconComponent && (
+                <Box
+                  sx={{
+                    width: { xs: 40, sm: 56 },
+                    height: { xs: 40, sm: 56 },
+                    backgroundColor: '#fff',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: { xs: 1, sm: 2 },
+                    mx: 'auto',
+                  }}
+                >
+                  <IconComponent width={22} height={22} />
+                </Box>
+              )}
 
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: 'Keania One',
+                  color: '#DBD515',
+                  fontSize: { xs: 13, sm: 15 },
+                  lineHeight: 1.2,
+                  mb: 0.5,
+                }}
+              >
+                {servicio.name}
+              </Typography>
+
+              <Typography
+                sx={{
+                  color: '#ccc',
+                  fontSize: { xs: 11, sm: 13 },
+                  lineHeight: 1.3,
+                }}
+              >
+                {servicio.description}
+              </Typography>
+            </CardContent>
+
+            {/* ACCIONES ADMIN */}
+            {user?.role === 'admin' && (
+              <Box
+                display="flex"
+                justifyContent="center"
+                gap={1}
+                pb={1}
+              >
+                <IconButton
+                  sx={{ color: '#DBD515' }}
+                  onClick={() => {
+                    setEditingService(servicio);
+                    setOpenDialog(true);
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+
+                <IconButton
+                  color="error"
+                  onClick={() => {
+                    setServiceToDelete(servicio);
+                    setConfirmDeleteOpen(true);
+                  }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+            )}
+          </Card>
+        );
+      })}
     </Box>
-  )
-}
+
+    {/* BOTÓN NUEVO SERVICIO */}
+    {user?.role === 'admin' && (
+      <Box textAlign="center" mt={4}>
+        <Button
+          startIcon={<AddIcon />}
+          variant="contained"
+          sx={{ backgroundColor: '#DBD515', color: '#000' }}
+          onClick={() => {
+            setEditingService(null);
+            setOpenDialog(true);
+          }}
+        >
+          Nuevo servicio
+        </Button>
+      </Box>
+    )}
+  </Box>
+
+  {/* SNACKBAR + DIÁLOGOS (SIN CAMBIOS) */}
+  <Snackbar
+    open={snackbar.open}
+    autoHideDuration={4000}
+    onClose={() => setSnackbar({ ...snackbar, open: false })}
+  >
+    <Alert
+      severity={snackbar.severity}
+      onClose={() => setSnackbar({ ...snackbar, open: false })}
+    >
+      {snackbar.message}
+    </Alert>
+  </Snackbar>
+
+  <ServiceDialog
+    open={openDialog}
+    onClose={() => {
+      setOpenDialog(false);
+      setEditingService(null);
+    }}
+    initialData={editingService}
+    onSubmit={editingService ? handleUpdateService : handleCreateService}
+  />
+
+  <Dialog
+    open={confirmDeleteOpen}
+    onClose={() => setConfirmDeleteOpen(false)}
+  >
+    <DialogTitle>Confirmar eliminación</DialogTitle>
+    <DialogContent>
+      <Typography>
+        ¿Estás seguro que deseas eliminar el servicio{' '}
+        <strong>{serviceToDelete?.name}</strong>?
+        <br />
+        Esta acción no se puede deshacer.
+      </Typography>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={() => setConfirmDeleteOpen(false)}>
+        Cancelar
+      </Button>
+      <Button
+        color="error"
+        startIcon={<DeleteIcon />}
+        onClick={() => {
+          if (serviceToDelete) {
+            handleDelete(serviceToDelete.id);
+          }
+        }}
+      >
+        Eliminar
+      </Button>
+    </DialogActions>
+  </Dialog>
+</Box>
+)}

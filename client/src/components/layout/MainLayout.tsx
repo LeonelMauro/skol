@@ -17,7 +17,7 @@ export default function MainLayout({
       <Header />
 
       {/* Spacer exacto al Header */}
-      {hasSpacing && <Toolbar sx={{ minHeight: 72 }} />}
+      {hasSpacing && <Toolbar  />}
 
       {children}
     </>

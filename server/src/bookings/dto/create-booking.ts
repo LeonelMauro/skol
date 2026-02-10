@@ -7,6 +7,8 @@ export class CreateBookingDto {
   @IsNumber()
   clientId: number;
 
+  guestName?: string; 
+
   @IsNumber()
   serviceId: number;
 

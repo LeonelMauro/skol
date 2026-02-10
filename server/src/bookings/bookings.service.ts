@@ -4,13 +4,14 @@ import { BarberAvailability } from 'src/barber-availability/entities/barber-avai
 import { Reservation,ReservationStatus} from 'src/reservation/entities/reservation.entity';
 import { Service } from 'src/services/entities/service.entity';
 import { User } from 'src/user/entities/user.entity';
-import { In, Repository } from 'typeorm';
+import { DeepPartial, In, Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { MailService } from 'src/mail/mail.service';
 import { Logger } from '@nestjs/common';
 import { DayOfWeek } from 'src/barber-availability/day-of-week.enum';
 import { Location } from 'src/location/entities/location.entity';
+import { CreateDirectBookingDto } from './dto/createDirect-booking.dto';
 
 
 
@@ -140,10 +141,24 @@ async findPending() {
 
   async create(dto: CreateBookingDto) {
 
-  const client = await this.userRepository.findOne({
-    where: { id: dto.clientId },
-  });
-  if (!client) throw new NotFoundException('Cliente no encontrado');
+  let client: User | null = null;
+
+  if (dto.clientId) {
+    client = await this.userRepository.findOne({
+      where: { id: dto.clientId },
+    });
+
+    if (!client) {
+      throw new NotFoundException('Cliente no encontrado');
+    }
+  }
+
+  if (!dto.clientId && !dto.guestName) {
+    throw new BadRequestException(
+      'Debe indicar un cliente registrado o un nombre de cliente'
+    );
+  }
+
 
   const service = await this.serviceRepository.findOne({
     where: { id: dto.serviceId },
@@ -216,20 +231,24 @@ if (dto.barberId) {
   }
 
   const reservation = this.reservationRepository.create({
-    client,
     barber,
     service,
     location,
     date: dto.date,
     time: dto.time,
     status: ReservationStatus.PENDING,
+    ...(client ? { client } : {}),
+    ...(!client && dto.guestName ? { guestName: dto.guestName } : {}),
   });
 
   const saved = await this.reservationRepository.save(reservation);
 
-  this.sendReservationCreatedEmails(saved);
+  if (this.hasRegisteredClient(saved)) {
+    this.sendReservationCreatedEmails(saved);
+  }
 
   return saved;
+
 }
 
 
@@ -360,9 +379,11 @@ if (dto.barberId) {
   //Metodos Privado Crear//
 
 private async sendReservationCreatedEmails(reservation: Reservation) {
+  if (!this.hasRegisteredClient(reservation)) return;
+
   try {
     await this.mailService.sendMail(
-      reservation.client.email,
+      reservation.client!.email,
       'Reserva creada - Skol Barbería',
       this.buildClientCreatedTemplate(reservation),
     );
@@ -379,18 +400,22 @@ private async sendReservationCreatedEmails(reservation: Reservation) {
     );
   }
 };
+private hasRegisteredClient(reservation: Reservation): boolean {
+  return !!reservation.client?.email;
+}
 
 private buildClientCreatedTemplate(reservation: Reservation): string {
   return `
     <h2>Reserva creada</h2>
-    <p>Hola ${reservation.client.name},</p>
+    <p>Hola  ${this.getClientName(reservation)},</p>
     <p>Tu reserva fue creada correctamente.</p>
     <p>
       <strong>Barbero:</strong> ${reservation.barber.name}<br>
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
-      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
+      <strong>Local:</strong> ${reservation.location.name} - ${reservation.location.address}
+
     </p>
   `;
 }
@@ -400,11 +425,12 @@ private buildBarberCreatedTemplate(reservation: Reservation): string {
     <h2>Nueva reserva</h2>
     <p>Tenés una nueva reserva asignada.</p>
     <p>
-      <strong>Cliente:</strong> ${reservation.client.name}<br>
+      <strong>Cliente:</strong>  ${this.getClientName(reservation)}<br>
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
-      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
+      <strong>Local:</strong> ${reservation.location.name} - ${reservation.location.address}
+
     </p>
   `;
 }
@@ -412,9 +438,10 @@ private buildBarberCreatedTemplate(reservation: Reservation): string {
 //Metodos Privado confimar//
 
 private async sendReservationConfirmedEmails(reservation: Reservation) { 
+   if (!this.hasRegisteredClient(reservation)) return;
   try {
     await this.mailService.sendMail(
-      reservation.client.email,
+      reservation.client!.email,
       'Reserva confirmada - Skol Barbería',
       this.buildClientConfirmedTemplate(reservation),
     );
@@ -435,14 +462,15 @@ private async sendReservationConfirmedEmails(reservation: Reservation) {
 private buildClientConfirmedTemplate(reservation: Reservation): string {
   return `
     <h2>Reserva confirmada</h2>
-    <p>Hola ${reservation.client.name},</p>
+    <p>Hola ${this.getClientName(reservation)},</p>
     <p>Tu reserva fue confirmada.</p>
     <p>
       <strong>Barbero:</strong> ${reservation.barber.name}<br>
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
-      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
+      <strong>Local:</strong> ${reservation.location.name} - ${reservation.location.address}
+
     </p>
   `;
 }
@@ -451,11 +479,12 @@ private buildBarberConfirmedTemplate(reservation: Reservation): string {
     <h2>Reserva confirmada</h2>
     <p>Tenés una  reserva confirmada.</p>
     <p>
-      <strong>Cliente:</strong> ${reservation.client.name}<br>
+      <strong>Cliente:</strong>  ${this.getClientName(reservation)}<br>
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
-      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
+      <strong>Local:</strong> ${reservation.location.name} - ${reservation.location.address}
+
     </p>
   `;
 }
@@ -463,9 +492,10 @@ private buildBarberConfirmedTemplate(reservation: Reservation): string {
  //Metodos Privado Cancelar//
 
 private async sendReservationCanceledEmails(reservation: Reservation) {
+  if (!this.hasRegisteredClient(reservation)) return;
   try {
     await this.mailService.sendMail(
-      reservation.client.email,
+      reservation.client!.email,
       'Reserva cancelada - Skol Barbería',
       this.buildClientCanceledTemplate(reservation),
     );
@@ -485,14 +515,15 @@ private async sendReservationCanceledEmails(reservation: Reservation) {
 private buildClientCanceledTemplate(reservation: Reservation): string {
   return `
     <h2>Reserva cancelada</h2>
-    <p>Hola ${reservation.client.name},</p>
+    <p>Hola ${this.getClientName(reservation)},</p>
     <p>Tu reserva fue cancelada.</p>
     <p>
       <strong>Barbero:</strong> ${reservation.barber.name}<br>
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
-      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
+      <strong>Local:</strong> ${reservation.location.name} - ${reservation.location.address}
+
     </p>
   `;
 }
@@ -501,14 +532,23 @@ private buildBarberCanceledTemplate(reservation: Reservation): string {
     <h2>Reserva cancelada</h2>
     <p>Tenés una reserva cancelada.</p>
     <p>
-      <strong>Cliente:</strong> ${reservation.client.name}<br>
+      <strong>Cliente:</strong> $ ${this.getClientName(reservation)}<br>
       <strong>Servicio:</strong> ${reservation.service.name}<br>
       <strong>Fecha:</strong> ${reservation.date}<br>
       <strong>Hora:</strong> ${reservation.time}
-      <strong>Local:</strong> ${reservation.location.name , reservation.location.address}
+      <strong>Local:</strong> ${reservation.location.name} - ${reservation.location.address}
+
     </p>
   `;
 }
+private getClientName(reservation: Reservation): string {
+  return (
+    reservation.client?.name ??
+    reservation.guestName ??
+    'Cliente'
+  );
+}
+
 private async getAnyAvailableBarber(
   dto: CreateBookingDto,
 ): Promise<User> {
@@ -646,7 +686,35 @@ getBarberHistory(barberId: number) {
     order: { date: 'DESC', time: 'DESC' },
   });
 }
+async createDirect(dto: CreateDirectBookingDto) {
+  let client: User | null = null;
 
+  if (dto.clientEmail) {
+    client = await this.userRepository.findOne({
+      where: { email: dto.clientEmail },
+    });
+  }
+
+  if (!client && !dto.guestName) {
+    throw new BadRequestException(
+      'Debe indicar un cliente registrado o un nombre de cliente',
+    );
+  }
+
+  const reservation = this.reservationRepository.create({
+    barber: { id: dto.barberId },
+    service: { id: dto.serviceId },
+    location: { id: dto.locationId },
+    date: dto.date,
+    time: dto.time,
+    client: client ?? undefined,
+    guestName: client ? undefined : dto.guestName,
+    status: ReservationStatus.COMPLETED,
+    completedAt: new Date(),
+  });
+
+  return this.reservationRepository.save(reservation);
+}
 
 
 }

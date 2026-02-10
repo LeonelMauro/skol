@@ -34,8 +34,12 @@ export class BookingsReminderService {
       .getMany();
 
     for (const reservation of reservations) {
+      if (!reservation.client?.email) {
+        return;
+      }
       try {
         await this.mailService.sendMail(
+          
           reservation.client.email,
           'Recordatorio de tu reserva - Skol Barbería',
           `

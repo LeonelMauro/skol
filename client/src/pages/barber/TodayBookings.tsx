@@ -306,7 +306,7 @@ const dailyRevenue = todayHistory
         }}>
           <CardContent>
             <Typography sx={{ color: '#fff', fontSize: 14 }}>
-              {r.time} · {r.client.name}
+              {r.time} · {r.client?.name ?? 'Cliente anónimo'}
             </Typography>
 
             <Typography sx={{ color: '#ccc', fontSize: 13, mt: 0.5 }}>
@@ -438,7 +438,7 @@ const dailyRevenue = todayHistory
                 textAlign: 'center',
               }}
             >
-              Historial de hoy
+            Atras            
             </Typography>
           </Box>
 
@@ -508,7 +508,7 @@ const dailyRevenue = todayHistory
 
                   {/* Cliente */}
                   <Typography sx={{ color: '#ccc', fontSize: { xs: 13, sm: 14 } }}>
-                    👤 {r.client.name}
+                    👤 {r.client?.name ?? 'Cliente anónimo'}
                   </Typography>
 
                   {/* Servicio */}
@@ -517,6 +517,9 @@ const dailyRevenue = todayHistory
                   </Typography>                  
                   <Typography sx={{ color: '#888', fontSize: 12 }}>
                     📍 {r.location.name} – {r.location.address}
+                  </Typography>
+                   <Typography sx={{ color: '#888', fontSize: 12 }}>
+                    📍 {r.date} 
                   </Typography>
                 </CardContent>
               </Card>

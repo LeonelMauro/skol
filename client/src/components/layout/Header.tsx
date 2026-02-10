@@ -124,6 +124,12 @@ export default function Header() {
     {label.toLowerCase()}
   </Button>
 );
+
+const SOCIAL_LINKS = {
+  facebook: 'https://www.facebook.com/skolmza/?locale=es_LA',
+  instagram: 'https://www.instagram.com/skol.barberia/?hl=es-la',
+};
+
 const socialIconStyles = {
   color: '#575757ff',
   transition: 'color 0.25s ease, transform 0.25s ease',
@@ -173,6 +179,7 @@ const instagramHover = {
             sx={{
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: 1.5,
             }}
           >
@@ -181,7 +188,7 @@ const instagramHover = {
               src={icono}
               alt="Logo"
               sx={{
-                height: 30,
+                height: 50,
                 display: 'block',
               }}
             />
@@ -208,13 +215,26 @@ const instagramHover = {
           <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             {!isMobile && (
               <>
-                <IconButton sx={{ ...socialIconStyles, ...facebookHover }}>
+                <IconButton
+                  component="a"
+                  href={SOCIAL_LINKS.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ ...socialIconStyles, ...facebookHover }}
+                >
                   <FacebookIcon />
                 </IconButton>
 
-                <IconButton sx={{ ...socialIconStyles, ...instagramHover }}>
+                <IconButton
+                  component="a"
+                  href={SOCIAL_LINKS.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ ...socialIconStyles, ...instagramHover }}
+                >
                   <InstagramIcon />
                 </IconButton>
+
 
 
                 {!user ? (
@@ -279,13 +299,26 @@ const instagramHover = {
           >
             {/* Redes */}
             <Box>
-              <IconButton sx={{ ...socialIconStyles, ...facebookHover }}>
+              <IconButton
+                component="a"
+                href={SOCIAL_LINKS.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ ...socialIconStyles, ...facebookHover }}
+              >
                 <FacebookIcon />
               </IconButton>
 
-              <IconButton sx={{ ...socialIconStyles, ...instagramHover }}>
+              <IconButton
+                component="a"
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ ...socialIconStyles, ...instagramHover }}
+              >
                 <InstagramIcon />
               </IconButton>
+
 
             </Box>
 
@@ -364,13 +397,26 @@ const instagramHover = {
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
             {!user ? (
               <Box>
-              <IconButton sx={{ ...socialIconStyles, ...facebookHover }}>
+              <IconButton
+                component="a"
+                href={SOCIAL_LINKS.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ ...socialIconStyles, ...facebookHover }}
+              >
                 <FacebookIcon />
               </IconButton>
 
-              <IconButton sx={{ ...socialIconStyles, ...instagramHover }}>
+              <IconButton
+                component="a"
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ ...socialIconStyles, ...instagramHover }}
+              >
                 <InstagramIcon />
               </IconButton>
+
 
               <IconButton component={RouterLink} to="/login" sx={{ color: '#575757ff' }}>
                 <PersonOutlineIcon />

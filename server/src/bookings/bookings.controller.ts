@@ -3,6 +3,7 @@ import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CreateDirectBookingDto } from './dto/createDirect-booking.dto';
 
 
 @Controller('bookings')
@@ -31,6 +32,12 @@ export class BookingsController {
   create(@Body()dto : CreateBookingDto){
     return this.bookingsService.create(dto)
   }
+
+  @Post('barber/direct')
+  createDirectBooking(@Body() dto: CreateDirectBookingDto) {
+  return this.bookingsService.createDirect(dto);
+  }
+
 
   @Patch(':id')
   updateBooking(

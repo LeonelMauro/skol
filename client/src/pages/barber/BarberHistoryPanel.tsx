@@ -33,6 +33,12 @@ export default function BarberHistoryPanel() {
 
   const [history, setHistory] = useState<TodayBooking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week');
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+  new Date().getMonth()
+);
+  const now = new Date();
+
 
 useEffect(() => {
   if (!user?.access_token) return;
@@ -50,22 +56,60 @@ useEffect(() => {
 }, [user?.access_token]);
 
 
-  const today = new Date().toISOString().split('T')[0];
-  const todayHistory = history.filter(r => r.date === today);
-
-  const metrics = {
-  total: history.length,
-  completed: history.filter(r => r.status === 'completed').length,
-  canceled: history.filter(r => r.status === 'canceled').length,
+ 
+  const parseLocalDate = (dateStr: string) => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
 };
 
-const bookingsByDate = Object.values(
-  history.reduce((acc: any, r) => {
-    acc[r.date] = acc[r.date] || { date: r.date, count: 0 };
-    acc[r.date].count += 1;
-    return acc;
-  }, {})
-);
+
+
+  const filteredHistory = history.filter(r => {
+  const date = parseLocalDate(r.date);;
+ 
+ console.log({
+  backend: r.date,
+  parsed: new Date(r.date),
+  now,
+});
+
+ if (period === 'day') {
+
+  return (
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+  );
+}
+
+
+
+  if (period === 'week') {
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    return date >= startOfWeek && date <= endOfWeek;
+  }
+
+  if (period === 'month') {
+    return date.getMonth() === selectedMonth &&
+           date.getFullYear() === now.getFullYear();
+  }
+  
+
+  return true;
+});
+
+
+  const metrics = {
+  total: filteredHistory.length,
+  completed: filteredHistory.filter(r => r.status === 'completed').length,
+  canceled: filteredHistory.filter(r => r.status === 'canceled').length,
+};
+
 const statusData = [
   { name: 'Atendidos', value: metrics.completed },
   { name: 'Cancelados', value: metrics.canceled },
@@ -73,15 +117,13 @@ const statusData = [
 
 const COLORS = ['#4caf50', '#f44336'];
 
-const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week');
-const [selectedMonth, setSelectedMonth] = useState<number>(
-  new Date().getMonth()
-);
 const groupByDay = (data: TodayBooking[]) => {
   const map: Record<string, number> = {};
 
   data.forEach(r => {
-    const formattedDate = new Date(r.date).toLocaleDateString('es-AR', {
+    const date = parseLocalDate(r.date);
+
+    const formattedDate = date.toLocaleDateString('es-AR', {
       day: '2-digit',
       month: '2-digit',
     });
@@ -94,6 +136,7 @@ const groupByDay = (data: TodayBooking[]) => {
     count,
   }));
 };
+
 
 
 const groupByWeekDay = (data: TodayBooking[]) => {
@@ -123,22 +166,12 @@ const groupByMonth = (data: TodayBooking[], month: number) => {
 
 const chartData =
   period === 'day'
-    ? groupByDay(todayHistory)
+    ? groupByDay(filteredHistory)
     : period === 'week'
-    ? groupByWeekDay(history)
-    : groupByMonth(history, selectedMonth);
+    ? groupByWeekDay(filteredHistory)
+    : groupByMonth(filteredHistory, selectedMonth);
 
 
-
-
-const totalRevenue = history
-  .filter(r => r.status === 'completed')
-  .reduce((acc, r) => acc + r.service.price, 0);
-
-
-  const dailyRevenue = todayHistory
-    .filter(r => r.status === 'completed')
-    .reduce((acc, r) => acc + r.service.price, 0);
 
     const formatCurrency = (value: number) =>
   value.toLocaleString('es-AR', {
@@ -155,12 +188,20 @@ const totalRevenue = history
     );
   }
 
+
+
+  const periodRevenue = filteredHistory
+  .filter(r => r.status === 'completed')
+  .reduce((acc, r) => acc + r.service.price, 0);
+
+
+
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#0F0F0F', p: 2 }}>
 
       {/* Historial */}
       <Stack spacing={2} alignItems="center">
-        {todayHistory.map(r => (
+        {filteredHistory.map(r => (
           <Card
             key={r.id}
             sx={{
@@ -171,7 +212,7 @@ const totalRevenue = history
           >
             <CardContent>
               <Typography sx={{ color: '#fff', fontWeight: 600 }}>
-                {r.time} · {r.client.name}
+                {r.time} · {r.client?.name ?? 'Cliente anónimo'}
               </Typography>
 
               <Typography sx={{ color: '#aaa', fontSize: 13 }}>
@@ -180,6 +221,9 @@ const totalRevenue = history
 
               <Typography sx={{ color: '#777', fontSize: 12 }}>
                 Estado: {r.status}
+              </Typography>
+              <Typography sx={{ color: '#777', fontSize: 12 }}>
+                Fecha: {r.date}
               </Typography>
             </CardContent>
           </Card>
@@ -211,8 +255,12 @@ const totalRevenue = history
         <Metric label="Turnos" value={metrics.total} />
         <Metric label="Atendidos" value={metrics.completed} color="success.main" />
         <Metric label="Cancelados" value={metrics.canceled} color="error.main" />
-        <Metric label="💰 Hoy" value={formatCurrency(dailyRevenue)} />
-        <Metric label="💰 Total" value={formatCurrency(totalRevenue)} color="info.main" />
+        <Metric
+          label={`💰 ${period === 'day' ? 'Hoy' : period === 'week' ? 'Semana' : 'Mes'}`}
+          value={formatCurrency(periodRevenue)}
+          color="info.main"
+        />
+
       </Box>
       
 <Stack

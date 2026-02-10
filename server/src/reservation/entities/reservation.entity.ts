@@ -17,8 +17,9 @@ export class Reservation {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => User, (user) => user.reservationsAsClient)
-    client: User;
+    @ManyToOne(() => User, (user) => user.reservationsAsClient, { nullable: true })
+    client?: User ;
+
 
     @ManyToOne(() => User, (user) => user.reservationsAsBarber)
     barber: User;
@@ -48,5 +49,8 @@ export class Reservation {
 
     @ManyToOne(() => Location)
     location: Location;
+
+    @Column({ nullable: true })
+    guestName?: string;
 
 }

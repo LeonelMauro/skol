@@ -228,11 +228,13 @@ const DAY_ORDER = [
     <Box
       sx={{
       minHeight: '100vh',
-      backgroundColor: '#696161ff',
+      backgroundColor: '#0F0F0F',
       width: '100vw',
       marginLeft: 'calc(50% - 50vw)',
       px: { xs: 2, md: 6 },
       pt: { xs: 10, md: 12 }, // AppBar fixed
+      
+
       }}
     >
       <Typography variant="h2"
@@ -241,6 +243,9 @@ const DAY_ORDER = [
         mb:2,
         color: '#DBD515',
         fontFamily: 'Keania One',
+        maxWidth: 1200,
+        mx: 'auto'
+
         }}
     >
         Disponibilidad de barberos
