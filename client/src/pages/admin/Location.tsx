@@ -6,6 +6,8 @@ import { Box, Card, CardActionArea, CardContent, Typography, IconButton, Snackba
 import DeleteIcon from '@mui/icons-material/Delete';
 import LocationDialog from "./LocationDialog";
 import EditIcon from '@mui/icons-material/Edit';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+
 
 
 export default function Locations(){
@@ -104,228 +106,230 @@ export default function Locations(){
 
     return(
     <Box
-          sx={{
-            minHeight: '100vh',
-            backgroundColor: '#696161ff',
-            width: '100vw',
-            marginLeft: 'calc(50% - 50vw)',
-            px: { xs: 2, md: 6 },
-            pt: { xs: 10, md: 12 }, // AppBar fixed
-          }}
-        >
-        <Typography
-        variant="h2"
-        textAlign= 'center'
-        sx={{
-            color: '#DBD515',
-            fontFamily: 'Keania One',
-        }}
-        >
-        Nuestros Locales
-        </Typography>
-        <Box
-                    sx={{
-                      display: 'grid',
-                      gridTemplateColumns: {
-                        xs: '1fr',
-                        sm: 'repeat(2, 1fr)',
-                        md: 'repeat(3, 1fr)',
-                      },
-                      gap: 4,
-                      px: { xs: 2, md: 8 },
-                      justifyItems: 'center',
-                    }}
-                  >
-                    {locations.map((local) => (
-                      <Card
-                        key={local.id}
-                        sx={{
-                          width: '100%',
-                          maxWidth: 320,
-                          borderRadius: 2.5,
-                          overflow: 'hidden',
-                          backgroundColor: '#111',
-                          boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
-                          transition: '0.35s ease',
-                          cursor: 'pointer',
-                          justifyItems: 'center',
-        
-                          '&:hover': {
-                            transform: 'translateY(-6px)',
-                            boxShadow: '0 18px 45px rgba(219,213,21,0.35)',
-                          },
-                        }}
-                      >
-                        <CardActionArea
-                          
-                          sx={{ position: 'relative',justifyItems: 'center', }}
-                          
-                        >
-                          {/* IMAGEN */}
-                          <Box
-                            sx={{
-                              height: 180,
-                              backgroundImage: `url(${local.imageUrl})`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center',
-                            }}
-                          />
-        
-                          {/* OVERLAY DORADO HOVER */}
-                          <Box
-                            sx={{
-                              position: 'absolute',
-                              inset: 0,
-                              background:
-                                'linear-gradient(rgba(219,213,21,0.25), rgba(0,0,0,0.7))',
-                              opacity: 0,
-                              transition: '0.35s',
-                              '&:hover': {
-                                opacity: 1,
-                              },
-                            }}
-                          />
-        
-                          {/* CONTENIDO */}
-                          <CardContent
-                            sx={{
-                              position: 'relative',
-                              backgroundColor: '#0F0F0F',
-                            }}
-                          >
-                            <Typography
-                              variant="subtitle1"
-                              sx={{
-                                fontFamily: 'Keania One',
-                                color: '#DBD515',
-                                letterSpacing: 1,
-                              }}
-                            >
-                              {local.name}
-                            </Typography>
-        
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: '#ccc',
-                                mt: 0.5,
-                              }}
-                            >
-                              {local.address}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: '#ccc',
-                                mt: 0.5,
-                              }}
-                            >
-                              {local.phone}
-                            </Typography>
-                          </CardContent>
-                        </CardActionArea>                        
-                          {user?.role === 'admin' && (
-                            <Box display="flex" justifyContent="flex-end">
-                              <IconButton
-                                onClick={() => {
-                                  setEditingLocation(local);
-                                  setOpenDialog(true);
-                                }}
-                                sx={{ color: '#DBD515' }}
-                              >
-                                <EditIcon />
-                              </IconButton>
-                              <IconButton
-                                color="error"
-                                onClick={() => {
-                                setLocationToDelete(local);
-                                setConfirmDeleteOpen(true);
-                              }}
-
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            </Box>
-                          )}
-                          
-                      </Card>
-                    ))}
-                    {user?.role === 'admin' && (
-                      <Box textAlign='center' mb={4}>
-                        <Button
-                          variant="contained"
-                          sx={{ backgroundColor: '#DBD515', color: '#000' }}
-                          onClick={() => {
-                            setEditingLocation(null);   // ← modo crear
-                            setOpenDialog(true);
-                          }}
-                        >
-                          Más local
-                        </Button>
-                      </Box>
-                    )}
-                  </Box>
-                  <LocationDialog
-                  open={openDialog}
-                  onClose={() => {
-                    setOpenDialog(false);
-                    setEditingLocation(null);
-                  }}
-                  initialData={editingLocation}
-                  onSubmit={editingLocation ? handleUpdateLocation : handleCreateLocation}
-                />
-
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          severity={snackbar.severity}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-      <Dialog
-  open={confirmDeleteOpen}
-  onClose={() => setConfirmDeleteOpen(false)}
+  sx={{
+    minHeight: '100vh',
+    backgroundColor: '#0F0F0F',
+    pt: { xs: 10, md: 12 },
+    px: { xs: 2, md: 4 },
+  }}
 >
-  <DialogTitle>Confirmar eliminación</DialogTitle>
-
-  <DialogContent>
-    <Typography>
-      ¿Estás seguro que deseas eliminar el local{' '}
-      <strong>{locationToDelete?.name}</strong>?
-      <br />
-      Esta acción no se puede deshacer.
-    </Typography>
-  </DialogContent>
-
-  <DialogActions>
-    <Button onClick={() => setConfirmDeleteOpen(false)}>
-      Cancelar
-    </Button>
-
-    <Button
-      color="error"
-      onClick={() => {
-        if (locationToDelete) {
-          handleDelete(locationToDelete.id);
-        }
-        setConfirmDeleteOpen(false);
-        setLocationToDelete(null);
+  <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 6 } }}>
+    <Typography
+      sx={{
+        fontFamily: 'Keania One',
+        fontSize: { xs: 28, sm: 32, md: 36 },
+        color: '#DBD515',
+        letterSpacing: 1.5,
+        mb: 1,
       }}
     >
-      Eliminar
-    </Button>
-  </DialogActions>
-</Dialog>
+      Nuestros Locales
+    </Typography>
+  </Box>
 
+  {/* GRID DE LOCALES */}
+  <Box
+    sx={{
+      display: 'grid',
+      gridTemplateColumns: {
+        xs: 'repeat(auto-fit, minmax(150px, 1fr))',
+        sm: 'repeat(auto-fit, minmax(200px, 1fr))',
+        md: 'repeat(auto-fit, minmax(260px, 1fr))',
+      },
+      justifyContent: 'center',
+      gap: { xs: 1.5, sm: 3 },
+    }}
+  >
+    {locations.map((local) => (
+      <Card
+        key={local.id}
+        sx={{
+        borderRadius: 2,
+        backgroundColor: '#111',
+        border: '1px solid rgba(255,255,255,0.06)',
+        overflow: 'hidden',
+        transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+        cursor: 'pointer',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          borderColor: 'rgba(219,213,21,0.15)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.55)',
+        },
+      }}
+      >
+        <CardActionArea sx={{  }}>
+          {/* IMAGEN */}
+          <Box
+            sx={{
+              height: { xs: 110, sm: 130, md: 150 },
+              backgroundImage: `url(${local.imageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
 
+          {/* CONTENIDO */}
+          <CardContent
+            sx={{
+              textAlign: 'center',
+              py: { xs: 1, sm: 1.5 },
+              px: { xs: 1, sm: 2 },
+            }}
+          >
+            {/* NOMBRE */}
+            <Typography
+              sx={{
+                fontFamily: 'Keania One',
+                color: '#DBD515',
+                fontSize: { xs: 12, sm: 16, md: 18 },
+                lineHeight: 1.2,
+                mb: 0.25,
+              }}
+            >
+              {local.name}
+            </Typography>
+
+            {/* DIRECCIÓN + DEPARTAMENTO */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.4,
+              }}
+            >
+              <Typography
+                sx={{
+                  color: '#bbb',
+                  fontSize: { xs: 10.5, sm: 13, md: 14 },
+                  lineHeight: 1.25,
+                }}
+              >
+                {local.address}
+                {local.department ? ', ' + local.department : ''}
+              </Typography>
+
+              <Box
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const fullAddress = `${local.address}${local.department ? ', ' + local.department : ''}`;
+                  window.open(
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`,
+                    '_blank'
+                  );
+                }}
+                sx={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', color: 'rgba(219,213,21,0.5)' }}
+              >
+                <LocationOnIcon sx={{ fontSize: 20 }} />
+              </Box>
+
+            </Box>
+
+            {/* TELÉFONO */}
+            <Typography
+              sx={{
+                color: '#ccc',
+                fontSize: { xs: 10.5, sm: 13, md: 14 },
+                mt: 0.5,
+              }}
+            >
+              {local.phone}
+            </Typography>
+          </CardContent>
+        </CardActionArea>
+
+         {/* BOTONES ADMIN */}
+  {user?.role === 'admin' && (
+    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, px: 2, pb: 2 }}>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          setEditingLocation(local);
+          setOpenDialog(true);
+        }}
+        sx={{ color: '#DBD515' }}
+      >
+        <EditIcon />
+      </IconButton>
+      <IconButton
+        color="error"
+        onClick={(e) => {
+          e.stopPropagation();
+          setLocationToDelete(local);
+          setConfirmDeleteOpen(true);
+        }}
+      >
+        <DeleteIcon />
+      </IconButton>
     </Box>
-    
+  )}
+      </Card>
+    ))}
+
+    {/* BOTÓN NUEVO LOCAL */}
+    {user?.role === 'admin' && (
+      <Box textAlign="center" mb={4} mt={2}>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: '#DBD515', color: '#000' }}
+          onClick={() => {
+            setEditingLocation(null);
+            setOpenDialog(true);
+          }}
+        >
+          Más local
+        </Button>
+      </Box>
+    )}
+  </Box>
+
+  {/* DIALOG CREAR/EDITAR */}
+  <LocationDialog
+    open={openDialog}
+    onClose={() => {
+      setOpenDialog(false);
+      setEditingLocation(null);
+    }}
+    initialData={editingLocation}
+    onSubmit={editingLocation ? handleUpdateLocation : handleCreateLocation}
+  />
+
+  {/* SNACKBAR */}
+  <Snackbar
+    open={snackbar.open}
+    autoHideDuration={4000}
+    onClose={() => setSnackbar({ ...snackbar, open: false })}
+  >
+    <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+      {snackbar.message}
+    </Alert>
+  </Snackbar>
+
+  {/* CONFIRM DELETE */}
+  <Dialog open={confirmDeleteOpen} onClose={() => setConfirmDeleteOpen(false)}>
+    <DialogTitle>Confirmar eliminación</DialogTitle>
+    <DialogContent>
+      <Typography>
+        ¿Estás seguro que deseas eliminar el local <strong>{locationToDelete?.name}</strong>?
+        <br />
+        Esta acción no se puede deshacer.
+      </Typography>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={() => setConfirmDeleteOpen(false)}>Cancelar</Button>
+      <Button
+        color="error"
+        onClick={() => {
+          if (locationToDelete) handleDelete(locationToDelete.id);
+          setConfirmDeleteOpen(false);
+          setLocationToDelete(null);
+        }}
+      >
+        Eliminar
+      </Button>
+    </DialogActions>
+  </Dialog>
+</Box>
+
     )
-    
 }
