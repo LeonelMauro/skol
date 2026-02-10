@@ -22,6 +22,7 @@ import ConfirmReservation from '../pages/client/ConfirmReservation';
 import MyReservations from '../pages/client/MyReservations';
 import ReservationsBarber from '../pages/barber/TodayBookings';
 import BarberHistoryPanel from '../pages/barber/BarberHistoryPanel';
+import AddService from '../pages/barber/AddService';
 
 export default function AppRouter() {
   return (
@@ -116,6 +117,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute roles={['barber']}>
                 <BarberHistoryPanel />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/servicios"
+            element={
+              <ProtectedRoute roles={['barber']}>
+                <AddService />
               </ProtectedRoute>
             }
           />
