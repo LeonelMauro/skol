@@ -28,6 +28,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import BarberDialogAvail from './BarberDialogAvailad';
 import BarberDialogEditAvail from './BarberDialogEditAvail';
 import Register from '../Register';
+import { useTheme, useMediaQuery } from "@mui/material";
 
 export default function BarberAvailability() {
   
@@ -51,6 +52,8 @@ export default function BarberAvailability() {
     ) => {
       setSnackbar({open:true,message,severity})
     }
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [availabi, setAvailabi] = useState<BarberAvailability[]>([]);
   
@@ -75,7 +78,13 @@ export default function BarberAvailability() {
   );
   const barbersWithoutAvailability = barbers.filter(
     barber => !barberIdsWithAvailability.has(barber.id)
+    
   );
+  console.log("isMobile:", isMobile);
+  console.log("barbers:", barbers);
+  console.log("availabi:", availabi);
+  console.log("barberIdsWithAvailability:", barberIdsWithAvailability);
+  console.log("barbersWithoutAvailability:", barbersWithoutAvailability);
 
   
   const fechtBarbers = async () =>{
@@ -224,33 +233,40 @@ const DAY_ORDER = [
   sunday: "Dom",
 };
 
+
   return (
     <Box
-      sx={{
+       sx={{
       minHeight: '100vh',
       backgroundColor: '#0F0F0F',
-      width: '100vw',
-      marginLeft: 'calc(50% - 50vw)',
-      px: { xs: 2, md: 6 },
-      pt: { xs: 10, md: 12 }, // AppBar fixed
-      
-
-      }}
+      pt: { xs: 10, md: 12 },
+    }}
     >
-      <Typography variant="h2"
-      textAlign= 'center'
+      <Box
+          sx={{
+            maxWidth: 1200,
+            mx: 'auto',
+            px: { xs: 2, md: 4 },
+            textAlign: 'center',
+          }}
+        >
+      <Typography 
+      variant="h4"
       sx={{
-        mb:2,
-        color: '#DBD515',
         fontFamily: 'Keania One',
-        maxWidth: 1200,
-        mx: 'auto'
-
-        }}
+        color: '#DBD515',
+        mb: 1,
+      }}
     >
         Disponibilidad de barberos
       </Typography>
-      <TableBody>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: { xs: 'center', sm: 'flex-end' },
+          mb: 3,
+        }}
+      >
         <Button
           variant="contained"
           startIcon={<PersonAddIcon />}
@@ -259,26 +275,60 @@ const DAY_ORDER = [
             backgroundColor: '#DBD515',
             color: '#000',
             fontWeight: 600,
+            width: { xs: '100%', sm: 'auto' },
+            maxWidth: 300,
             '&:hover': { backgroundColor: '#c4bd13' },
           }}
         >
           Crear barbero
         </Button>
-        {barbersWithoutAvailability.map((barber) => (
-          <TableRow key={barber.id}>
-            <TableCell>{barber.name}</TableCell>
+      </Box>
 
-            <TableCell colSpan={3}>
+    
+      {isMobile ? (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {barbersWithoutAvailability.map((barber) => (
+          
+          
+          <Paper
+            key={`no-avail-${barber.id}`}
+            sx={{
+              p: { xs: 1.2, sm: 2 },
+              backgroundColor: '#111',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: 2,
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 1,
+              }}
+            >
+              <Typography sx={{ color: '#DBD515', fontWeight: 600 }}>
+                {barber.name}
+              </Typography>
+
               <Chip
                 label="Sin disponibilidad"
                 color="warning"
                 size="small"
               />
-            </TableCell>
+            </Box>
 
-            <TableCell align="right">
+            <Typography variant="caption" sx={{ color: '#888' }}>
+              Inactivo
+            </Typography>
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
               <IconButton
-                color="primary"
+                sx={{
+                  color: '#DBD515',
+                  border: '1px solid rgba(219,213,21,0.3)',
+                  borderRadius: 2,
+                }}
                 onClick={() => {
                   setSelectedBarberId(barber.id);
                   setOpenCreate(true);
@@ -286,10 +336,111 @@ const DAY_ORDER = [
               >
                 <EditIcon />
               </IconButton>
-            </TableCell>
-          </TableRow>
+            </Box>
+          </Paper>
         ))}
-      </TableBody>
+
+        {Object.values(availabilityByBarber).map(({ barber, availabilities }) => (
+          <Paper
+            key={barber.id}
+            sx={{
+              p: 2,
+              backgroundColor: '#111',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: 2,
+            }}
+          >
+            {/* Nombre + Estado */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 1,
+              }}
+            >
+              <Typography sx={{ color: '#DBD515', fontWeight: 600 }}>
+                {barber.name}
+              </Typography>
+
+              <Chip
+              label={
+                availabilities.some(a => a.is_active)
+                  ? "Disponible"
+                  : "Inactivo"
+              }
+              color={
+                availabilities.some(a => a.is_active)
+                  ? "success"
+                  : "default"
+              }
+              size="small"
+            />
+            </Box>
+
+            {/* Horarios */}
+            <Box sx={{ mb: 1 }}>
+              {DAY_ORDER.map(day => {
+              const dayAvailabilities = availabilities
+                .filter(a => a.day_of_week === day)
+                .sort((a, b) =>
+                  a.start_time.localeCompare(b.start_time)
+                );
+
+              if (!dayAvailabilities.length) return null;
+
+              return (
+                <Box key={day} sx={{ mb: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: '#DBD515', fontWeight: 600 }}
+                  >
+                    {DAY_LABELS[day]}
+                  </Typography>
+
+                  {dayAvailabilities.map(a => (
+                    <Typography
+                      key={a.id}
+                      variant="caption"
+                      sx={{ display: 'block', color: '#bbb', ml: 1 }}
+                    >
+                      • {a.start_time} – {a.end_time}
+                    </Typography>
+                  ))}
+                </Box>
+              );
+            })}
+
+            </Box>
+
+            {/* Local */}
+            <Typography variant="caption" sx={{ color: '#888' }}>
+              {barber.location?.name ?? 'Sin local'}
+            </Typography>
+
+            {/* Botón */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+              <IconButton
+                onClick={() => {
+                  setSelectedBarber({
+                    barberId: barber.id,
+                    name: barber.name,
+                    availabilities,
+                    locationId: barber.location?.id ?? null,
+                  });
+                  setOpenEditDialog(true);
+                }}
+                sx={{ color: '#DBD515' }}
+              >
+                <EditIcon />
+              </IconButton>
+            </Box>
+          </Paper>
+        ))}
+      </Box>
+    ) : (
+      // 👇 ACÁ DEJÁS TU TABLE ACTUAL
+
 
       <TableContainer component={Paper}>
         <Table size="small">
@@ -306,46 +457,88 @@ const DAY_ORDER = [
           </TableHead>
 
           <TableBody>
+            {barbersWithoutAvailability.map((barber) => (
+              <TableRow key={`no-avail-${barber.id}`}>
+                <TableCell>{barber.name}</TableCell>
+
+                <TableCell colSpan={3}>
+                  <Chip
+                    label="Sin disponibilidad"
+                    color="warning"
+                    size="small"
+                  />
+                </TableCell>
+
+                <TableCell sx={{ display: { xs: "none", sm: "table-cell" } }}>
+                  <Chip label="Inactivo" size="small" />
+                </TableCell>
+
+                <TableCell align="right">
+                  <IconButton
+                    sx={{
+                      color: '#DBD515',
+                      border: '1px solid rgba(219,213,21,0.3)',
+                      borderRadius: 2,
+                    }}
+                    onClick={() => {
+                      setSelectedBarberId(barber.id);
+                      setOpenCreate(true);
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
             {Object.values(availabilityByBarber).map(({ barber, availabilities }) => (
               <TableRow key={barber.id}>
                 <TableCell>{barber.name}</TableCell>
 
                 {/* DÍAS AGRUPADOS */}
                 <TableCell>
-                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                    {DAY_ORDER
-                    .map(day =>
-                      availabilities.find(a => a.day_of_week === day)
-                    )
-                    .filter(Boolean)
-                    .map(a => (
-                      <Chip
-                        key={a!.id}
-                        label={DAY_LABELS[a!.day_of_week]}
-                        size="small"
-                        color={a!.is_active ? "success" : "default"}
-                        variant={a!.is_active ? "filled" : "outlined"}
-                      />
-                    ))}
+                <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+                  {DAY_ORDER.flatMap(day =>
+                    availabilities
+                      .filter(a => a.day_of_week === day)
+                      .map(a => (
+                        <Chip
+                          key={a.id}
+                          label={DAY_LABELS[day]}
+                          size="small"
+                          color={a.is_active ? "success" : "default"}
+                          variant={a.is_active ? "filled" : "outlined"}
+                        />
+                      ))
+                  )}
+                </Box>
+              </TableCell>
 
-                  </Box>
-                </TableCell>
 
                 {/* HORARIO (asumimos mismo rango) */}
                 <TableCell>
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
-                  {DAY_ORDER
-                    .map(day =>
-                      availabilities.find(a => a.day_of_week === day)
-                    )
-                    .filter(Boolean)
-                    .map(a => (
-                      <Typography key={a!.id} variant="caption">
-                        {DAY_LABELS[a!.day_of_week]}: {a!.start_time} – {a!.end_time}
-                      </Typography>
-                    ))}
-                </Box>
-              </TableCell>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    {DAY_ORDER
+                      .filter(day =>
+                        availabilities.some(a => a.day_of_week === day)
+                      )
+                      .map(day => {
+                        const ranges = availabilities
+                        .filter(a => a.day_of_week === day)
+                        .sort((a, b) =>
+                          a.start_time.localeCompare(b.start_time)
+                        )
+                        .map(a => `${a.start_time}–${a.end_time}`)
+                        .join(" y ");
+
+                        return (
+                          <Typography key={day} variant="caption">
+                            {DAY_LABELS[day]}: {ranges}
+                          </Typography>
+                        );
+                      })}
+                  </Box>
+                </TableCell>
+
 
                 <TableCell>
                   {barber.location?.name ?? "Sin local"}
@@ -381,7 +574,7 @@ const DAY_ORDER = [
           </TableBody>
         </Table>
       </TableContainer>
-
+    )}
       {/* Acá después va el Dialog de crear / editar */}
       {/* Y el Dialog de confirmación */}
   <Snackbar
@@ -418,25 +611,40 @@ const DAY_ORDER = [
 
 
           <Dialog
-            open={openCreateBarber}
-            onClose={() => setOpenCreateBarber(false)}
-            maxWidth="sm"
-            fullWidth
+          open={openCreateBarber}
+          onClose={() => setOpenCreateBarber(false)}
+          maxWidth="sm"
+          fullWidth
+          fullScreen={isMobile}
+        >
+          <DialogTitle
+            sx={{
+              fontSize: { xs: 18, sm: 22 },
+              pb: 1
+            }}
           >
-            <DialogTitle>Crear barbero</DialogTitle>
+            Crear barbero
+          </DialogTitle>
 
-            <DialogContent>
-              <Register
-                mode="admin-barber"
-                onSuccess={() => {
-                  fechtBarbers();
-                  fechtAvailabilities();
-                  showSnackbar('Barbero creado correctamente', 'success');
-                  setOpenCreateBarber(false);
-                }}
-              />
-            </DialogContent>
-          </Dialog>
+          <DialogContent
+            sx={{
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 2 }
+            }}
+          >
+            <Register
+              mode="admin-barber"
+              onSuccess={() => {
+                fechtBarbers();
+                fechtAvailabilities();
+                showSnackbar('Barbero creado correctamente', 'success');
+                setOpenCreateBarber(false);
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+
+        </Box>
     </Box>
 
     

@@ -13,6 +13,8 @@ import {
 import type { SelectChangeEvent } from "@mui/material";
 import type { CreateBarberAvailabilityPayload } from "../../types/barberAvailability";
 import type { AvailabilityForm } from "../../types/barberAvailability.form";
+import { useTheme, useMediaQuery } from "@mui/material";
+
 
 interface BarberDialogAvailProps {
   open: boolean;
@@ -30,8 +32,10 @@ export default function BarberDialogAvail({
   const [form, setForm] = useState<AvailabilityForm>({
     barberId: 0,
     days: [],
-    start_time: "",
-    end_time: "",
+    timeRanges: [
+  { start_time: "", end_time: "" }
+],
+
   });
 
   /** Reset al cerrar */
@@ -40,23 +44,35 @@ export default function BarberDialogAvail({
       setForm({
         barberId: barberId ?? 0,
         days: [],
-        start_time: "",
-        end_time: "",
+        timeRanges: [
+        { start_time: "", end_time: "" }
+      ],
       });
     }
   }, [open, barberId]);
 
   /** Validación de horario */
-  const isTimeRangeValid =
-    form.start_time !== "" &&
-    form.end_time !== "" &&
-    form.end_time > form.start_time;
+  const areRangesValid = form.timeRanges.every(
+  (range) =>
+    range.start_time !== "" &&
+    range.end_time !== "" &&
+    range.end_time > range.start_time
+);
 
   /** Validación total */
+  const isValidRange = (start: string, end: string) => {
+  if (!start || !end) return false;
+  return new Date(`1970-01-01T${end}`) > new Date(`1970-01-01T${start}`);
+};
+
   const isFormValid =
-    form.barberId > 0 &&
-    form.days.length > 0 &&
-    isTimeRangeValid;
+  form.days.length > 0 &&
+  form.timeRanges.length > 0 &&
+  form.timeRanges.every((range) =>
+    isValidRange(range.start_time, range.end_time)
+  );
+
+
 
   const DAY_LABELS: Record<string, string> = {
     monday: "Lunes",
@@ -67,18 +83,23 @@ export default function BarberDialogAvail({
     saturday: "Sábado",
     sunday: "Domingo",
   };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
 
   const handleSubmit = async () => {
   if (!isFormValid || !barberId) return;
 
   for (const day of form.days) {
-    await onSubmit({
-      barberId,
-      day_of_week: day,
-      start_time: form.start_time,
-      end_time: form.end_time,
-      is_active: true,
-    });
+    for (const range of form.timeRanges) {
+      await onSubmit({
+        barberId,
+        day_of_week: day,
+        start_time: range.start_time,
+        end_time: range.end_time,
+        is_active: true,
+      });
+    }
   }
 
   onClose();
@@ -87,83 +108,192 @@ export default function BarberDialogAvail({
 
 
 
+
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Asignar disponibilidad</DialogTitle>
+  <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          width: { xs: "95%", sm: "100%" },
+          maxHeight: { xs: "80vh", sm: "none" },
+          m: 1,
+        },
+      }}
+    >
 
-      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-        {/* Días */}
-        <TextField
-          select
-          label="Días"
-          SelectProps={{ multiple: true }}
-          value={form.days}
-          onChange={(e: SelectChangeEvent<string[]>) =>
-            setForm({ ...form, days: e.target.value as string[] })
-          }
-          fullWidth
-        >
-          {Object.entries(DAY_LABELS).map(([value, label]) => (
-            <MenuItem key={value} value={value}>
-              {label}
-            </MenuItem>
+    <DialogTitle
+      sx={{
+        fontSize: { xs: 18, sm: 22 },
+        pb: 1,
+      }}
+    >
+      Asignar disponibilidad
+    </DialogTitle>
+
+    <DialogContent
+      dividers
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+        px: 2,
+        py: 1.5,
+        overflowY: "auto",
+      }}
+    >
+
+      {/* DÍAS */}
+      <TextField
+        select
+        label="Días"
+        SelectProps={{ multiple: true }}
+        value={form.days}
+        onChange={(e: SelectChangeEvent<string[]>) =>
+          setForm({ ...form, days: e.target.value as string[] })
+        }
+        fullWidth
+        size={isMobile ? "small" : "medium"}
+      >
+        {Object.entries(DAY_LABELS).map(([value, label]) => (
+          <MenuItem key={value} value={value}>
+            {label}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      {form.days.length > 0 && (
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+          {form.days.map((day) => (
+            <Chip
+              key={day}
+              label={DAY_LABELS[day]}
+              size="medium"
+              onDelete={() =>
+                setForm({
+                  ...form,
+                  days: form.days.filter((d) => d !== day),
+                })
+              }
+            />
           ))}
-        </TextField>
+        </Box>
+      )}
 
-        {form.days.length > 0 && (
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            {form.days.map((day) => (
-              <Chip
-                key={day}
-                label={DAY_LABELS[day]}
-                onDelete={() =>
-                  setForm({
-                    ...form,
-                    days: form.days.filter((d) => d !== day),
-                  })
-                }
-              />
-            ))}
-          </Box>
-        )}
+      {form.timeRanges.map((range, index) => {
+      const isValid =
+        range.start_time &&
+        range.end_time &&
+        range.end_time > range.start_time;
 
-        {/* Hora inicio */}
-        <TextField
-          label="Hora inicio"
-          type="time"
-          value={form.start_time}
-          onChange={(e) =>
-            setForm({ ...form, start_time: e.target.value })
-          }
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
+      return (
+        <Box
+          key={index}
+          sx={{
+            display: "flex",
+            gap: 1,
+            alignItems: "center",
+          }}
+        >
+          <TextField
+            label="Inicio"
+            type="time"
+            value={range.start_time}
+            onChange={(e) => {
+              const updated = [...form.timeRanges];
+              updated[index].start_time = e.target.value;
+              setForm({ ...form, timeRanges: updated });
+            }}
+            InputLabelProps={{ shrink: true }}
+            size="small"
+          />
 
-        {/* Hora fin */}
-        <TextField
-          label="Hora fin"
-          type="time"
-          value={form.end_time}
-          onChange={(e) =>
-            setForm({ ...form, end_time: e.target.value })
-          }
-          error={form.end_time !== "" && !isTimeRangeValid}
-          helperText={
-            form.end_time !== "" && !isTimeRangeValid
-              ? "La hora fin debe ser mayor a la de inicio"
-              : ""
-          }
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
-      </DialogContent>
+          <TextField
+            label="Fin"
+            type="time"
+            value={range.end_time}
+            onChange={(e) => {
+              const updated = [...form.timeRanges];
+              updated[index].end_time = e.target.value;
+              setForm({ ...form, timeRanges: updated });
+            }}
+            error={range.end_time !== "" && !isValid}
+            helperText={
+              range.end_time !== "" && !isValid
+                ? "Fin debe ser mayor"
+                : ""
+            }
+            InputLabelProps={{ shrink: true }}
+            size="small"
+          />
 
-      <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={!isFormValid}>
-          Guardar
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+          {form.timeRanges.length > 1 && (
+            <Button
+              color="error"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  timeRanges: form.timeRanges.filter((_, i) => i !== index),
+                })
+              }
+            >
+              X
+            </Button>
+          )}
+        </Box>
+      );
+    })}
+
+    {/* 👇 ESTE VA FUERA DEL MAP */}
+    <Button
+      variant="outlined"
+      size="small"
+      onClick={() =>
+        setForm({
+          ...form,
+          timeRanges: [
+            ...form.timeRanges,
+            { start_time: "", end_time: "" },
+          ],
+        })
+      }
+    >
+      + Agregar horario
+    </Button>
+
+
+    </DialogContent>
+
+    <DialogActions
+      sx={{
+        px: { xs: 2, sm: 3 },
+        pb: { xs: 2, sm: 2 },
+        flexDirection: { xs: "column", sm: "row" },
+        gap: { xs: 1, sm: 0 },
+      }}
+    >
+      <Button
+        onClick={onClose}
+        fullWidth={isMobile}
+        size={isMobile ? "large" : "medium"}
+      >
+        Cancelar
+      </Button>
+
+      <Button
+        variant="contained"
+        onClick={handleSubmit}
+        disabled={!isFormValid}
+        fullWidth={isMobile}
+        size={isMobile ? "large" : "medium"}
+      >
+        Guardar
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
 }
