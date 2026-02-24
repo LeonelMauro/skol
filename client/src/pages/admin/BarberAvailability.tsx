@@ -80,12 +80,7 @@ export default function BarberAvailability() {
     barber => !barberIdsWithAvailability.has(barber.id)
     
   );
-  console.log("isMobile:", isMobile);
-  console.log("barbers:", barbers);
-  console.log("availabi:", availabi);
-  console.log("barberIdsWithAvailability:", barberIdsWithAvailability);
-  console.log("barbersWithoutAvailability:", barbersWithoutAvailability);
-
+ 
   
   const fechtBarbers = async () =>{
     try {
@@ -132,48 +127,71 @@ const [selectedBarber, setSelectedBarber] = useState<{
 
 
   const handleSaveSchedule = async (
-        payload: UpdateBarberSchedulePayload
-      ) => {
-        try {
-                // 1. Eliminar días
-          if (payload.removedIds?.length) {
-            await Promise.all(
-              payload.removedIds.map(id =>
-                api.delete(`/barber-availability/${id}`, {
-                  headers: authHeader,
-                })
-              )
-            );
-          }
-          await Promise.all(
-            payload.availabilities.map(a =>
-              api.patch(
-                `/barber-availability/${a.id}`,
-                {
-                  start_time: a.start_time,
-                  end_time: a.end_time,
-                  is_active: a.is_active,
-                },
-                { headers: authHeader }
-              )
+  payload: UpdateBarberSchedulePayload
+) => {
+  try {
+    // 1️⃣ ELIMINAR
+    if (payload.removedIds?.length) {
+      await Promise.all(
+        payload.removedIds.map(id =>
+          api.delete(`/barber-availability/${id}`, {
+            headers: authHeader,
+          })
+        )
+      );
+    }
+
+    // 2️⃣ ACTUALIZAR EXISTENTES
+    await Promise.all(
+      payload.availabilities.flatMap(day =>
+        day.timeRanges
+          .filter(range => range.id)
+          .map(range =>
+            api.patch(
+              `/barber-availability/${range.id}`,
+              {
+                start_time: range.start_time,
+                end_time: range.end_time,
+                is_active: day.is_active,
+              },
+              { headers: authHeader }
             )
-          );
+          )
+      )
+    );
 
-          showSnackbar(
-            'Disponibilidad actualizada con éxito',
-            'success'
-          );
+    // 3️⃣ CREAR NUEVOS
+    await Promise.all(
+      payload.availabilities.flatMap(day =>
+        day.timeRanges
+          .filter(range => !range.id)
+          .map(range =>
+            api.post(
+              `/barber-availability`,
+              {
+                barberId: payload.barberId,
+                day_of_week: day.day_of_week,
+                start_time: range.start_time,
+                end_time: range.end_time,
+                is_active: day.is_active,
+              },
+              { headers: authHeader }
+            )
+          )
+      )
+    );
 
-          setOpenEditDialog(false);
-          setSelectedBarber(null);
-          fechtAvailabilities();
-        } catch (error) {
-          showSnackbar(
-            'Error al actualizar disponibilidad',
-            'error'
-          );
-        }
-      };
+    showSnackbar('Disponibilidad actualizada con éxito', 'success');
+
+    setOpenEditDialog(false);
+    setSelectedBarber(null);
+    fechtAvailabilities();
+  } catch (error) {
+    console.error(error);
+    showSnackbar('Error al actualizar disponibilidad', 'error');
+  }
+};
+
 
   const handleUpdateBarberLocation = async (
   barberId: number,
@@ -496,22 +514,31 @@ const DAY_ORDER = [
 
                 {/* DÍAS AGRUPADOS */}
                 <TableCell>
-                <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                  {DAY_ORDER.flatMap(day =>
-                    availabilities
-                      .filter(a => a.day_of_week === day)
-                      .map(a => (
-                        <Chip
-                          key={a.id}
-                          label={DAY_LABELS[day]}
-                          size="small"
-                          color={a.is_active ? "success" : "default"}
-                          variant={a.is_active ? "filled" : "outlined"}
-                        />
-                      ))
-                  )}
-                </Box>
-              </TableCell>
+                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+                    {Array.from(
+                      new Set(availabilities.map(a => a.day_of_week))
+                    )
+                      .sort((a, b) =>
+                        DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b)
+                      )
+                      .map(day => {
+                        const isActive = availabilities.some(
+                          a => a.day_of_week === day && a.is_active
+                        );
+
+                        return (
+                          <Chip
+                            key={day}
+                            label={DAY_LABELS[day]}
+                            size="small"
+                            color={isActive ? "success" : "default"}
+                            variant={isActive ? "filled" : "outlined"}
+                          />
+                        );
+                      })}
+                  </Box>
+                </TableCell>
+
 
 
                 {/* HORARIO (asumimos mismo rango) */}

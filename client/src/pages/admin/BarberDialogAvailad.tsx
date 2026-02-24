@@ -10,7 +10,6 @@ import {
   Chip,
   Box,
 } from "@mui/material";
-import type { SelectChangeEvent } from "@mui/material";
 import type { CreateBarberAvailabilityPayload } from "../../types/barberAvailability";
 import type { AvailabilityForm } from "../../types/barberAvailability.form";
 import { useTheme, useMediaQuery } from "@mui/material";
@@ -40,24 +39,18 @@ export default function BarberDialogAvail({
 
   /** Reset al cerrar */
   useEffect(() => {
-    if (!open) {
-      setForm({
-        barberId: barberId ?? 0,
-        days: [],
-        timeRanges: [
-        { start_time: "", end_time: "" }
-      ],
-      });
-    }
-  }, [open, barberId]);
+  if (open) {
+    setForm({
+      barberId: barberId ?? 0,
+      days: [],
+      timeRanges: [{ start_time: "", end_time: "" }],
+    });
+  }
+}, [open, barberId]);
 
-  /** Validación de horario */
-  const areRangesValid = form.timeRanges.every(
-  (range) =>
-    range.start_time !== "" &&
-    range.end_time !== "" &&
-    range.end_time > range.start_time
-);
+
+ 
+ 
 
   /** Validación total */
   const isValidRange = (start: string, end: string) => {
@@ -150,13 +143,26 @@ export default function BarberDialogAvail({
       <TextField
         select
         label="Días"
-        SelectProps={{ multiple: true }}
-        value={form.days}
-        onChange={(e: SelectChangeEvent<string[]>) =>
-          setForm({ ...form, days: e.target.value as string[] })
-        }
         fullWidth
-        size={isMobile ? "small" : "medium"}
+        SelectProps={{
+          multiple: true,
+          value: form.days,
+          onChange: (e) =>
+            setForm({
+              ...form,
+              days: e.target.value as string[],
+            }),
+          renderValue: (selected) => (
+            <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+              {(selected as string[]).map((value) => (
+                <Chip
+                  key={value}
+                  label={DAY_LABELS[value]}
+                />
+              ))}
+            </Box>
+          ),
+        }}
       >
         {Object.entries(DAY_LABELS).map(([value, label]) => (
           <MenuItem key={value} value={value}>
@@ -164,6 +170,7 @@ export default function BarberDialogAvail({
           </MenuItem>
         ))}
       </TextField>
+
 
       {form.days.length > 0 && (
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
