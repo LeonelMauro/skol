@@ -420,11 +420,18 @@ const DAY_ORDER = [
                     <Typography
                       key={a.id}
                       variant="caption"
-                      sx={{ display: 'block', color: '#bbb', ml: 1 }}
+                      sx={{
+                        display: "block",
+                        ml: 1,
+                        color: a.is_active ? "#2e7d32" : "#434444ff",
+                        textDecoration: a.is_active ? "none" : "line-through",
+                        opacity: a.is_active ? 1 : 0.6,
+                      }}
                     >
                       • {a.start_time} – {a.end_time}
                     </Typography>
                   ))}
+
                 </Box>
               );
             })}
@@ -543,28 +550,49 @@ const DAY_ORDER = [
 
                 {/* HORARIO (asumimos mismo rango) */}
                 <TableCell>
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    {DAY_ORDER
-                      .filter(day =>
-                        availabilities.some(a => a.day_of_week === day)
-                      )
-                      .map(day => {
-                        const ranges = availabilities
-                        .filter(a => a.day_of_week === day)
-                        .sort((a, b) =>
-                          a.start_time.localeCompare(b.start_time)
-                        )
-                        .map(a => `${a.start_time}–${a.end_time}`)
-                        .join(" y ");
+  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+    {DAY_ORDER
+      .filter(day =>
+        availabilities.some(a => a.day_of_week === day)
+      )
+      .map(day => {
+        const dayRanges = availabilities
+          .filter(a => a.day_of_week === day)
+          .sort((a, b) =>
+            a.start_time.localeCompare(b.start_time)
+          );
 
-                        return (
-                          <Typography key={day} variant="caption">
-                            {DAY_LABELS[day]}: {ranges}
-                          </Typography>
-                        );
-                      })}
-                  </Box>
-                </TableCell>
+        return (
+          <Box key={day}>
+            <Typography
+              variant="caption"
+              sx={{ fontWeight: 600 }}
+            >
+              {DAY_LABELS[day]}
+            </Typography>
+
+            {dayRanges.map(range => (
+              <Typography
+                key={range.id}
+                variant="caption"
+                sx={{
+                  display: "block",
+                  ml: 1,
+                  color: range.is_active ? "#2e7d32" : "#777",
+                  textDecoration: range.is_active
+                    ? "none"
+                    : "line-through",
+                  opacity: range.is_active ? 1 : 0.6,
+                }}
+              >
+                {range.start_time} – {range.end_time}
+              </Typography>
+            ))}
+          </Box>
+        );
+      })}
+  </Box>
+</TableCell>
 
 
                 <TableCell>
