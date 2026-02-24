@@ -24,6 +24,7 @@ import ReservationsBarber from '../pages/barber/TodayBookings';
 import BarberHistoryPanel from '../pages/barber/BarberHistoryPanel';
 import AddService from '../pages/barber/AddService';
 import SelectClient from '../pages/barber/SelectClient';
+import BarberAgendaStructurePage from '../pages/barber/BarberAgendaStructurePage';
 
 export default function AppRouter() {
   return (
@@ -134,6 +135,13 @@ export default function AppRouter() {
           element={
             <ProtectedRoute roles={['barber']}>
               <SelectClient />
+            </ProtectedRoute>
+          }
+        /><Route
+          path="/agenda"
+          element={
+            <ProtectedRoute roles={['barber']}>
+              <BarberAgendaStructurePage />
             </ProtectedRoute>
           }
         />

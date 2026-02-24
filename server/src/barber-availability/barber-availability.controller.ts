@@ -25,6 +25,12 @@ export class BarberAvailabilityController {
   }
   
   @Roles('admin','barber','client')
+@Get('barber/:barberId')
+findByBarber(@Param('barberId') barberId: string) {
+  return this.barberAvailabilityService.findByBarber(+barberId);
+}
+
+  @Roles('admin','barber','client')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.barberAvailabilityService.findOne(+id);

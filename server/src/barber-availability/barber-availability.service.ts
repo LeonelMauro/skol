@@ -133,4 +133,11 @@ async findAll(): Promise<BarberAvailabilityResponseDto[]> {
     }
     return this.barberAvailRepository.remove(availability);
   }
+  async findByBarber(barberId: number) {
+  return this.barberAvailRepository.find({
+    where: { barber: { id: barberId } },
+    relations: ['barber'],
+  });
+}
+
 }
