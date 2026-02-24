@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState ,useMemo} from 'react';
 import api from '../../services/api';
 import type {
   BarberAvailability,
@@ -8,7 +8,7 @@ import type {
 } from '../../types/barberAvailability';
 
 
-import type { Barber, } from "../../types/user";
+import type { Barber} from "../../types/user";
 
 import {
   Table, TableBody, TableCell, TableContainer,
@@ -19,7 +19,9 @@ import {
   Button,
   DialogContent,
   Dialog,
-  DialogTitle
+  DialogTitle,
+  InputAdornment,
+  TextField
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {useAuth} from '../../context/AuthContext';
@@ -29,6 +31,7 @@ import BarberDialogAvail from './BarberDialogAvailad';
 import BarberDialogEditAvail from './BarberDialogEditAvail';
 import Register from '../Register';
 import { useTheme, useMediaQuery } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
 
 export default function BarberAvailability() {
   
@@ -210,8 +213,25 @@ const [selectedBarber, setSelectedBarber] = useState<{
     showSnackbar('Error al actualizar local', 'error');
   }
 };
-   
+  const [search, setSearch] = useState('');
 
+  const fetchUsers = async (query?: string) => {
+    const res = await api.get('/user', {
+      headers: authHeader,
+      params: query ? { q: query } : {},
+    });
+    (res.data);
+  };
+  
+    
+
+   useEffect(() => {
+      const timeout = setTimeout(() => {
+        fetchUsers(search);
+      }, 300); // debounce
+  
+      return () => clearTimeout(timeout);
+    }, [search]);
   const availabilityByBarber = availabi.reduce((acc, availability) => {
   const barberId = availability.barber.id;
 
@@ -230,6 +250,18 @@ const [selectedBarber, setSelectedBarber] = useState<{
   return acc;
 }, {} as Record<number, { barber: BarberTableInfo; availabilities: BarberAvailability[] }>);
 
+  const filteredBarbers = useMemo(() => {
+  const list = Object.values(availabilityByBarber);
+
+  if (!search.trim()) return list;
+
+  const lowerSearch = search.toLowerCase();
+
+  return list.filter(b =>
+    b.barber.name.toLowerCase().includes(lowerSearch)
+  );
+}, [availabilityByBarber, search]);
+
 const DAY_ORDER = [
   'monday',
   'tuesday',
@@ -239,6 +271,9 @@ const DAY_ORDER = [
   'saturday',
   'sunday',
 ] as const;
+
+type DayOfWeek = typeof DAY_ORDER[number];
+
 
 
   const DAY_LABELS: Record<string, string> = {
@@ -278,13 +313,18 @@ const DAY_ORDER = [
     >
         Disponibilidad de barberos
       </Typography>
+      
       <Box
         sx={{
           display: 'flex',
-          justifyContent: { xs: 'center', sm: 'flex-end' },
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 2,
           mb: 3,
         }}
       >
+        {/* Botón crear */}
         <Button
           variant="contained"
           startIcon={<PersonAddIcon />}
@@ -294,12 +334,31 @@ const DAY_ORDER = [
             color: '#000',
             fontWeight: 600,
             width: { xs: '100%', sm: 'auto' },
-            maxWidth: 300,
             '&:hover': { backgroundColor: '#c4bd13' },
           }}
         >
           Crear barbero
         </Button>
+
+        {/* Buscador */}
+        <TextField
+          size="small"
+          placeholder="Buscar por nombre o email"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{
+            width: { xs: '100%', sm: 280 },
+            backgroundColor: '#1a1a1a',
+            borderRadius: 1,
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: '#888' }} />
+              </InputAdornment>
+            ),
+          }}
+        />
       </Box>
 
     
@@ -358,7 +417,7 @@ const DAY_ORDER = [
           </Paper>
         ))}
 
-        {Object.values(availabilityByBarber).map(({ barber, availabilities }) => (
+        {filteredBarbers.map(({ barber, availabilities }) => (
           <Paper
             key={barber.id}
             sx={{
@@ -515,7 +574,7 @@ const DAY_ORDER = [
                 </TableCell>
               </TableRow>
             ))}
-            {Object.values(availabilityByBarber).map(({ barber, availabilities }) => (
+            {filteredBarbers.map(({ barber, availabilities }) => (
               <TableRow key={barber.id}>
                 <TableCell>{barber.name}</TableCell>
 
@@ -523,7 +582,8 @@ const DAY_ORDER = [
                 <TableCell>
                   <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
                     {Array.from(
-                      new Set(availabilities.map(a => a.day_of_week))
+                      new Set(availabilities.map(a => a.day_of_week as DayOfWeek))
+
                     )
                       .sort((a, b) =>
                         DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b)
@@ -550,49 +610,49 @@ const DAY_ORDER = [
 
                 {/* HORARIO (asumimos mismo rango) */}
                 <TableCell>
-  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-    {DAY_ORDER
-      .filter(day =>
-        availabilities.some(a => a.day_of_week === day)
-      )
-      .map(day => {
-        const dayRanges = availabilities
-          .filter(a => a.day_of_week === day)
-          .sort((a, b) =>
-            a.start_time.localeCompare(b.start_time)
-          );
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                    {DAY_ORDER
+                      .filter(day =>
+                        availabilities.some(a => a.day_of_week === day)
+                      )
+                      .map(day => {
+                        const dayRanges = availabilities
+                          .filter(a => a.day_of_week === day)
+                          .sort((a, b) =>
+                            a.start_time.localeCompare(b.start_time)
+                          );
 
-        return (
-          <Box key={day}>
-            <Typography
-              variant="caption"
-              sx={{ fontWeight: 600 }}
-            >
-              {DAY_LABELS[day]}
-            </Typography>
+                        return (
+                          <Box key={day}>
+                            <Typography
+                              variant="caption"
+                              sx={{ fontWeight: 600 }}
+                            >
+                              {DAY_LABELS[day]}
+                            </Typography>
 
-            {dayRanges.map(range => (
-              <Typography
-                key={range.id}
-                variant="caption"
-                sx={{
-                  display: "block",
-                  ml: 1,
-                  color: range.is_active ? "#2e7d32" : "#777",
-                  textDecoration: range.is_active
-                    ? "none"
-                    : "line-through",
-                  opacity: range.is_active ? 1 : 0.6,
-                }}
-              >
-                {range.start_time} – {range.end_time}
-              </Typography>
-            ))}
-          </Box>
-        );
-      })}
-  </Box>
-</TableCell>
+                            {dayRanges.map(range => (
+                              <Typography
+                                key={range.id}
+                                variant="caption"
+                                sx={{
+                                  display: "block",
+                                  ml: 1,
+                                  color: range.is_active ? "#2e7d32" : "#777",
+                                  textDecoration: range.is_active
+                                    ? "none"
+                                    : "line-through",
+                                  opacity: range.is_active ? 1 : 0.6,
+                                }}
+                              >
+                                {range.start_time} – {range.end_time}
+                              </Typography>
+                            ))}
+                          </Box>
+                        );
+                      })}
+                  </Box>
+                </TableCell>
 
 
                 <TableCell>
