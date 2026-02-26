@@ -74,7 +74,7 @@ export default function BarberAgendaStructurePage() {
 
   try {
     const response = await api.get(
-      '/bookings/barber/history',
+      '/bookings/barber/by-date',
       {
         headers: {
           Authorization: `Bearer ${user.access_token}`,

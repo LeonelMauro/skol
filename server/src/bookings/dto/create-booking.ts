@@ -1,23 +1,28 @@
-import { IsNumber, IsDateString, Matches } from "class-validator";
+import { IsOptional, IsString, IsNumber, IsDateString } from 'class-validator';
 
 export class CreateBookingDto {
-  @IsNumber()
-  barberId: number;
 
+  @IsOptional()
   @IsNumber()
-  clientId: number;
+  clientId?: number;
 
-  guestName?: string; 
+  @IsOptional()
+  @IsString()
+  guestName?: string;
 
   @IsNumber()
   serviceId: number;
 
-  @IsDateString()
-  date: string; // yyyy-mm-dd
-
   @IsNumber()
-  locationId: number; 
+  locationId: number;
 
-  @Matches(/^\d{2}:\d{2}$/, { message: "El formato de hora debe ser HH:MM" })
+  @IsOptional()
+  @IsNumber()
+  barberId?: number;
+
+  @IsDateString()
+  date: string;
+
+  @IsString()
   time: string;
 }

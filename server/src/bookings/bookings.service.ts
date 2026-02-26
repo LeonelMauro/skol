@@ -79,7 +79,7 @@ async findPending() {
     const duration = service.duration_minutes;
 
     // 3️⃣ Buscar disponibilidad
-    const availability = await this.barberAvailabilityRepository.findOne({
+    const availabilities = await this.barberAvailabilityRepository.find({
       where: {
         barber: { id: barberId },
         day_of_week: weekday,
@@ -87,17 +87,24 @@ async findPending() {
       },
     });
 
-    if (!availability) {
+    if (!availabilities.length) {
   throw new NotFoundException(`El barbero no trabaja el día ${weekday}`);
 }
 
 
     // 4️⃣ Crear horarios disponibles
-    const slots = this.generateTimeSlots(
-      availability.start_time,
-      availability.end_time,
-      duration,
-    );
+    let slots: string[] = [];
+
+    for (const availability of availabilities) {
+      const rangeSlots = this.generateTimeSlots(
+        availability.start_time,
+        availability.end_time,
+        duration,
+      );
+
+      slots.push(...rangeSlots);
+    }
+    slots.sort();
 
     // 5️⃣ Reservas existentes
     const reservations = await this.reservationRepository.find({
@@ -199,24 +206,26 @@ if (dto.barberId) {
     .toLocaleDateString('en-US', { weekday: 'long' })
     .toLowerCase() as DayOfWeek;
 
-  const availability = await this.barberAvailabilityRepository.findOne({
-    where: {
-      barber: { id: barber.id },
-      day_of_week: weekday,
-      is_active: true,
-    },
-  });
+  const availabilities = await this.barberAvailabilityRepository.find({
+  where: {
+    barber: { id: barber.id },
+    day_of_week: weekday,
+    is_active: true,
+  },
+});
 
-  if (!availability) {
-    throw new BadRequestException('El barbero no trabaja ese día');
-  }
+if (!availabilities.length) {
+  throw new BadRequestException('El barbero no trabaja ese día');
+}
 
-  if (
-    dto.time < availability.start_time ||
-    dto.time >= availability.end_time
-  ) {
-    throw new BadRequestException('Horario fuera de rango');
-  }
+// Validar que la hora esté dentro de ALGUNO de los rangos
+const isWithinSomeRange = availabilities.some(a => {
+  return dto.time >= a.start_time && dto.time < a.end_time;
+});
+
+if (!isWithinSomeRange) {
+  throw new BadRequestException('Horario fuera de rango');
+}
 
   const exists = await this.reservationRepository.findOne({
     where: {
@@ -715,6 +724,17 @@ async createDirect(dto: CreateDirectBookingDto) {
 
   return this.reservationRepository.save(reservation);
 }
-
+async getBookingsByDate(barberId: number, date: string) {
+  return this.reservationRepository.find({
+    where: {
+      barber: { id: barberId },
+      date,
+    },
+    relations: ['client', 'service', 'location'],
+    order: {
+      time: 'ASC',
+    },
+  });
+}
 
 }

@@ -27,6 +27,17 @@ export class BookingsController {
   ) {
     return this.bookingsService.getAvailableSlots(barberId, date, serviceId);
   }
+  @Get('barber/by-date')
+  @UseGuards(JwtAuthGuard)
+  getBookingsByDate(
+    @Req() req,
+    @Query('date') date: string
+  ) {
+    return this.bookingsService.getBookingsByDate(
+      req.user.sub,
+      date
+    );
+  }
 
   @Post()
   create(@Body()dto : CreateBookingDto){

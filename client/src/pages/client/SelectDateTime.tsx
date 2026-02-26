@@ -17,6 +17,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
+import type { EditableBarberAvailability } from '../../types/barberAvailability';
 
 interface AvailableSlotsResponse {
   availableSlots: string[];
@@ -59,7 +60,18 @@ export default function SelectDateTime() {
   const [slots, setSlots] = useState<string[]>([]);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [barberAvailabilities, setBarberAvailabilities] =
+  useState<EditableBarberAvailability[]>([]);
 
+  const visibleRanges =
+  selectedDate && barber.mode === 'specific'
+    ? barberAvailabilities
+        .filter(a =>
+          a.is_active &&
+          Number(a.day_of_week) === dayjs(selectedDate).day()
+        )
+        .flatMap(a => a.timeRanges)
+    : [];
   const authHeader = {
     Authorization: `Bearer ${user?.access_token}`,
   };
@@ -74,50 +86,15 @@ export default function SelectDateTime() {
 
   // ⬇️ Filtra los horarios que ya pasaron si es el día actual
 useEffect(() => {
-  if (!selectedDate) return;
-
-  setLoadingSlots(true);
-  setSelectedTime(null);
+  if (barber.mode !== 'specific') return;
 
   api
-    .get<AvailableSlotsResponse>(
-      barberId
-        ? `/bookings/barbers/${barberId}/available-slots`
-        : `/bookings/available-slots`,
-      {
-        params: {
-          date: selectedDate,
-          serviceId: service.id,
-          locationId: location.id,
-        },
-        headers: authHeader,
-      }
+    .get<EditableBarberAvailability[]>(
+      `/barbers/${barber.barber.id}/schedule`
     )
-    .then(res => {
-      let available = res.data.availableSlots;
-
-      // Si la fecha es hoy, eliminar horarios que ya pasaron
-      const today = dayjs().format('YYYY-MM-DD');
-      if (selectedDate === today) {
-        const nowHour = dayjs().hour();
-        const nowMinute = dayjs().minute();
-
-        available = available.filter(time => {
-          const [hourStr, minuteStr] = time.split(':');
-          const hour = parseInt(hourStr);
-          const minute = parseInt(minuteStr);
-          return hour > nowHour || (hour === nowHour && minute > nowMinute);
-        });
-      }
-
-      setSlots(available);
-    })
-    .catch(() => setSlots([]))
-    .finally(() => setLoadingSlots(false));
-}, [selectedDate, barberId, service.id, location.id]);
-
-
-
+    .then(res => setBarberAvailabilities(res.data))
+    .catch(() => setBarberAvailabilities([]));
+}, [barber]);
   useEffect(() => {
   if (!selectedDate) return;
 
@@ -209,6 +186,7 @@ useEffect(() => {
         if (barber.mode === 'any') return false;
         const day = date.day();
         return !workingDays.includes(day);
+        
       }}
       slotProps={{
         actionBar: { actions: [] }, // sin OK/Cancelar
@@ -270,6 +248,22 @@ useEffect(() => {
 
 
       {/* HORARIOS */}
+      {barber.mode === 'specific' && visibleRanges.length > 0 && (
+      <Box sx={{ mt: 3 }}>
+        <Typography sx={{ color: '#aaa', fontSize: 14 }}>
+          Horario del barbero:
+        </Typography>
+
+        {visibleRanges.map((range, index) => (
+          <Typography
+            key={index}
+            sx={{ color: '#DBD515', fontSize: 14 }}
+          >
+            {range.start_time.slice(0, 5)} – {range.end_time.slice(0, 5)}
+          </Typography>
+        ))}
+      </Box>
+    )}
       {loadingSlots && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <CircularProgress sx={{ color: '#DBD515' }} />
