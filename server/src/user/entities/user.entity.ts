@@ -3,6 +3,7 @@ import { Reservation } from "src/reservation/entities/reservation.entity";
 import { BarberAvailability } from "src/barber-availability/entities/barber-availability.entity";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from "typeorm";
 import { Location } from "src/location/entities/location.entity";
+import { Commission } from "src/commission/entities/commission.entity";
 
 @Entity()
 export class User {
@@ -45,5 +46,8 @@ export class User {
 
   @ManyToOne(() => Location, location => location.barbers, { nullable: true })
   location: Location;
+
+  @OneToMany(() => Commission, (commission) => commission.barber)
+  commissions: Commission[];
 
 }

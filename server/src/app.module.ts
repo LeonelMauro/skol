@@ -12,6 +12,9 @@ import { MailModule } from './mail/mail.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LocationModule } from './location/location.module';
 import { StatsModule } from './stats/stats.module';
+import { CommissionModule } from './commission/commission.module';
+import { PaymentModule } from './payment/payment.module';
+import { CashClosureModule } from './cash-closure/cash-closure.module';
 
 @Module({
   imports: [
@@ -41,6 +44,9 @@ import { StatsModule } from './stats/stats.module';
   MailModule,
   LocationModule,
   StatsModule,
+  CommissionModule,
+  PaymentModule,
+  CashClosureModule,
 ],
 
   controllers: [],

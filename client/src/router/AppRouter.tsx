@@ -25,6 +25,7 @@ import BarberHistoryPanel from '../pages/barber/BarberHistoryPanel';
 import AddService from '../pages/barber/AddService';
 import SelectClient from '../pages/barber/SelectClient';
 import BarberAgendaStructurePage from '../pages/barber/BarberAgendaStructurePage';
+import PaymentStep from '../pages/barber/PaymentStep';
 
 export default function AppRouter() {
   return (
@@ -137,11 +138,20 @@ export default function AppRouter() {
               <SelectClient />
             </ProtectedRoute>
           }
-        /><Route
+        />
+        <Route
           path="/agenda"
           element={
             <ProtectedRoute roles={['barber']}>
               <BarberAgendaStructurePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-service/payment"
+          element={
+            <ProtectedRoute roles={['barber']}>
+              <PaymentStep />
             </ProtectedRoute>
           }
         />

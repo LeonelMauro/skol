@@ -6,35 +6,25 @@ import {
   Button,
   Divider,
   CircularProgress,
-} from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import api from '../../services/api';
-import Autocomplete from '@mui/material/Autocomplete';
-import {
-  Snackbar, 
-  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
 } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+import api from '../../services/api';
+import Autocomplete from '@mui/material/Autocomplete';
 
 export default function SelectClient() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
 
   const [clients, setClients] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
   const [guestName, setGuestName] = useState('Cliente anónimo');
-  const [clientEmail, setClientEmail] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  
 
   const state = location.state as
     | { service: { id: number; name: string } }
@@ -44,6 +34,8 @@ export default function SelectClient() {
     navigate('/servicios', { replace: true });
     return null;
   }
+
+  const { service } = state;
 
   const searchClients = async (query: string) => {
     if (!query || query.length < 2) return;
@@ -59,58 +51,10 @@ export default function SelectClient() {
     }
   };
 
-  const { service } = state;
-
-  const handleSubmitBooking = async () => {
-  if (!user?.location?.id) return;
-
-  try {
-    setSubmitting(true);
-
-    const now = new Date();
-
-    await api.post('/bookings/barber/direct', {
-      barberId: user.id,
-      locationId: user.location.id,
-      serviceId: service.id,
-      clientEmail: clientEmail || undefined,
-      guestName: clientEmail ? undefined : guestName,
-      date: now.toLocaleDateString('en-CA'),
-      time: now.toLocaleTimeString('es-AR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      }),
-    });
-
-    setSnackbarOpen(true);
-
-    setTimeout(() => {
-      navigate('/barber');
-    }, 1500);
-
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setSubmitting(false);
-    setConfirmOpen(false);
-  }
-};
-
-  const whiteTextField = {
-    input: { color: '#fff', fontSize: { xs: 14, sm: 16 } },
-    label: { color: '#ccc', fontSize: { xs: 14, sm: 16 } },
-    '& label.Mui-focused': { color: '#DBD515' },
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': { borderColor: '#fff' },
-      '&:hover fieldset': { borderColor: '#DBD515' },
-      '&.Mui-focused fieldset': { borderColor: '#DBD515' },
-    },
-  };
   const displayClientName =
-  selectedClient?.name ||
-  guestName?.trim() ||
-  "Cliente anónimo";
+    selectedClient?.name ||
+    guestName?.trim() ||
+    'Cliente anónimo';
 
   const now = new Date();
   const formattedTime = now.toLocaleTimeString('es-AR', {
@@ -118,13 +62,25 @@ export default function SelectClient() {
     minute: '2-digit',
     hour12: false,
   });
+
+  const whiteTextField = {
+    input: { color: '#fff' },
+    label: { color: '#ccc' },
+    '& label.Mui-focused': { color: '#DBD515' },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': { borderColor: '#fff' },
+      '&:hover fieldset': { borderColor: '#DBD515' },
+      '&.Mui-focused fieldset': { borderColor: '#DBD515' },
+    },
+  };
+
   return (
     <Box
       sx={{
         minHeight: '100vh',
         backgroundColor: '#0F0F0F',
-        pt: { xs: 6, sm: 10, md: 12 },
-        px: { xs: 2, sm: 3, md: 0 },
+        pt: 10,
+        px: 2,
       }}
     >
       <Box
@@ -134,7 +90,7 @@ export default function SelectClient() {
           textAlign: 'center',
           display: 'flex',
           flexDirection: 'column',
-          gap: { xs: 1.5, sm: 2 }, // espacio entre elementos
+          gap: 2,
         }}
       >
         <Typography
@@ -142,29 +98,29 @@ export default function SelectClient() {
           sx={{
             fontFamily: 'Keania One',
             color: '#DBD515',
-            fontSize: { xs: '1.8rem', sm: '2rem', md: '2.2rem' },
           }}
         >
           {service.name}
         </Typography>
 
-        <Typography sx={{ color: '#aaa', fontSize: 14 }}>
+        <Typography sx={{ color: '#aaa' }}>
           Confirmar cliente del turno
         </Typography>
 
-        <Divider sx={{ mb: 2, borderColor: '#444' }} />
+        <Divider sx={{ borderColor: '#444' }} />
 
         <Autocomplete
           options={clients}
           getOptionLabel={(option) =>
-            option.email ? `${option.name} (${option.email})` : option.name
+            option.email
+              ? `${option.name} (${option.email})`
+              : option.name
           }
           loading={searching}
           onInputChange={(_, value) => searchClients(value)}
           onChange={(_, value) => {
             setSelectedClient(value);
             if (value) {
-              setClientEmail(value.email);
               setGuestName(value.name);
             }
           }}
@@ -177,7 +133,9 @@ export default function SelectClient() {
                 ...params.InputProps,
                 endAdornment: (
                   <>
-                    {searching ? <CircularProgress size={18} /> : null}
+                    {searching ? (
+                      <CircularProgress size={18} />
+                    ) : null}
                     {params.InputProps.endAdornment}
                   </>
                 ),
@@ -186,7 +144,7 @@ export default function SelectClient() {
           )}
         />
 
-        <Typography sx={{ color: '#aaa', fontSize: { xs: 12, sm: 14 } }}>o</Typography>
+        <Typography sx={{ color: '#aaa' }}>o</Typography>
 
         <TextField
           fullWidth
@@ -195,14 +153,8 @@ export default function SelectClient() {
           onChange={(e) => setGuestName(e.target.value)}
           sx={whiteTextField}
         />
-        <Box
-          sx={{
-            mt: { xs: 2.5, sm: 4 },
-            display: 'flex',
-            gap: 2,
-            flexDirection: { xs: 'column', sm: 'row' },
-          }}
-        >
+
+        <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
           <Button
             fullWidth
             variant="outlined"
@@ -211,25 +163,26 @@ export default function SelectClient() {
               borderColor: '#555',
               fontWeight: 'bold',
             }}
-            onClick={() => navigate('/servicios')}>
-              Volver
+            onClick={() => navigate('/servicios')}
+          >
+            Volver
           </Button>
-      
+
           <Button
             fullWidth
             variant="contained"
             sx={{
-            backgroundColor: '#DBD515',
-            color: '#000',
-            fontWeight: 'bold',
+              backgroundColor: '#DBD515',
+              color: '#000',
+              fontWeight: 'bold',
             }}
-            disabled={submitting}
             onClick={() => setConfirmOpen(true)}
-            >
-              Continuar
-            </Button>
+          >
+            Continuar
+          </Button>
         </Box>
       </Box>
+
       {/* Confirmación */}
       <Dialog
         open={confirmOpen}
@@ -237,28 +190,36 @@ export default function SelectClient() {
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>
-          Confirmar turno
-        </DialogTitle>
+        <DialogTitle>Confirmar turno</DialogTitle>
 
         <DialogContent>
           <DialogContentText>
-            ¿Confirmar <strong>{service.name}</strong> para{" "}
-            <strong>{displayClientName}</strong> a las{" "}
+            ¿Confirmar <strong>{service.name}</strong> para{' '}
+            <strong>{displayClientName}</strong> a las{' '}
             <strong>{formattedTime}</strong>?
           </DialogContentText>
         </DialogContent>
 
         <DialogActions>
-          <Button
-            onClick={() => setConfirmOpen(false)}
-            color="inherit"
-          >
+          <Button onClick={() => setConfirmOpen(false)}>
             Cancelar
           </Button>
 
           <Button
-            onClick={handleSubmitBooking}
+            onClick={() => {
+              setConfirmOpen(false);
+
+              navigate('/add-service/payment', {
+                state: {
+                  service,
+                  clientEmail: selectedClient?.email || undefined,
+                  guestName:
+                    selectedClient?.email
+                      ? undefined
+                      : guestName,
+                },
+              });
+            }}
             variant="contained"
             sx={{
               backgroundColor: '#DBD515',
@@ -270,16 +231,6 @@ export default function SelectClient() {
           </Button>
         </DialogActions>
       </Dialog>
-      <Snackbar
-      open={snackbarOpen}
-      autoHideDuration={1500}
-      onClose={() => setSnackbarOpen(false)}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-    >
-      <Alert severity="success" sx={{ width: '100%' }}>
-        Turno confirmado correctamente
-      </Alert>
-    </Snackbar>      
     </Box>
-  ); 
+  );
 }

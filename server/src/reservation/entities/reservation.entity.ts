@@ -1,7 +1,8 @@
 import { Location } from "src/location/entities/location.entity";
+import { Payment } from "src/payment/entities/payment.entity";
 import { Service } from "src/services/entities/service.entity";
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 export enum ReservationStatus {
   PENDING = 'pending',        // creado, sin confirmar
@@ -52,5 +53,8 @@ export class Reservation {
 
     @Column({ nullable: true })
     guestName?: string;
+    
+    @OneToOne(() => Payment, (payment) => payment.reservation)
+    payment: Payment;
 
 }

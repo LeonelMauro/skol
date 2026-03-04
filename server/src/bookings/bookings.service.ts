@@ -718,8 +718,8 @@ async createDirect(dto: CreateDirectBookingDto) {
     time: dto.time,
     client: client ?? undefined,
     guestName: client ? undefined : dto.guestName,
-    status: ReservationStatus.COMPLETED,
-    completedAt: new Date(),
+    status: ReservationStatus.CONFIRMED,
+    
   });
 
   return this.reservationRepository.save(reservation);
