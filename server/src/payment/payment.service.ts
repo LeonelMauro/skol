@@ -10,6 +10,7 @@ import { Location } from 'src/location/entities/location.entity';
 import { Commission } from 'src/commission/entities/commission.entity';
 import { DataSource } from 'typeorm';
 import { ReservationStatus } from 'src/reservation/entities/reservation.entity';
+import { Between } from 'typeorm';
 
 @Injectable()
 export class PaymentService {
@@ -93,19 +94,48 @@ export class PaymentService {
     };
   }
 
-  findAll() {
-    return `This action returns all payment`;
-  }
+  async getBarberTodayMetrics(barberId: number) {
 
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
-  }
+  const today = new Date();
 
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
-  }
+  const start = new Date();
+  start.setHours(0,0,0,0);
 
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
-  }
+  const end = new Date();
+  end.setHours(23,59,59,999);
+
+ 
+  const payments = await this.paymentRepo.find({
+    where: {
+      barber: { id: barberId },
+      paidAt: Between(start, end),
+      
+    }
+  });
+
+  let cash = 0;
+  let mp = 0;
+  let total = 0;
+
+  payments.forEach(p => {
+
+    total += Number(p.barberEarning);
+
+    if(p.method === 'cash'){
+      cash += Number(p.barberEarning);
+    }
+
+    if(p.method === 'mercado_pago'){
+      mp += Number(p.barberEarning);
+    }
+
+  });
+
+  return {
+    servicesDone: payments.length,
+    totalEarned: total,
+    cash,
+    mercadoPago: mp
+  };
+}
 }

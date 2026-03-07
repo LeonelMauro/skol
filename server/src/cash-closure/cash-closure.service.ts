@@ -38,7 +38,7 @@ export class CashClosureService {
         date: dto.date,
       }
     })
-    if(!existing){
+    if(existing){
       throw new BadRequestException('Ya existe un cierre para esa fecha')
     }
 
@@ -86,8 +86,8 @@ export class CashClosureService {
       },
       relations: ['location']
     })
-    if(closure){
-      throw new BadRequestException('No existe cierre para esa fecha')
+    if(!closure){
+      throw new NotFoundException('No existe cierre para esa fecha')
     }
     return closure;
   }
@@ -99,6 +99,35 @@ export class CashClosureService {
       order: { date: 'DESC' },
     });
   }
+
+  async findBarberHistory(
+    barberId: number,
+    from?: string,
+    to?: string,
+  ) {
+    const where: any = {
+      barber: { id: barberId },
+    };
+
+    if (from && to) {
+      where.paidAt = Between(
+        new Date(`${from}T00:00:00`),
+        new Date(`${to}T23:59:59`),
+      );
+    }
+
+    return await this.paymentRepo.find({
+      where,
+      relations: [
+        'reservation',
+        'reservation.service',
+        'reservation.client',
+        'location',
+      ],
+      order: { paidAt: 'DESC' },
+    });
+  }
+  
 
   
   remove(id: number) {

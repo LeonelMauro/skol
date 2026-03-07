@@ -27,10 +27,16 @@ import type { TodayBooking } from '../../types/booking';
 import Metric from './Metric';
 
 
+type BarberMetrics = {
+  servicesDone: number;
+  totalEarned: number;
+  cash: number;
+  mercadoPago: number;
+};
 
 export default function BarberHistoryPanel() {
   const { user } = useAuth();
-
+  const [metricsToday, setMetricsToday] = useState<BarberMetrics | null>(null);
   const [history, setHistory] = useState<TodayBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week');
@@ -62,6 +68,19 @@ useEffect(() => {
   return new Date(year, month - 1, day);
 };
 
+  useEffect(() => {
+  if (!user?.access_token) return;
+
+  api
+    .get('/payment/barber/today', {
+      headers: {
+        Authorization: `Bearer ${user.access_token}`,
+      },
+    })
+    .then(res => setMetricsToday(res.data))
+    .catch(() => setMetricsToday(null));
+
+}, [user?.access_token]);
 
 
   const filteredHistory = history.filter(r => {
@@ -190,11 +209,6 @@ const chartData =
 
 
 
-  const periodRevenue = filteredHistory
-  .filter(r => r.status === 'completed')
-  .reduce((acc, r) => acc + r.service.price, 0);
-
-
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#0F0F0F', p: 2 }}>
@@ -256,9 +270,22 @@ const chartData =
         <Metric label="Atendidos" value={metrics.completed} color="success.main" />
         <Metric label="Cancelados" value={metrics.canceled} color="error.main" />
         <Metric
-          label={`💰 ${period === 'day' ? 'Hoy' : period === 'week' ? 'Semana' : 'Mes'}`}
-          value={formatCurrency(periodRevenue)}
+          label="💰 Ganado hoy"
+          value={formatCurrency(metricsToday?.totalEarned ?? 0)}
           color="info.main"
+        />
+        <Metric
+          label="💵 Efectivo"
+          value={formatCurrency(metricsToday?.cash ?? 0)}
+        />
+
+        <Metric
+          label="📱 Mercado Pago"
+          value={formatCurrency(metricsToday?.mercadoPago ?? 0)}
+        />
+        <Metric
+          label="Servicios hoy"
+          value={metricsToday?.servicesDone ?? 0}
         />
 
       </Box>
