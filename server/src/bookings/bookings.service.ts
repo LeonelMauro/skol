@@ -691,7 +691,7 @@ getBarberHistory(barberId: number) {
       barber: { id: barberId },
       status: In(['completed', 'canceled', 'no_show']),
     },
-    relations: ['client', 'service', 'location'],
+    relations: ['client', 'service', 'location', 'payment'],
     order: { date: 'DESC', time: 'DESC' },
   });
 }

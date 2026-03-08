@@ -27,19 +27,12 @@ import type { TodayBooking } from '../../types/booking';
 import Metric from './Metric';
 
 
-type BarberMetrics = {
-  servicesDone: number;
-  totalEarned: number;
-  cash: number;
-  mercadoPago: number;
-};
-
 export default function BarberHistoryPanel() {
   const { user } = useAuth();
-  const [metricsToday, setMetricsToday] = useState<BarberMetrics | null>(null);
   const [history, setHistory] = useState<TodayBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week');
+  const [showHistory, setShowHistory] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<number>(
   new Date().getMonth()
 );
@@ -68,19 +61,7 @@ useEffect(() => {
   return new Date(year, month - 1, day);
 };
 
-  useEffect(() => {
-  if (!user?.access_token) return;
-
-  api
-    .get('/payment/barber/today', {
-      headers: {
-        Authorization: `Bearer ${user.access_token}`,
-      },
-    })
-    .then(res => setMetricsToday(res.data))
-    .catch(() => setMetricsToday(null));
-
-}, [user?.access_token]);
+  
 
 
   const filteredHistory = history.filter(r => {
@@ -128,6 +109,37 @@ useEffect(() => {
   completed: filteredHistory.filter(r => r.status === 'completed').length,
   canceled: filteredHistory.filter(r => r.status === 'canceled').length,
 };
+
+const revenueMetrics = filteredHistory
+  .filter(r => r.status === 'completed')
+  .reduce(
+    (acc, r) => {
+
+      const earning = Number(r.payment?.barberEarning ?? 0);
+
+      acc.total += earning;
+
+      if (r.payment?.method === 'cash') {
+        acc.cash += earning;
+      }
+
+      if (r.payment?.method === 'mercado_pago') {
+        acc.mercadoPago += earning;
+      }
+
+      acc.servicesDone++;
+
+      return acc;
+
+    },
+    {
+      total: 0,
+      cash: 0,
+      mercadoPago: 0,
+      servicesDone: 0,
+    }
+  );
+
 
 const statusData = [
   { name: 'Atendidos', value: metrics.completed },
@@ -213,7 +225,17 @@ const chartData =
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#0F0F0F', p: 2 }}>
 
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => setShowHistory(prev => !prev)}
+        sx={{ color: '#fff', borderColor: '#333' }}
+      >
+        {showHistory ? 'Ocultar historial' : 'Mostrar historial'}
+      </Button>
+
       {/* Historial */}
+      {showHistory && (
       <Stack spacing={2} alignItems="center">
         {filteredHistory.map(r => (
           <Card
@@ -236,6 +258,7 @@ const chartData =
               <Typography sx={{ color: '#777', fontSize: 12 }}>
                 Estado: {r.status}
               </Typography>
+
               <Typography sx={{ color: '#777', fontSize: 12 }}>
                 Fecha: {r.date}
               </Typography>
@@ -243,6 +266,7 @@ const chartData =
           </Card>
         ))}
       </Stack>
+      )}
       <Typography
         sx={{
           textAlign: 'center',
@@ -270,22 +294,22 @@ const chartData =
         <Metric label="Atendidos" value={metrics.completed} color="success.main" />
         <Metric label="Cancelados" value={metrics.canceled} color="error.main" />
         <Metric
-          label="💰 Ganado hoy"
-          value={formatCurrency(metricsToday?.totalEarned ?? 0)}
+          label="💰 Ganancias"
+          value={formatCurrency(revenueMetrics.total)}
           color="info.main"
         />
         <Metric
           label="💵 Efectivo"
-          value={formatCurrency(metricsToday?.cash ?? 0)}
+          value={formatCurrency(revenueMetrics.cash)}
         />
 
         <Metric
           label="📱 Mercado Pago"
-          value={formatCurrency(metricsToday?.mercadoPago ?? 0)}
+          value={formatCurrency(revenueMetrics.mercadoPago)}
         />
         <Metric
           label="Servicios hoy"
-          value={metricsToday?.servicesDone ?? 0}
+          value={revenueMetrics.servicesDone}
         />
 
       </Box>
