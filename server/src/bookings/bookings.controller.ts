@@ -4,6 +4,8 @@ import { CreateBookingDto } from './dto/create-booking';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateDirectBookingDto } from './dto/createDirect-booking.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 
 @Controller('bookings')
@@ -84,9 +86,15 @@ export class BookingsController {
   }
   @UseGuards(JwtAuthGuard)
   @Get('barber/history')
-  getBarberHistory(@Req() req) {
+  getMyBarberHistory(@Req() req) {
     return this.bookingsService.getBarberHistory(req.user.sub);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('barber/:id/history')
+  getBarberHistory(@Param('id') id: number) {
+    return this.bookingsService.getBarberHistory(id);
+}
 
 }

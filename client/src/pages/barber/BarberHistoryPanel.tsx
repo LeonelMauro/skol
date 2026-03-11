@@ -66,12 +66,7 @@ useEffect(() => {
 
   const filteredHistory = history.filter(r => {
   const date = parseLocalDate(r.date);;
- 
- console.log({
-  backend: r.date,
-  parsed: new Date(r.date),
-  now,
-});
+
 
  if (period === 'day') {
 

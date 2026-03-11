@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, Query } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
@@ -20,5 +20,12 @@ export class PaymentController {
   @Get('barber/today')
   getToday(@Req() req){
     return this.paymentService.getBarberTodayMetrics(req.user.sub);
+  }
+  @Get('barber/:id/metrics')
+  getMetrics(
+    @Param('id') id: number,
+    @Query('period') period: 'day' | 'week' | 'month' = 'day'
+  ) {
+    return this.paymentService.getBarberMetrics(id, period);
   }
 }

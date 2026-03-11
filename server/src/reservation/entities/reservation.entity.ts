@@ -54,7 +54,7 @@ export class Reservation {
     @Column({ nullable: true })
     guestName?: string;
     
-    @OneToOne(() => Payment, (payment) => payment.reservation)
-    payment: Payment;
+    @OneToOne(() => Payment, (payment) => payment.reservation, { nullable: true })
+    payment?: Payment;
 
 }

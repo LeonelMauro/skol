@@ -26,6 +26,7 @@ import AddService from '../pages/barber/AddService';
 import SelectClient from '../pages/barber/SelectClient';
 import BarberAgendaStructurePage from '../pages/barber/BarberAgendaStructurePage';
 import PaymentStep from '../pages/barber/PaymentStep';
+import RepostsHIstory from '../pages/admin/Reposts';
 
 export default function AppRouter() {
   return (
@@ -196,6 +197,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute roles={['admin']}>
                 <BarberAvailability />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reportes"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <RepostsHIstory />
               </ProtectedRoute>
             }
           />

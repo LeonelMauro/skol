@@ -93,7 +93,39 @@ export class PaymentService {
       paymentId: payment.id,
     };
   }
+  private getDateRange(period: 'day' | 'week' | 'month') {
+  const now = new Date();
 
+  let start = new Date();
+  let end = new Date();
+
+  if (period === 'day') {
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+  }
+
+  if (period === 'week') {
+    const day = now.getDay(); 
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+
+    start = new Date(now);
+    start.setDate(diff);
+    start.setHours(0, 0, 0, 0);
+
+    end = new Date();
+    end.setHours(23, 59, 59, 999);
+  }
+
+  if (period === 'month') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    start.setHours(0, 0, 0, 0);
+
+    end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    end.setHours(23, 59, 59, 999);
+  }
+
+  return { start, end };
+}
   async getBarberTodayMetrics(barberId: number) {
 
   const today = new Date();
@@ -110,7 +142,8 @@ export class PaymentService {
       barber: { id: barberId },
       paidAt: Between(start, end),
       
-    }
+    },
+    relations: ['reservation','service']
   });
 
   let cash = 0;
@@ -136,6 +169,57 @@ export class PaymentService {
     totalEarned: total,
     cash,
     mercadoPago: mp
+  };
+}
+async getBarberMetrics(barberId: number, period: 'day' | 'week' | 'month') {
+
+  const { start, end } = this.getDateRange(period);
+
+  const payments = await this.paymentRepo.find({
+    where: {
+      barber: { id: barberId },
+      paidAt: Between(start, end),
+    },
+  });
+
+  let barberTotal = 0;
+  let shopTotal = 0;
+  let cash = 0;
+  let mercadoPago = 0;
+
+  payments.forEach(p => {
+    barberTotal += Number(p.barberEarning);
+    shopTotal += Number(p.shopEarning);
+
+    if (p.method === 'cash') cash += Number(p.barberEarning);
+    if (p.method === 'mercado_pago') mercadoPago += Number(p.barberEarning);
+  });
+
+  return {
+    services: payments.length,
+    barberTotal,
+    shopTotal,
+    totalGenerated: barberTotal + shopTotal,
+    cash,
+    mercadoPago
+  };
+}
+async getShopMetrics() {
+  const payments = await this.paymentRepo.find();
+
+  let barberTotal = 0;
+  let shopTotal = 0;
+
+  payments.forEach(p => {
+    barberTotal += Number(p.barberEarning);
+    shopTotal += Number(p.shopEarning);
+  });
+
+  return {
+    barberPaid: barberTotal,
+    shopRevenue: shopTotal,
+    totalRevenue: barberTotal + shopTotal,
+    services: payments.length
   };
 }
 }
