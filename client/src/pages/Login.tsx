@@ -41,6 +41,7 @@ export default function Login() {
       name: payload.name,
       role: payload.role,
       location: payload.location,
+      avatar: payload.avatar,
       access_token,
     });
 

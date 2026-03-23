@@ -343,9 +343,12 @@ const totalDay = filteredHistory.reduce(
             fontWeight:600
           }}
         >
-          Total del mes: $
-          {totalDay.toLocaleString("es-AR")}
+          Total del mes: $ 
+          {totalDay.toLocaleString("es-AR")} ; 
+          Total del local: $
+          {data.shopTotal}
         </Typography>
+        
       )}
 
       {/* HISTORIAL */}

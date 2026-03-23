@@ -135,51 +135,20 @@ export default function HomePublic() {
                 },
                 textTransform: 'uppercase',
                 lineHeight: 1,
-                textShadow: '0 2px 8px rgba(0,0,0,0.7)', // mobile default
-
-                [theme.breakpoints.up('md')]: {
-                  textShadow: `
-                    -2px -2px 0 rgba(0,0,0,0.2),
-                    2px -2px 0 rgba(0,0,0,0.2),
-                    -2px  2px 0 rgba(0,0,0,0.2),
-                    2px  2px 0 rgba(0,0,0,0.2),
-                    -6px -6px 0 rgba(0,0,0,1),
-                    6px -6px 0 rgba(0,0,0,1),
-                    -6px  6px 0 rgba(0,0,0,1),
-                    6px  6px 0 rgba(0,0,0,1)
-                  `,
-                },
+               textShadow: `
+  -2px -2px 0 rgba(0,0,0,0.2),
+  2px -2px 0 rgba(0,0,0,0.2),
+  -2px  2px 0 rgba(0,0,0,0.2),
+  2px  2px 0 rgba(0,0,0,0.2),
+  -6px -6px 0 rgba(0,0,0,1),
+  6px -6px 0 rgba(0,0,0,1),
+  -6px  6px 0 rgba(0,0,0,1),
+  6px  6px 0 rgba(0,0,0,1)
+`,
               })}
             >
               SKOL
             </Typography>
-            <Typography
-              sx={(theme) => ({
-                fontFamily: 'Keania One',
-                fontSize: {
-                  xs: '1.1rem',
-                  sm: '1.6rem',
-                  md: '2.2rem',
-                },
-                color: '#DBD515',
-                letterSpacing: {
-                  xs: '2px',
-                  md: '4px',
-                },
-                textTransform: 'uppercase',
-                mt: { xs: 0.5, md: -1 },
-                textShadow: '0 1px 4px rgba(0,0,0,0.6)',
-
-                [theme.breakpoints.up('md')]: {
-                  textShadow: 'none',
-                },
-              })}
-            >
-              SALÓN DE CABALLEROS
-            </Typography>
-
-
-
             <Button
               variant="contained"
               href="/login"

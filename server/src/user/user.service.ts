@@ -11,6 +11,8 @@ import { CreateClientDto } from './dto/create-client.dto';
 import { ILike } from 'typeorm';
 import { CreateBarberDto } from './dto/create-barber.dto';
 import { Location } from 'src/location/entities/location.entity';
+import * as fs from 'fs';
+import { join } from 'path';
 
 
 
@@ -291,6 +293,31 @@ async findAllClient(q?: string) {
   });
 }
 
+async updateAvatar(userId: number, file: Express.Multer.File) {
+  const user = await this.userRepository.findOne({
+    where: { id: userId },
+  });
 
+  if (!user) {
+    throw new NotFoundException('Usuario no encontrado');
+  }
+
+  // borrar avatar anterior
+  if (user.avatar) {
+    const oldPath = join(process.cwd(), user.avatar);
+
+    if (fs.existsSync(oldPath) && oldPath !== file.path) {
+      fs.unlinkSync(oldPath);
+    }
+  }
+
+  user.avatar = `/uploads/avatars/${file.filename}`;
+
+  await this.userRepository.save(user);
+
+  return {
+    avatar: user.avatar,
+  };
+}
 
 }

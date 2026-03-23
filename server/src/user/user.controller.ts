@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,6 +21,21 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateClientDto } from './dto/create-client.dto';
 import { CreateBarberDto } from './dto/create-barber.dto';
 import { UpdateBarberLocationDto } from './dto/update-barber-location.dto';
+import { UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname , join} from 'path';
+import { Request } from 'express';
+import * as fs from 'fs';
+
+interface AuthRequest extends Request {
+  user: {
+    id: number;
+    email: string;
+    role: string;
+    avatar: string
+  };
+}
 
 @Controller('user')
 export class UserController {
@@ -63,8 +79,8 @@ export class UserController {
   // Perfil del usuario autenticado
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Req() req) {
-    return req.user;
+  getProfile(@Req() req: AuthRequest) {
+    return this.userService.findOne(req.user.id);
   }
 
   // Crear usuario — solo admin
@@ -128,6 +144,67 @@ export class UserController {
   }
   
 
-  
-  
+  @Post('avatar')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin', 'barber', 'client')
+@UseInterceptors(
+  FileInterceptor('file', {
+    storage: diskStorage({
+
+      destination: (req, file, callback) => {
+        const uploadPath = join(process.cwd(), 'uploads', 'avatars');
+
+        // crear carpeta si no existe
+        if (!fs.existsSync(uploadPath)) {
+          fs.mkdirSync(uploadPath, { recursive: true });
+        }
+
+        callback(null, uploadPath);
+      },
+
+      filename: (req, file, callback) => {
+        const request = req as AuthRequest;
+
+        const extension = extname(file.originalname);
+
+        const filename = `user_${request.user.id}${extension}`;
+
+        callback(null, filename);
+      },
+
+    }),
+
+    limits: {
+      fileSize: 2 * 1024 * 1024, // 2MB
+    },
+
+    fileFilter: (req, file, callback) => {
+      const allowedTypes = /jpg|jpeg|png/;
+
+      const ext = allowedTypes.test(extname(file.originalname).toLowerCase());
+      const mime = allowedTypes.test(file.mimetype);
+
+      if (ext && mime) {
+        callback(null, true);
+      } else {
+        callback(
+          new BadRequestException('Solo se permiten imágenes JPG o PNG'),
+          false,
+        );
+      }
+    },
+
+  }),
+)
+uploadAvatar(
+  @Req() req: AuthRequest,
+  @UploadedFile() file: Express.Multer.File,
+) {
+  console.log('FILE:', file);
+  if (!file) {
+    throw new BadRequestException('No se envió ninguna imagen');
+  }
+
+  return this.userService.updateAvatar(req.user.id, file);
+}
 }

@@ -27,6 +27,7 @@ import SelectClient from '../pages/barber/SelectClient';
 import BarberAgendaStructurePage from '../pages/barber/BarberAgendaStructurePage';
 import PaymentStep from '../pages/barber/PaymentStep';
 import RepostsHIstory from '../pages/admin/Reposts';
+import Profile from '../pages/Profile';
 
 export default function AppRouter() {
   return (
@@ -39,6 +40,12 @@ export default function AppRouter() {
           {/* AUTH */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/perfil" element={
+              <ProtectedRoute roles={['client', 'barber', 'admin']}>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
 
           {/* CLIENT */}
           <Route

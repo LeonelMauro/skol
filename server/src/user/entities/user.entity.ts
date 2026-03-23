@@ -32,6 +32,9 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ nullable: true })
+  avatar: string;
+
   // Reservas hechas por el cliente
   @OneToMany(() => Reservation, (reservation) => reservation.client)
   reservationsAsClient: Reservation[];
