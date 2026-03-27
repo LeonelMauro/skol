@@ -9,7 +9,7 @@ export interface AuthUser {
   role: UserRole;
   location?: Location | null;
   access_token?: string;
-  avatar?:string;
+  avatar?: string | null
 }
 
 

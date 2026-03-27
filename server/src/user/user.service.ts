@@ -319,5 +319,32 @@ async updateAvatar(userId: number, file: Express.Multer.File) {
     avatar: user.avatar,
   };
 }
+async deleteAvatar(userId: number) {
+
+  const user = await this.userRepository.findOne({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new NotFoundException('Usuario no encontrado');
+  }
+
+  if (user.avatar) {
+
+    const filePath = join(process.cwd(), 'uploads', 'avatars', user.avatar);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    user.avatar = null;
+    await this.userRepository.save(user);
+  }
+
+  return {
+    message: 'Avatar eliminado correctamente',
+    avatar: null,
+  };
+}
 
 }

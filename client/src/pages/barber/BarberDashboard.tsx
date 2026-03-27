@@ -4,6 +4,7 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  Avatar,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -46,7 +47,10 @@ export default function DashboardBarber() {
     path: '/servicios',
   },
   ];
-
+  const avatarUrl =
+  user?.avatar
+    ? `${import.meta.env.VITE_API_URL}${user.avatar}?t=${Date.now()}`
+    : undefined;
   return (
     <Box
       sx={{
@@ -57,6 +61,23 @@ export default function DashboardBarber() {
         textAlign: 'center',
       }}
     >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          mb: 2,
+        }}
+      >
+        <Avatar
+          src={avatarUrl}
+          alt={user?.name}
+          sx={{
+            width: 80,
+            height: 80,
+            border: '3px solid #DBD515',
+          }}
+        />
+      </Box>
       <Typography
         variant="h4"
         sx={{

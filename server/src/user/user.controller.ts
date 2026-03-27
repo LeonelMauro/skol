@@ -133,78 +133,87 @@ export class UserController {
   ) {
     return this.userService.updateBarberLocation(id, dto.locationId);
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin', 'barber', 'client')
+@Delete('delete-avatar')
+async deleteAvatar(@Req() req: AuthRequest) {
+  return this.userService.deleteAvatar(req.user.id);
+}
 
   // Eliminar usuario — solo admin
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
+    console.log("REMOVE USER");
     return this.userService.remove(+id);
   }
   
 
   @Post('avatar')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin', 'barber', 'client')
-@UseInterceptors(
-  FileInterceptor('file', {
-    storage: diskStorage({
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'barber', 'client')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
 
-      destination: (req, file, callback) => {
-        const uploadPath = join(process.cwd(), 'uploads', 'avatars');
+        destination: (req, file, callback) => {
+          const uploadPath = join(process.cwd(), 'uploads', 'avatars');
 
-        // crear carpeta si no existe
-        if (!fs.existsSync(uploadPath)) {
-          fs.mkdirSync(uploadPath, { recursive: true });
-        }
+          // crear carpeta si no existe
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+          }
 
-        callback(null, uploadPath);
+          callback(null, uploadPath);
+        },
+
+        filename: (req, file, callback) => {
+          const request = req as AuthRequest;
+
+          const extension = extname(file.originalname);
+
+          const filename = `user_${request.user.id}${extension}`;
+
+          callback(null, filename);
+        },
+
+      }),
+
+      limits: {
+        fileSize: 2 * 1024 * 1024, // 2MB
       },
 
-      filename: (req, file, callback) => {
-        const request = req as AuthRequest;
+      fileFilter: (req, file, callback) => {
+        const allowedTypes = /jpg|jpeg|png/;
 
-        const extension = extname(file.originalname);
+        const ext = allowedTypes.test(extname(file.originalname).toLowerCase());
+        const mime = allowedTypes.test(file.mimetype);
 
-        const filename = `user_${request.user.id}${extension}`;
-
-        callback(null, filename);
+        if (ext && mime) {
+          callback(null, true);
+        } else {
+          callback(
+            new BadRequestException('Solo se permiten imágenes JPG o PNG'),
+            false,
+          );
+        }
       },
 
     }),
+  )
+  uploadAvatar(
+    @Req() req: AuthRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    console.log('FILE:', file);
+    if (!file) {
+      throw new BadRequestException('No se envió ninguna imagen');
+    }
 
-    limits: {
-      fileSize: 2 * 1024 * 1024, // 2MB
-    },
-
-    fileFilter: (req, file, callback) => {
-      const allowedTypes = /jpg|jpeg|png/;
-
-      const ext = allowedTypes.test(extname(file.originalname).toLowerCase());
-      const mime = allowedTypes.test(file.mimetype);
-
-      if (ext && mime) {
-        callback(null, true);
-      } else {
-        callback(
-          new BadRequestException('Solo se permiten imágenes JPG o PNG'),
-          false,
-        );
-      }
-    },
-
-  }),
-)
-uploadAvatar(
-  @Req() req: AuthRequest,
-  @UploadedFile() file: Express.Multer.File,
-) {
-  console.log('FILE:', file);
-  if (!file) {
-    throw new BadRequestException('No se envió ninguna imagen');
+    return this.userService.updateAvatar(req.user.id, file);
   }
+   
 
-  return this.userService.updateAvatar(req.user.id, file);
-}
+ 
 }

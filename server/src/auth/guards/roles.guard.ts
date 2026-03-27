@@ -12,6 +12,7 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+
     const requiredRoles = this.reflector.getAllAndOverride<string[]>(
       ROLES_KEY,
       [
@@ -20,18 +21,26 @@ export class RolesGuard implements CanActivate {
       ],
     );
 
-    if (!requiredRoles) return true; // No requiere roles
+    // Si la ruta no requiere roles → permitir
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
+    }
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (!user)
-      throw new ForbiddenException('No autorizado: usuario no encontrado');
+    
 
-    // Si alguno de los roles coincide, permitir
-    const hasRole = requiredRoles.some((role) => user.role === role);
+    if (!user) {
+      throw new ForbiddenException('Usuario no autenticado');
+    }
+
+    const userRole = user.role;
+
+    const hasRole = requiredRoles.includes(userRole);
 
     if (!hasRole) {
+      console.log('ROL DEL USUARIO:', userRole);
       throw new ForbiddenException('No tienes permisos suficientes');
     }
 

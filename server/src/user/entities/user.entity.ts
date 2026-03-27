@@ -32,8 +32,11 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ nullable: true })
-  avatar: string;
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  avatar: string | null;
 
   // Reservas hechas por el cliente
   @OneToMany(() => Reservation, (reservation) => reservation.client)

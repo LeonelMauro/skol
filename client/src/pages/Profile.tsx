@@ -1,88 +1,129 @@
-import {  useEffect, useState } from 'react';
-import { Box, Typography, Button, Avatar } from '@mui/material';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import { useEffect, useState } from "react";
+import { Box, Typography, Button } from "@mui/material";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
+import AvatarCompress from "./Avatarcompress";
 
 export default function Profile() {
-  const { user ,setUser} = useAuth();
 
+  const { user, setUser } = useAuth();
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const token = localStorage.getItem('token');
 
-  const handleSelectImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (!selected) return;
+  const token = localStorage.getItem("token");
 
-    setFile(selected);
-    setPreview(URL.createObjectURL(selected));
-  };
-  
   const avatarUrl =
-    user?.avatar
-      ? `${import.meta.env.VITE_API_URL}${user.avatar}`
-      : undefined;
-  
+  user?.avatar
+    ? `${import.meta.env.VITE_API_URL}${user.avatar}?t=${Date.now()}`
+    : undefined;
+    
+  const handleSelectFile = (file: File) => {
+    setFile(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
   const uploadAvatar = async () => {
-      if (!file) return;
+    if (!file) return;
 
-      const formData = new FormData();
-      formData.append('file', file);
+    const formData = new FormData();
+    formData.append("file", file);
 
+    try {
+      const res = await api.post("/user/avatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const updatedUser = {
+        ...user!,
+        avatar: res.data.avatar,
+      };
+
+      setUser(updatedUser);
+
+      setFile(null);
+      setPreview(null);
+
+      alert("Avatar actualizado");
+
+    } catch (error) {
+      console.error(error);
+      alert("Error subiendo imagen");
+    }
+  };
+
+  const handleViewAvatar = () => {
+    if (!avatarUrl) return;
+
+    window.open(avatarUrl, "_blank");
+  };
+
+  const handleDeleteAvatar = async () => {
+
+    if (!user?.avatar) return;
+
+    try {
+        await api.delete('/user/delete-avatar', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setPreview(null);
+      setFile(null);
+
+      setUser({
+        ...user,
+        avatar: null,
+      });
+
+      alert('Avatar eliminado');
+
+    } catch (error) {
+      console.error(error);
+      alert('Error eliminando avatar');
+    }
+  };
+  useEffect(() => {
+
+    if (!token) return;
+
+    const loadProfile = async () => {
       try {
-        const res = await api.post('/user/avatar', formData, {
+
+        const res = await api.get("/user/profile", {
           headers: {
-            'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
           },
         });
 
-        const updatedUser = {
-          ...user!,
-          avatar: res.data.avatar,
-        };
+        setUser(res.data);
 
-        setUser(updatedUser);
-
-        alert('Avatar actualizado');
-      } catch (error) {
-        console.error(error);
-        alert('Error subiendo imagen');
+      } catch (err) {
+        console.error(err);
       }
     };
-    useEffect(() => {
-        if (!token) return;
 
-        const loadProfile = async () => {
-          try {
-            const res = await api.get('/user/profile', {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
+    loadProfile();
 
-            setUser(res.data);
+  }, [token]);
 
-          } catch (err) {
-            console.error(err);
-          }
-        };
-
-        loadProfile();
-      }, [token]);
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        backgroundColor: '#0F0F0F',
+        minHeight: "100vh",
+        backgroundColor: "#0F0F0F",
         pt: 10,
-        textAlign: 'center',
+        textAlign: "center",
       }}
     >
+
       <Typography
         sx={{
-          fontFamily: 'Keania One',
-          color: '#DBD515',
+          fontFamily: "Keania One",
+          color: "#DBD515",
           mb: 4,
           fontSize: 30,
         }}
@@ -90,55 +131,32 @@ export default function Profile() {
         Mi Perfil
       </Typography>
 
-     <Avatar
-      src={preview || avatarUrl}
-      sx={{
-        width: 140,
-        height: 140,
-        margin: '0 auto',
-        mb: 3,
-        border: '3px solid #DBD515',
-      }}
+      <AvatarCompress
+      avatarUrl={preview || avatarUrl}
+      onSelectFile={handleSelectFile}
+      onDelete={handleDeleteAvatar}
+      onView={handleViewAvatar}
     />
 
-      <Typography sx={{ color: '#fff', mb: 1 }}>
+      <Typography sx={{ color: "#fff", mb: 1 }}>
         {user?.name}
       </Typography>
 
-      <Typography sx={{ color: '#aaa', mb: 4 }}>
+      <Typography sx={{ color: "#aaa", mb: 4 }}>
         {user?.email}
       </Typography>
 
       <Button
-        variant="contained"
-        component="label"
+        variant="outlined"
+        onClick={uploadAvatar}
         sx={{
-          backgroundColor: '#DBD515',
-          color: '#000',
-          mb: 2,
+          borderColor: "#DBD515",
+          color: "#DBD515",
         }}
       >
-        Seleccionar imagen
-        <input
-          type="file"
-          hidden
-          accept="image/png, image/jpeg"
-          onChange={handleSelectImage}
-        />
+        Subir foto
       </Button>
 
-      <Box>
-        <Button
-          variant="outlined"
-          onClick={uploadAvatar}
-          sx={{
-            borderColor: '#DBD515',
-            color: '#DBD515',
-          }}
-        >
-          Subir foto
-        </Button>
-      </Box>
     </Box>
   );
 }

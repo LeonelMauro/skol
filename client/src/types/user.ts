@@ -35,6 +35,7 @@ export interface Barber {
   isActive: boolean;
   location?: Location | null;
   availabilities: BarberAvailability[];
+  avatar?: string | null;
 }
 
 export interface CreateBarberPayload {

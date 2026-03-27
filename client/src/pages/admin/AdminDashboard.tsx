@@ -7,7 +7,8 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-
+import { Avatar } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
 import PeopleIcon from '@mui/icons-material/People';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
 import StoreIcon from '@mui/icons-material/Store';
@@ -26,8 +27,13 @@ export default function DashboardAdmin() {
     { label: 'Locales', icon: <StoreIcon />, path: '/admin/locales' },
     { label: 'Reservas', icon: <EventAvailableIcon />, path: '/admin/reservas' },
     { label: 'Reportes', icon: <BarChartIcon />, path: '/admin/reportes' },
+    {label: 'Mi perfil',icon: <PersonIcon />,path: '/perfil',
+        },
   ];
-
+  const avatarUrl =
+  user?.avatar
+    ? `${import.meta.env.VITE_API_URL}${user.avatar}?t=${Date.now()}`
+    : undefined;
   return (
     <Box
       sx={{
@@ -38,6 +44,23 @@ export default function DashboardAdmin() {
         textAlign: 'center',
       }}
     >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          mb: 2,
+        }}
+      >
+        <Avatar
+          src={avatarUrl}
+          alt={user?.name}
+          sx={{
+            width: 80,
+            height: 80,
+            border: '3px solid #DBD515',
+          }}
+        />
+      </Box>
       <Typography
         variant="h4"
         sx={{

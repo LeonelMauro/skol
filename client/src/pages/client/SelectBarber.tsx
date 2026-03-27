@@ -70,6 +70,7 @@ export default function SelectBarber() {
 });
 
   };
+ 
 
   return (
     <Box
@@ -126,63 +127,66 @@ export default function SelectBarber() {
 
             {/* BARBEROS */}
             {barbers.map(barber => {
+
               const selected =
                 selectedBarber?.mode === 'specific' &&
                 selectedBarber.barber.id === barber.id;
 
+              const avatarUrl = barber.avatar
+                ? `${import.meta.env.VITE_API_URL}${barber.avatar}`
+                : undefined;
+
               return (
-                  <Card
-                    onClick={() =>
-                      setSelectedBarber({
-                        mode: 'specific',
-                        barber,
-                      })
-                    }
-                    sx={{
-                    width: '100%',
-                    maxWidth: 320,
+                <Box
+                  key={barber.id}
+                  onClick={() =>
+                    setSelectedBarber({
+                      mode: 'specific',
+                      barber,
+                    })
+                  }
+                  sx={{
                     cursor: 'pointer',
-                    backgroundColor: '#000',
+                    textAlign: 'center',
+                    p: 2,
                     borderRadius: 3,
+                    transition: '0.3s',
                     border: selected
                       ? '2px solid #DBD515'
                       : '1px solid #333',
-                    transition: '0.35s ease',
 
                     '&:hover': {
-                      transform: 'translateY(-6px)',
-                      boxShadow: selected
-                        ? '0 0 20px rgba(219,213,21,0.4)'
-                        : '0 12px 30px rgba(0,0,0,0.6)',
+                      transform: 'translateY(-5px)',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.6)',
                     },
                   }}
+                >
+                  <Avatar
+                    src={avatarUrl}
+                    alt={barber.name}
+                    sx={{
+                      width: 90,
+                      height: 90,
+                      mx: 'auto',
+                      mb: 1.5,
+                      border: selected
+                        ? '3px solid #DBD515'
+                        : '2px solid #444',
+                    }}
+                  />
+
+                  <Typography
+                    sx={{
+                      fontFamily: 'Keania One',
+                      color: selected ? '#DBD515' : '#fff',
+                      letterSpacing: 1,
+                    }}
                   >
-                    <CardActionArea>
-                      <CardContent sx={{ textAlign: 'center' }}>
-                        <Avatar
-                           sx={{
-                            mx: 'auto',
-                            mb: 1.5,
-                            width: 56,
-                            height: 56,
-                          }}
-                          />
-                        <Typography
-                          sx={{
-                          fontFamily: 'Keania One',
-                          color: '#DBD515',
-                          fontSize: { xs: '1.05rem', sm: '1.15rem' },
-                          letterSpacing: 1,
-                        }}
-                        >
-                          {barber.name}
-                        </Typography>
-                        
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
+                    {barber.name}
+                  </Typography>
+                </Box>
               );
-            })}
+})}
           </Box>
 
          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>

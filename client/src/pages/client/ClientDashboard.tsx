@@ -4,6 +4,7 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  Avatar,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -33,7 +34,10 @@ export default function DashboardClient() {
       path: '/perfil',
     },
   ];
-
+  const avatarUrl =
+  user?.avatar
+    ? `${import.meta.env.VITE_API_URL}${user.avatar}?t=${Date.now()}`
+    : undefined;
   return (
     <Box
       sx={{
@@ -44,6 +48,23 @@ export default function DashboardClient() {
         textAlign: 'center',
       }}
     >
+      <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                mb: 2,
+              }}
+            >
+              <Avatar
+                src={avatarUrl}
+                alt={user?.name}
+                sx={{
+                  width: 80,
+                  height: 80,
+                  border: '3px solid #DBD515',
+                }}
+              />
+            </Box>
       {/* BIENVENIDA */}
       <Typography
         variant="h4"
