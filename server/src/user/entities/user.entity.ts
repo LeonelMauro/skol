@@ -20,11 +20,11 @@ export class User {
   password: string;
 
   @Column({ nullable: true })
-  phone: string;
+  phone?: string;
 
 
   @Column({ type: 'date' })
-  birthDate: string; // formato YYYY-MM-DD
+  birthDate?: string; // formato YYYY-MM-DD
 
   @ManyToOne(() => Role, (role) => role.users)
   role: Role;

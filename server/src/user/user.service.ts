@@ -148,37 +148,20 @@ async createBarber(dto: CreateBarberDto){
     return user ;
   }
 
-  async update(id: number, Dto: UpdateUserDto) {
-    const user = await this.userRepository.findOne({
-      where: {id}
-    })
-    if (!user){
-      throw new NotFoundException('Usuario no encontrado')
-    }
-    if (Dto.roleId !== undefined) {
-      const role = await this.roleRepository.findOne({
-        where: { id: Dto.roleId },
-      });
+  async update(id: number, dto: UpdateUserDto) {
 
-      if (!role) {
-        throw new NotFoundException('Rol no encontrado');
-      }
-      
-      user.role = role; 
-    }
-    if(Dto.name !== undefined){
-      user.name= Dto.name
-    }
-    if(Dto.email !== undefined){
-      user.email= Dto.email
-    }
-    
-    if(Dto.birthDate !== undefined){
-      user.birthDate= Dto.birthDate
-    }
-     
-    return await this.userRepository.save(user);
+  const user = await this.userRepository.findOne({
+    where: { id }
+  });
+
+  if (!user) {
+    throw new NotFoundException('Usuario no encontrado');
   }
+
+  Object.assign(user, dto);
+
+  return this.userRepository.save(user);
+}
   
   async updateBarberLocation(barberId: number, locationId: number) {
   const barber = await this.userRepository.findOne({

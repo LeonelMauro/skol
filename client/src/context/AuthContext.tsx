@@ -6,10 +6,13 @@ export interface AuthUser {
   id: number;
   name?: string;
   email: string;
+  phone?: string
+  birthDate?: string
   role: UserRole;
   location?: Location | null;
   access_token?: string;
   avatar?: string | null
+  isActive?: boolean
 }
 
 
@@ -44,8 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUserState(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    
   };
 
   return (

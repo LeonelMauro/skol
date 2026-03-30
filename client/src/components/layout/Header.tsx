@@ -51,6 +51,8 @@ const menuByRole = {
     { label: 'Barbers', link: '/admin/barbers' },
     { label: 'Servicios', link: '/admin/services' },
     { label: 'Reportes', link: '/admin/reportes' },
+    { label: 'Perfil', link: '/perfil' },
+
   ],
 };
 

@@ -23,7 +23,6 @@ export interface UpdateUserPayload {
   email?: string;
   phone?: string;
   birthDate?: string;
-  roleId?: number;
 }
 
 export interface Barber {

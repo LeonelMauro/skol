@@ -6,7 +6,6 @@ import {
   TextField,
   Button,
   Box,
-  MenuItem,
   Typography,
   Divider,
   useMediaQuery,
@@ -125,20 +124,6 @@ export default function AdminUserDialog({
             InputLabelProps={{ shrink: true }}
             fullWidth
           />
-
-          <TextField
-            select
-            label="Rol"
-            value={form.roleId}
-            onChange={(e) =>
-                setForm({ ...form, roleId: Number(e.target.value) })
-            }
-            fullWidth
-            >
-            <MenuItem value={1}>Admin</MenuItem>
-            <MenuItem value={2}>Barber</MenuItem>
-            <MenuItem value={3}>Cliente</MenuItem>
-          </TextField>
 
         </Box>
 

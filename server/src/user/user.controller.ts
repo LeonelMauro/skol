@@ -33,7 +33,7 @@ interface AuthRequest extends Request {
     id: number;
     email: string;
     role: string;
-    avatar: string
+    avatar:  string | null;
   };
 }
 
@@ -76,6 +76,14 @@ export class UserController {
     return this.userService.createBarber(dto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  updateProfile(
+    @Req() req: AuthRequest,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(req.user.id, updateUserDto);
+  }
   // Perfil del usuario autenticado
   @UseGuards(JwtAuthGuard)
   @Get('profile')

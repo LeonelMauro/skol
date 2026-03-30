@@ -42,6 +42,8 @@ export default function Login() {
       role: payload.role,
       location: payload.location,
       avatar: payload.avatar,
+      phone: payload.phone,
+      birthDate: payload.birthDate,
       access_token,
     });
 
@@ -51,7 +53,6 @@ export default function Login() {
     } else if (payload.role === 'barber') {
       navigate('/barber');
     } else {
-      console.log(login)
       navigate('/client');
     }
 

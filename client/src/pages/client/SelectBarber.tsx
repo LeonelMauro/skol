@@ -4,9 +4,6 @@ import {
   Typography,
   Divider,
   CircularProgress,
-  Card,
-  CardActionArea,
-  CardContent,
   Avatar,
   Button,
 } from '@mui/material';

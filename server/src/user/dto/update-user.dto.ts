@@ -1,10 +1,15 @@
 // update-user.dto.ts
-import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class UpdateUserDto {
-  @IsOptional()
   @IsString()
+  @IsNotEmpty()
+  @Transform(({ value }) =>
+  value
+  .toLowerCase()
+  .replace(/\b\w/g, (char) => char.toUpperCase())
+  )
   name?: string;
 
   @IsOptional()
@@ -19,8 +24,5 @@ export class UpdateUserDto {
   @IsDateString()
   birthDate?: string;
 
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  roleId?: number;
+  
 }

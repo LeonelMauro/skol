@@ -34,6 +34,8 @@ export class AuthService {
       role: user.role.name,
       email: user.email,
       avatar: user.avatar,
+      phone: user.phone,
+      birthDate: user.birthDate,
       location: user.location
       ? {
           id: user.location.id,

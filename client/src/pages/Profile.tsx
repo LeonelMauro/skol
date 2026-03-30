@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
-import { Box, Typography, Button } from "@mui/material";
-import { useAuth } from "../context/AuthContext";
+import { Box, Typography, Button, Dialog } from "@mui/material";
+import  { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import AvatarCompress from "./Avatarcompress";
+import type { UpdateUserPayload } from "../types/user";
+import ProfileDialog from "./ProfileDialog";
+import Zoom from "@mui/material/Zoom";
 
 export default function Profile() {
+
 
   const { user, setUser } = useAuth();
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
-
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openAvatar, setOpenAvatar] = useState(false);
   const token = localStorage.getItem("token");
-
   const avatarUrl =
   user?.avatar
     ? `${import.meta.env.VITE_API_URL}${user.avatar}?t=${Date.now()}`
@@ -22,6 +26,30 @@ export default function Profile() {
     setPreview(URL.createObjectURL(file));
   };
 
+  const updateProfile = async (data: UpdateUserPayload) => {
+    try {
+
+      const res = await api.patch(
+        "/user/profile",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setUser({
+        ...user!,
+        ...res.data
+      });
+
+      alert("Perfil actualizado");
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const uploadAvatar = async () => {
     if (!file) return;
 
@@ -56,8 +84,7 @@ export default function Profile() {
 
   const handleViewAvatar = () => {
     if (!avatarUrl) return;
-
-    window.open(avatarUrl, "_blank");
+    setOpenAvatar(true);
   };
 
   const handleDeleteAvatar = async () => {
@@ -88,27 +115,26 @@ export default function Profile() {
   };
   useEffect(() => {
 
-    if (!token) return;
+  if (!token) return;
 
-    const loadProfile = async () => {
-      try {
+  const loadProfile = async () => {
+    try {
 
-        const res = await api.get("/user/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const res = await api.get("/user/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUser(res.data);
 
-        setUser(res.data);
+    } catch (err) {
+      console.error("Error cargando perfil:", err);
+    }
+  };
 
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  loadProfile();
 
-    loadProfile();
-
-  }, [token]);
+}, [token]);
 
   return (
     <Box
@@ -145,18 +171,79 @@ export default function Profile() {
       <Typography sx={{ color: "#aaa", mb: 4 }}>
         {user?.email}
       </Typography>
+      <Typography sx={{ color: "#aaa" }}>
+        Teléfono: {user?.phone || "No especificado"}
+      </Typography>
+      <Typography sx={{ color: "#aaa" }}>
+        Fecha de nacimiento: {
+          user?.birthDate
+            ? new Date(user.birthDate).toLocaleDateString()
+            : "No especificado"
+        }
+      </Typography>
 
+      <Typography sx={{ color: "#aaa", mb: 4 }}>
+        Rol: {user?.role}
+      </Typography>
       <Button
-        variant="outlined"
-        onClick={uploadAvatar}
+        variant="contained"
+        onClick={() => setOpenDialog(true)}
         sx={{
-          borderColor: "#DBD515",
-          color: "#DBD515",
+          backgroundColor: "#DBD515",
+          color: "#000",
+          mt: 2,
         }}
       >
-        Subir foto
+        Editar perfil
       </Button>
 
+      {file && (
+        <Button
+          variant="outlined"
+          onClick={uploadAvatar}
+          sx={{
+            borderColor: "#DBD515",
+            color: "#DBD515",
+          }}
+        >
+          Subir foto
+        </Button>
+      )}
+      <ProfileDialog
+      open={openDialog}
+      user={user}
+      onClose={() => setOpenDialog(false)}
+      onSave={(data) => {
+        updateProfile(data);
+        setOpenDialog(false);
+      }}
+    />
+    <Dialog
+      open={openAvatar}
+      onClose={() => setOpenAvatar(false)}
+      TransitionComponent={Zoom}
+      maxWidth="md"
+    >
+      <Box
+        sx={{
+          backgroundColor: "#000",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 2,
+        }}
+      >
+        <img
+          src={avatarUrl}
+          alt="avatar"
+          style={{
+            maxWidth: "100%",
+            maxHeight: "80vh",
+            borderRadius: 8,
+          }}
+        />
+      </Box>
+    </Dialog>
     </Box>
   );
 }
