@@ -40,13 +40,74 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const phoneRegex = /^\d{3}-\d{7}$/;
+  
+    const validatePhone = (phone: string) => {
+      if (!phone) return true;
+      return phoneRegex.test(phone);
+    };
+  
+    const validateBirthDate = (date: string) => {
+      if (!date) return true;
+  
+      const d = new Date(date);
+  
+      if (isNaN(d.getTime())) return false;
+  
+      const today = new Date();
+  
+      if (d > today) return false;
+  
+      const minYear = 1900;
+  
+      if (d.getFullYear() < minYear) return false;
+  
+      return true;
+    };
+    
+    const [errors, setErrors] = useState({
+      phone: "",
+      birthDate: "",
+    });
+    
+   const formatPhone = (value: string) => {
+      const numbers = value.replace(/\D/g, "").slice(0, 10);
 
+      if (numbers.length <= 3) return numbers;
+
+      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+    };
+    
+    const handleSave = () => {
+  let valid = true;
+
+  const newErrors = {
+    phone: "",
+    birthDate: "",
+  };
+
+  if (!validatePhone(form.phone)) {
+    newErrors.phone = "Formato inválido. Ej: 261-2158833";
+    valid = false;
+  }
+
+  if (!validateBirthDate(form.birthDate)) {
+    newErrors.birthDate = "Fecha inválida";
+    valid = false;
+  }
+
+  setErrors(newErrors);
+
+  return valid;
+};
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
+
+  if (!handleSave()) return;
 
   if (form.password !== form.confirmPassword) {
     alert('Las contraseñas no coinciden');
@@ -57,7 +118,7 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
 
   try {
     if (mode === 'admin-barber') {
-      alert('No autorizado');
+
       await api.post(
         '/user/create-barbers',
         {
@@ -70,12 +131,15 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
         },
         { headers: authHeader }
       );
+
       if (onSuccess) {
         onSuccess();
       } else {
         navigate('/barbers');
       }
+
     } else {
+
       await api.post('/user/register', {
         name: form.name,
         email: form.email,
@@ -89,26 +153,27 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
       } else {
         navigate('/login');
       }
-    
+
     }
+
   } catch {
     alert('Error al registrar');
   } finally {
     setLoading(false);
   }
-};   
+};  
   
   const [locations, setLocations] = useState<Location[]>([]);
 
- useEffect(() => {
-  if (mode !== 'admin-barber') return;
+  useEffect(() => {
+    if (mode !== 'admin-barber') return;
 
-  api
-    .get('/location') // 👈 ruta correcta
-    .then(res => {
-      setLocations(res.data);
-    })
-}, [mode]);
+    api
+      .get('/location') // 👈 ruta correcta
+      .then(res => {
+        setLocations(res.data);
+      })
+  }, [mode]);
 
   return (
     <Box
@@ -173,7 +238,6 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
             InputLabelProps={{ style: { color: '#aaa' } }}
             sx={{ input: { color: '#fff' } }}
           />
-
           <TextField
             label="Teléfono"
             name="phone"
@@ -181,28 +245,46 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
             fullWidth
             margin="normal"
             value={form.phone}
-            onChange={handleChange}
-            InputLabelProps={{ style: { color: '#aaa' } }}
-            sx={{ input: { color: '#fff' } }}
-          />
+            error={!!errors.phone}
+            helperText={errors.phone || "Ej: 261-2952223"}
+            onChange={(e) => {
+              const formatted = formatPhone(e.target.value);
 
+              setForm({
+                ...form,
+                phone: formatted,
+              });
+            }}
+            inputProps={{ maxLength: 11 }}
+            InputLabelProps={{ style: { color: '#aaa' } }}
+            sx={{
+              input: { color: '#fff' }
+            }}
+          />
+          
           <TextField
             label="Fecha de nacimiento"
             name="birthDate"
             type="date"
-            fullWidth
             size="small"
+            fullWidth
             margin="normal"
             value={form.birthDate}
-            onChange={handleChange}
+            error={!!errors.birthDate}
+            helperText={errors.birthDate}
+            onChange={(e) =>
+              setForm({ ...form, birthDate: e.target.value })
+            }
             required
             InputLabelProps={{
               shrink: true,
               style: { color: '#aaa' },
             }}
-            sx={{ input: { color: '#fff' } }}
+            sx={{
+              input: { color: '#fff' }
+            }}
           />
-
+          
           <TextField
             label="Contraseña"
             name="password"

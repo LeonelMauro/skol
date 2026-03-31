@@ -60,41 +60,42 @@ export default function SelectDateTime() {
   const [slots, setSlots] = useState<string[]>([]);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [barberAvailabilities, setBarberAvailabilities] =
-  useState<EditableBarberAvailability[]>([]);
-
-  const visibleRanges =
-  selectedDate && barber.mode === 'specific'
-    ? barberAvailabilities
-        .filter(a =>
-          a.is_active &&
-          Number(a.day_of_week) === dayjs(selectedDate).day()
-        )
-        .flatMap(a => a.timeRanges)
-    : [];
   const authHeader = {
     Authorization: `Bearer ${user?.access_token}`,
   };
-  useEffect(() => {
-  if (barber.mode !== 'specific') return;
-
-  api
-    .get(`/user/${barber.barber.id}/working-days`)
-    .then(res => setWorkingDays(res.data.workingDays))
-    .catch(() => setWorkingDays([]));
-}, [barber]);
-
-  // ⬇️ Filtra los horarios que ya pasaron si es el día actual
-useEffect(() => {
-  if (barber.mode !== 'specific') return;
+ useEffect(() => {
+  if (!barberId) return;
 
   api
     .get<EditableBarberAvailability[]>(
-      `/barbers/${barber.barber.id}/schedule`
+      `/barber-availability/barber/${barberId}`,
+      { headers: authHeader }
     )
-    .then(res => setBarberAvailabilities(res.data))
-    .catch(() => setBarberAvailabilities([]));
-}, [barber]);
+    .then(res => {
+      const daysMap: Record<string, number> = {
+        sunday: 0,
+        monday: 1,
+        tuesday: 2,
+        wednesday: 3,
+        thursday: 4,
+        friday: 5,
+        saturday: 6,
+      };
+
+      const days = [
+        ...new Set(
+          res.data
+            .filter(d => d.is_active)
+            .map(d => daysMap[d.day_of_week])
+        )
+      ];
+
+      setWorkingDays(days);
+    })
+    .catch(() => setWorkingDays([]));
+}, [barberId]);
+
+
   useEffect(() => {
   if (!selectedDate) return;
 
@@ -242,28 +243,6 @@ useEffect(() => {
   </Box>
 </LocalizationProvider>
 
-
-
-
-
-
-      {/* HORARIOS */}
-      {barber.mode === 'specific' && visibleRanges.length > 0 && (
-      <Box sx={{ mt: 3 }}>
-        <Typography sx={{ color: '#aaa', fontSize: 14 }}>
-          Horario del barbero:
-        </Typography>
-
-        {visibleRanges.map((range, index) => (
-          <Typography
-            key={index}
-            sx={{ color: '#DBD515', fontSize: 14 }}
-          >
-            {range.start_time.slice(0, 5)} – {range.end_time.slice(0, 5)}
-          </Typography>
-        ))}
-      </Box>
-    )}
       {loadingSlots && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <CircularProgress sx={{ color: '#DBD515' }} />

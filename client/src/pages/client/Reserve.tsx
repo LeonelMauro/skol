@@ -129,7 +129,7 @@ export default function Reserve() {
                     },
                   }}
                 >
-                  <CardActionArea >
+                  <Box >
                     <CardMedia
                     component="img"
                     image={loc.imageUrl}
@@ -184,7 +184,7 @@ export default function Reserve() {
                     </IconButton>
 
                     </CardContent>
-                  </CardActionArea>
+                  </Box>
                 </Card>
               );
             })}

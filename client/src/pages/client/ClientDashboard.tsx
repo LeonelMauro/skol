@@ -97,6 +97,7 @@ export default function DashboardClient() {
       >
         {actions.map((action) => (
           <Card
+            key={action.path}
             sx={{
               backgroundColor: '#000',
               borderRadius: 2.5,
