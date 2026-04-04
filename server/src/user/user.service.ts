@@ -114,14 +114,15 @@ async createBarber(dto: CreateBarberDto){
     if (q) {
       return this.userRepository.find({
         where: [
-          { name: ILike(`%${q}%`) },
-          { email: ILike(`%${q}%`) },
+          { name: ILike(`%${q}%`), isActive: true },
+          { email: ILike(`%${q}%`), isActive: true },
         ],
         relations: ['role'],
       });
     }
 
     return this.userRepository.find({
+      where: { isActive: true },
       relations: ['role'],
     });
   }
@@ -265,10 +266,10 @@ async createBarber(dto: CreateBarberDto){
 async findAllClient(q?: string) {
   const where = q
     ? [
-        { name: ILike(`%${q}%`), role: { id: 3 } }, 
-        { email: ILike(`%${q}%`), role: { id: 3 } },
+        { name: ILike(`%${q}%`), role: { id: 3 }, isActive: true },
+        { email: ILike(`%${q}%`), role: { id: 3 }, isActive: true },
       ]
-    : { role: { id: 3 } };
+    : { role: { id: 3 }, isActive: true };
 
   return this.userRepository.find({
     where,
@@ -328,6 +329,20 @@ async deleteAvatar(userId: number) {
     message: 'Avatar eliminado correctamente',
     avatar: null,
   };
+}
+async deactivate(id: number) {
+  const user = await this.userRepository.findOne({
+    where: { id },
+  });
+
+  if (!user) {
+    throw new NotFoundException('Usuario no encontrado');
+  }
+
+  user.isActive = false;
+  user.deletedAt = new Date();
+
+  return this.userRepository.save(user);
 }
 
 }

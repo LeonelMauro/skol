@@ -32,6 +32,9 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
+
   @Column({
     type: 'varchar',
     nullable: true,

@@ -10,6 +10,8 @@ import {
   Req,
   Query,
   BadRequestException,
+  ParseIntPipe,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -121,8 +123,15 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'barber', 'client')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  update(
+    @Param('id') id: string,
+    @Req() req: AuthRequest,
+    @Body() dto: UpdateUserDto,
+  ) {
+    if (req.user.role !== 'admin' && req.user.id !== +id) {
+      throw new ForbiddenException('No autorizado');
+    }
+    return this.userService.update(+id, dto);
   }
 
   // Cambiar contraseña — cualquier usuario logueado
@@ -155,6 +164,13 @@ async deleteAvatar(@Req() req: AuthRequest) {
   remove(@Param('id') id: string) {
     console.log("REMOVE USER");
     return this.userService.remove(+id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch(':id/deactivate')
+  deactivate(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.deactivate(id);
   }
   
 

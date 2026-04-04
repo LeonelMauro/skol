@@ -11,7 +11,10 @@ api.interceptors.request.use((config) => {
   if (storedUser) {
     const user = JSON.parse(storedUser);
 
-    if (user.access_token) {
+    if (
+      user.access_token &&
+      !config.url?.includes('/auth/login')
+    ) {
       config.headers.Authorization = `Bearer ${user.access_token}`;
     }
   }

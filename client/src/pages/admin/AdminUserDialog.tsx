@@ -52,7 +52,6 @@ export default function AdminUserDialog({
   email: '',
   phone: '',
   birthDate: '',
-  roleId: 3, // client por defecto
 });
   
 
@@ -64,8 +63,7 @@ export default function AdminUserDialog({
         name: user.name,
         email: user.email,
         phone: user.phone || '',
-        birthDate: user.birthDate,
-        roleId: user.role.id,
+        birthDate: user.birthDate || '',
       });
     }
   }, [user]);
@@ -192,7 +190,7 @@ export default function AdminUserDialog({
      <Button
         sx={{ backgroundColor: '#DBD515', color: '#000' }}
         onClick={() => {
-          onSave(form);
+         onSave(form);
 
           if (currentPassword && newPassword) {
             onChangePassword(user.id, currentPassword, newPassword);

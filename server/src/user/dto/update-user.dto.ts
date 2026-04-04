@@ -4,7 +4,7 @@ import { Transform, Type } from 'class-transformer';
 
 export class UpdateUserDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @Transform(({ value }) =>
   value
   .toLowerCase()

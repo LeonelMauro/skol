@@ -95,7 +95,7 @@ export default function AdminUsers() {
 
   const handleDelete = async (id: number) => {
   try {
-    await api.delete(`/user/${id}`, { headers: authHeader });
+    await api.patch(`/user/${id}/deactivate`,{}, { headers: authHeader });
 
     showSnackbar('Usuario eliminado correctamente', 'success');
     setOpen(false);

@@ -5,7 +5,6 @@ import {
   Divider,
   CircularProgress,
   Card,
-  CardActionArea,
   CardMedia,
   CardContent,
   Button,
