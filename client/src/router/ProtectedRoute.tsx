@@ -8,14 +8,20 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, roles }: Props) {
-  const { user } = useAuth();
+
+  const { user, loading } = useAuth();
+
+  // Esperar validación de sesión
+  if (loading) {
+    return null; // o un loader
+  }
 
   // No está logueado
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Tiene rol pero no autorizado
+  // No autorizado
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }

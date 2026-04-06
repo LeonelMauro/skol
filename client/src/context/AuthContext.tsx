@@ -18,6 +18,7 @@ export interface AuthUser {
 
 interface AuthContextType {
   user: AuthUser | null;
+  loading: boolean;
   login: (userData: AuthUser) => void;
   logout: () => void;
   setUser: (user: AuthUser) => void;
@@ -26,6 +27,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+
+  const [loading, setLoading] = useState(true);
 
   const [user, setUserState] = useState<AuthUser | null>(() => {
     try {
@@ -57,21 +60,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const validateSession = async () => {
 
-      if (!user?.access_token) return;
+      if (!user?.access_token) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        await api.get('/auth/profile');
-      } catch (error) {
+        const res = await api.get('/user/profile');
+         setUser({
+        ...res.data,
+        role: res.data.role?.name ?? res.data.role,
+        access_token: user?.access_token
+      });
+      } catch {
         logout();
+      } finally {
+        setLoading(false);
       }
 
     };
 
-    validateSession();
-  }, []);
+      validateSession();
+    }, []);;
+  
+  if (loading) {
+  return null; // o un loader
+}
+
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, setUser }}>
+    <AuthContext.Provider value={{ user,loading, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
