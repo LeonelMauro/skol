@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import type { Barber } from "../../types/user";
-import { Avatar, Box, Card, CardActionArea, CardContent, CircularProgress, Divider, Typography } from "@mui/material";
+import { Avatar, Box, CircularProgress, Divider, Typography } from "@mui/material";
 import api from "../../services/api";
 import BarberReport from "./BarberReport";
 
@@ -96,71 +96,68 @@ export default function RepostsHIstory (){
           
           >
             {/* BARBEROS */}
-            {barbers.map(barber => {
+            {barbers.map((barber) => {
               const selected =
-              selectedBarber?.mode === 'specific' &&
-              selectedBarber.barber.id === barber.id;
+                selectedBarber?.mode === 'specific' &&
+                selectedBarber.barber.id === barber.id;
+
+              const avatarUrl = barber.avatar
+                ? `${import.meta.env.VITE_API_URL}${barber.avatar}`
+                : undefined;
+
               return (
-                <Card  key={barber.id}
+                <Box
+                  key={barber.id}
                   onClick={() =>
                     setSelectedBarber({
-                    mode: 'specific',
-                    barber,
-                    }) }
+                      mode: 'specific',
+                      barber,
+                    })
+                  }
                   sx={{
-                    width: '100%',
-                    maxWidth: 320,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
                     cursor: 'pointer',
-                    backgroundColor: '#000',
-                    borderRadius: 3,
-                    border: selected
-                    ? '2px solid #DBD515'
-                    : '1px solid #333',
-                    transition: '0.35s ease',
-            
+                    transition: '0.3s ease',
+
                     '&:hover': {
-                    transform: 'translateY(-6px)',
-                    boxShadow: selected
-                    ? '0 0 20px rgba(219,213,21,0.4)'
-                    : '0 12px 30px rgba(0,0,0,0.6)',
+                      transform: 'translateY(-4px)',
                     },
-                      }}
-                    >
-                  <CardActionArea>
-                    <CardContent 
-                     sx={{
-                      textAlign: 'center',
-                      py: { xs: 1.2, sm: 2 },
-                      px: { xs: 1, sm: 2 },
+                  }}
+                >
+                  <Avatar
+                    src={avatarUrl}
+                    alt={barber.name}
+                    sx={{
+                      width: { xs: 90, sm: 110, md: 120 },
+                      height: { xs: 90, sm: 110, md: 120 },
+                      mb: 1,
+                      border: selected
+                        ? '3px solid #DBD515'
+                        : '2px solid #444',
+                      boxShadow: selected
+                        ? '0 0 18px rgba(219,213,21,0.45)'
+                        : '0 6px 16px rgba(0,0,0,0.6)',
+                      transform: selected ? 'scale(1.08)' : 'scale(1)',
+                      transition: '0.25s',
                     }}
-                    >
-                      <Avatar
-                        sx={{
-                          mx: 'auto',
-                          mb: 1.5,
-                          width: 64,
-                          height: 64,
-                          bgcolor: '#DBD515',
-                          color: '#000',
-                          fontWeight: 700,
-                        }}
-                        />
-                    <Typography
-                      sx={{
+                  />
+
+                  <Typography
+                    sx={{
                       fontFamily: 'Keania One',
-                      color: '#DBD515',
-                      fontSize: { xs: '1.05rem', sm: '1.15rem' },
+                      color: selected ? '#DBD515' : '#ccc',
+                      fontSize: { xs: '0.95rem', sm: '1rem' },
                       letterSpacing: 1,
-                      }}
-                      >
-                       {barber.name}
-                     </Typography>
-                                    
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-                          );
-                        })}
+                      textAlign: 'center',
+                    }}
+                  >
+                    {barber.name}
+                  </Typography>
+                </Box>
+              );
+            })}
           </Box>
         )}                        
           {selectedBarber?.mode === 'specific' && (

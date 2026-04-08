@@ -136,17 +136,17 @@ export default function HomePublic() {
                 textTransform: 'uppercase',
                 lineHeight: 1,
                textShadow: `
-  -2px -2px 0 rgba(0,0,0,0.2),
-  2px -2px 0 rgba(0,0,0,0.2),
-  -2px  2px 0 rgba(0,0,0,0.2),
-  2px  2px 0 rgba(0,0,0,0.2),
-  -6px -6px 0 rgba(0,0,0,1),
-  6px -6px 0 rgba(0,0,0,1),
-  -6px  6px 0 rgba(0,0,0,1),
-  6px  6px 0 rgba(0,0,0,1)
-`,
-              })}
-            >
+                  -2px -2px 0 rgba(0,0,0,0.2),
+                  2px -2px 0 rgba(0,0,0,0.2),
+                  -2px  2px 0 rgba(0,0,0,0.2),
+                  2px  2px 0 rgba(0,0,0,0.2),
+                  -6px -6px 0 rgba(0,0,0,1),
+                  6px -6px 0 rgba(0,0,0,1),
+                  -6px  6px 0 rgba(0,0,0,1),
+                  6px  6px 0 rgba(0,0,0,1)
+                `,
+                              })}
+                            >
               SKOL
             </Typography>
             <Button
@@ -161,8 +161,27 @@ export default function HomePublic() {
                 color: '#000',
                 fontWeight: 700,
                 borderRadius: 2,
+
+                animation: 'pulse 1.6s infinite',
+
+                '@keyframes pulse': {
+                  '0%': {
+                    backgroundColor: '#8a860fff', // apagado (más oscuro)
+                    boxShadow: '0 0 0 0 rgba(59, 58, 6, 0)',
+                  },
+                  '50%': {
+                    backgroundColor: '#DBD515', // encendido
+                    boxShadow: '0 0 12px 4px rgba(219,213,21,0.6)',
+                  },
+                  '100%': {
+                    backgroundColor: '#8a860fff', // vuelve a apagado
+                    boxShadow: '0 0 0 0 rgba(59, 58, 6, 0)',
+                  },
+                },
+
                 '&:hover': {
                   backgroundColor: '#c4bd13',
+                  animation: 'none',
                 },
               }}
             >
@@ -194,7 +213,7 @@ export default function HomePublic() {
             mb: 1,
           }}
         >
-          Reservar turno
+          Nuestros servicios
         </Typography>
 
         <Typography
@@ -426,6 +445,7 @@ export default function HomePublic() {
 
             {locales.map((local) => (
               <Card
+              key={local.id}
               sx={{
                 borderRadius: 2,
                 backgroundColor: '#111',

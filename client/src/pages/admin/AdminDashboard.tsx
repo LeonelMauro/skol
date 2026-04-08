@@ -55,8 +55,8 @@ export default function DashboardAdmin() {
           src={avatarUrl}
           alt={user?.name}
           sx={{
-            width: 80,
-            height: 80,
+            width: { xs: 90, sm: 110, md: 120 },
+            height: { xs: 90, sm: 110, md: 120 },
             border: '3px solid #DBD515',
           }}
         />

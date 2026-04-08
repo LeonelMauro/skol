@@ -123,8 +123,7 @@ export default function SelectBarber() {
         >
 
             {/* BARBEROS */}
-            {barbers.map(barber => {
-
+            {barbers.map((barber) => {
               const selected =
                 selectedBarber?.mode === 'specific' &&
                 selectedBarber.barber.id === barber.id;
@@ -143,18 +142,14 @@ export default function SelectBarber() {
                     })
                   }
                   sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
                     cursor: 'pointer',
-                    textAlign: 'center',
-                    p: 2,
-                    borderRadius: 3,
-                    transition: '0.3s',
-                    border: selected
-                      ? '2px solid #DBD515'
-                      : '1px solid #333',
+                    transition: '0.3s ease',
 
                     '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 20px rgba(0,0,0,0.6)',
+                      transform: 'translateY(-4px)',
                     },
                   }}
                 >
@@ -162,28 +157,34 @@ export default function SelectBarber() {
                     src={avatarUrl}
                     alt={barber.name}
                     sx={{
-                      width: 90,
-                      height: 90,
-                      mx: 'auto',
-                      mb: 1.5,
+                      width: { xs: 90, sm: 110, md: 120 },
+                      height: { xs: 90, sm: 110, md: 120 },
+                      mb: 1,
                       border: selected
                         ? '3px solid #DBD515'
                         : '2px solid #444',
+                      boxShadow: selected
+                        ? '0 0 18px rgba(219,213,21,0.45)'
+                        : '0 6px 16px rgba(0,0,0,0.6)',
+                      transform: selected ? 'scale(1.08)' : 'scale(1)',
+                      transition: '0.25s',
                     }}
                   />
 
                   <Typography
                     sx={{
                       fontFamily: 'Keania One',
-                      color: selected ? '#DBD515' : '#fff',
+                      color: selected ? '#DBD515' : '#ccc',
+                      fontSize: { xs: '0.95rem', sm: '1rem' },
                       letterSpacing: 1,
+                      textAlign: 'center',
                     }}
                   >
                     {barber.name}
                   </Typography>
                 </Box>
               );
-})}
+            })}
           </Box>
 
          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
