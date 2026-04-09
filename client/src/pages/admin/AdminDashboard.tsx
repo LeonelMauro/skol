@@ -73,7 +73,7 @@ export default function DashboardAdmin() {
       </Typography>
 
       <Typography variant="h6" sx={{ color: '#ccc', mb: 5 }}>
-        Hola {user?.email.split('@')[0]}
+        Bienvenido {user?.name}
       </Typography>
 
       <Box

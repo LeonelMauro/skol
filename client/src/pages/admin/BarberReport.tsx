@@ -102,6 +102,43 @@ const filteredHistory = useMemo(() => {
   if (!user?.access_token) return;
     fetchHistory();
   }, [barber.id]);
+
+  
+
+  const metrics = useMemo(() => {
+
+  const result = {
+    services: 0,
+    barberTotal: 0,
+    shopTotal: 0,
+    cash: 0,
+    mercadoPago: 0
+  };
+
+  filteredHistory.forEach(r => {
+
+    if (r.status !== "completed") return;
+
+    const barberEarning = Number(r.payment?.barberEarning ?? 0);
+    const shopEarning = Number(r.payment?.shopEarning ?? 0);
+
+    result.services++;
+    result.barberTotal += barberEarning;
+    result.shopTotal += shopEarning;
+
+    if (r.payment?.method === "cash") {
+      result.cash += barberEarning;
+    }
+
+    if (r.payment?.method === "mercado_pago") {
+      result.mercadoPago += barberEarning;
+    }
+
+  });
+
+  return result;
+
+}, [filteredHistory]);
   
   
 
@@ -186,11 +223,9 @@ const filteredHistory = useMemo(() => {
 
     return Object.values(map);
   }
-  
+    return [];
 
-  return [];
-
-}, [filteredHistory, period]);
+  }, [filteredHistory, period]);
 if (loading || !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
@@ -285,25 +320,31 @@ const totalDay = filteredHistory.reduce(
           display: "grid",
           gridTemplateColumns: {
             xs: "repeat(2,1fr)",
-            md: "repeat(5,1fr)",
+            md: "repeat(6,1fr)",
           },
           gap: 2,
           mb: 5,
         }}
       >
-        <Metric label="Servicios" value={data.services} />
+        <Metric label="Servicios" value={metrics.services} />
 
         <Metric
           label="💰 Ganancia barbero"
-          value={data.barberTotal}
+          value={metrics.barberTotal}
           color="success.main"
         />
 
-        <Metric label="🏪 Comisión local" value={data.shopTotal} />
+        <Metric label="🏪 Comisión local" value={metrics.shopTotal} />
 
-        <Metric label="💵 Efectivo" value={data.cash} />
+        <Metric label="💵 Efectivo" value={metrics.cash} />
 
-        <Metric label="📱 MercadoPago" value={data.mercadoPago} />
+        <Metric label="📱 MercadoPago" value={metrics.mercadoPago} />
+
+        <Metric
+          label="📊 Comisión barbero"
+          value={`${Number(data.commissionPercentage)}%`}
+          color="warning.main"
+        />
       </Box>
       <Box sx={{ mb: 5 }}>
         <RevenueChart data={chartData}  onSelect={(label)=>setSelectedService(label)}/>

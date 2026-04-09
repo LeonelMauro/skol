@@ -74,7 +74,7 @@ export default function DashboardClient() {
           mb: 1,
         }}
       >
-        Hola {user?.name}
+        Bienvenido {user?.name}
       </Typography>
 
       <Typography sx={{ color: '#ccc', mb: 5 }}>

@@ -134,7 +134,9 @@ const revenueMetrics = filteredHistory
       servicesDone: 0,
     }
   );
-
+const commissionPercentage =
+  history.find(r => r.payment?.commissionPercentage)?.payment
+    ?.commissionPercentage ?? 0;
 
 const statusData = [
   { name: 'Atendidos', value: metrics.completed },
@@ -277,7 +279,7 @@ const chartData =
           display: 'grid',
           gridTemplateColumns: {
             xs: 'repeat(2, 1fr)',
-            sm: 'repeat(5, 1fr)',
+            sm: 'repeat(6, 1fr)',
           },
           gap: 2,
           maxWidth: 900,
@@ -287,7 +289,6 @@ const chartData =
       >
         <Metric label="Turnos" value={metrics.total} />
         <Metric label="Atendidos" value={metrics.completed} color="success.main" />
-        <Metric label="Cancelados" value={metrics.canceled} color="error.main" />
         <Metric
           label="💰 Ganancias"
           value={formatCurrency(revenueMetrics.total)}
@@ -306,7 +307,12 @@ const chartData =
           label="Servicios hoy"
           value={revenueMetrics.servicesDone}
         />
-
+        <Metric
+          label="📊 Comisión"
+          value={`${Number(commissionPercentage)}%`}
+          color="warning.main"
+        />
+                
       </Box>
       
 <Stack

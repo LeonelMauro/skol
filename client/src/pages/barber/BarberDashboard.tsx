@@ -90,7 +90,7 @@ export default function DashboardBarber() {
       </Typography>
 
       <Typography sx={{ color: '#ccc', mb: 5 }}>
-        Bienvenido {user?.email.split('@')[0]}
+        Bienvenido {user?.name}
       </Typography>
 
       <Box

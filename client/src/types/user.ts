@@ -45,3 +45,10 @@ export interface CreateBarberPayload {
   birthDate: string;
   location?: Location | null;
 }
+export interface BarberTodayMetrics {
+  servicesDone: number;
+  totalEarned: number;
+  cash: number;
+  mercadoPago: number;
+  commissionPercentage: number;
+}

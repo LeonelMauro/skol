@@ -168,7 +168,8 @@ export class PaymentService {
     servicesDone: payments.length,
     totalEarned: total,
     cash,
-    mercadoPago: mp
+    mercadoPago: mp,
+    commissionPercentage: payments.length ? payments[0].commissionPercentage : 0
   };
 }
 async getBarberMetrics(barberId: number, period: 'day' | 'week' | 'month') {
@@ -201,7 +202,10 @@ async getBarberMetrics(barberId: number, period: 'day' | 'week' | 'month') {
     shopTotal,
     totalGenerated: barberTotal + shopTotal,
     cash,
-    mercadoPago
+    mercadoPago,
+    commissionPercentage: payments.length
+    ? payments[0].commissionPercentage
+    : 0
   };
 }
 async getShopMetrics() {
