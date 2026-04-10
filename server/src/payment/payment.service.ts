@@ -208,6 +208,81 @@ async getBarberMetrics(barberId: number, period: 'day' | 'week' | 'month') {
     : 0
   };
 }
+async getAdminReport(period: 'day' | 'week' | 'month') {
+
+  const { start, end } = this.getDateRange(period);
+
+  const payments = await this.paymentRepo.find({
+    where: {
+      paidAt: Between(start, end),
+    },
+    relations: ['location', 'barber'],
+  });
+
+  // 🏪 Agrupar por local
+  const locationsMap: any = {};
+
+  // 👨‍🔧 Agrupar barberos
+  const barbersMap: any = {};
+
+  let totalRevenue = 0;
+  let totalShop = 0;
+  let totalBarbers = 0;
+
+  payments.forEach(p => {
+
+    const locName = p.location.name;
+    const barberName = p.barber.name;
+
+    const shop = Number(p.shopEarning);
+    const barber = Number(p.barberEarning);
+    const total = shop + barber;
+
+    totalRevenue += total;
+    totalShop += shop;
+    totalBarbers += barber;
+
+    // 🔹 LOCAL
+    if (!locationsMap[locName]) {
+      locationsMap[locName] = {
+        name: locName,
+        revenue: 0,
+        services: 0,
+      };
+    }
+
+    locationsMap[locName].revenue += total;
+    locationsMap[locName].services++;
+
+    // 🔹 BARBERO
+    if (!barbersMap[barberName]) {
+      barbersMap[barberName] = {
+        name: barberName,
+        services: 0,
+        revenue: 0,
+      };
+    }
+
+    barbersMap[barberName].services++;
+    barbersMap[barberName].revenue += total;
+  });
+
+  // ordenar ranking
+  const topBarbers = Object.values(barbersMap)
+    .sort((a: any, b: any) => b.services - a.services)
+    .slice(0, 5);
+
+  return {
+    totals: {
+      totalRevenue,
+      totalShop,
+      totalBarbers,
+      services: payments.length,
+    },
+    locations: Object.values(locationsMap),
+    topBarbers,
+  };
+}
 async getShopMetrics() {
   const payments = await this.paymentRepo.find();
 
@@ -224,6 +299,60 @@ async getShopMetrics() {
     shopRevenue: shopTotal,
     totalRevenue: barberTotal + shopTotal,
     services: payments.length
+  };
+}
+async getLocationReport(locationId: number, period: 'day' | 'week' | 'month') {
+
+  const { start, end } = this.getDateRange(period);
+
+  const payments = await this.paymentRepo.find({
+    where: {
+      location: { id: locationId },
+      paidAt: Between(start, end),
+    },
+    relations: ['barber'],
+  });
+
+  let totalRevenue = 0;
+  let shopTotal = 0;
+  let barberTotal = 0;
+
+  const barbersMap: any = {};
+
+  payments.forEach(p => {
+    const shop = Number(p.shopEarning);
+    const barber = Number(p.barberEarning);
+    const total = shop + barber;
+
+    totalRevenue += total;
+    shopTotal += shop;
+    barberTotal += barber;
+
+    const barberName = p.barber.name;
+
+    if (!barbersMap[barberName]) {
+      barbersMap[barberName] = {
+        name: barberName,
+        services: 0,
+        revenue: 0,
+        avatar: p.barber.avatar,
+      };
+    }
+
+    barbersMap[barberName].services++;
+    barbersMap[barberName].revenue += total;
+  });
+
+  const topBarbers = Object.values(barbersMap)
+    .sort((a: any, b: any) => b.services - a.services)
+    .slice(0, 5);
+
+  return {
+    totalRevenue,
+    shopTotal,
+    barberTotal,
+    services: payments.length,
+    topBarbers,
   };
 }
 }

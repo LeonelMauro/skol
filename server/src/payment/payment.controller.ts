@@ -28,4 +28,19 @@ export class PaymentController {
   ) {
     return this.paymentService.getBarberMetrics(id, period);
   }
+  @Get('admin/report')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    getAdminReport(@Query('period') period: 'day' | 'week' | 'month') {
+      return this.paymentService.getAdminReport(period);
+    }
+  @Get('location/:id/report')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    getLocationReport(
+      @Param('id') id: number,
+      @Query('period') period: 'day' | 'week' | 'month'
+    ) {
+      return this.paymentService.getLocationReport(id, period);
+    }
 }
