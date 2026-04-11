@@ -1,16 +1,15 @@
-import { Box, Typography, Button, Card, CardActionArea, CardContent } from '@mui/material';
+import { Box, Typography, Button, Card,  CardContent } from '@mui/material';
 import hero1 from '../img/hero1.jpg';
 import hero2 from '../img/hero2.jpg';
 import nosotros from '../img/nosotros.jpg';
 
 
-import { useEffect, useState } from 'react';
+import { useEffect,  useState } from 'react';
 import api from '../services/api';
 import type { Location } from '../types/location';
 import type { Service } from '../types/services';
 import { serviceIcons } from '../utils/serviceIcons';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import IconButton from '@mui/material/IconButton';
+import HomeLocations from './HomeLocations';
 
 
 const heroImages = [hero1, hero2];
@@ -46,6 +45,8 @@ export default function HomePublic() {
 
     return () => clearInterval(interval);
   }, []);
+
+
 
   useEffect(() => {
   const fetchLocales = async () => {
@@ -120,7 +121,7 @@ export default function HomePublic() {
         >
           <Box>
             <Typography
-              sx={(theme) => ({
+              sx={{
                 fontFamily: '"Keania One"',
                 fontSize: {
                   xs: '3.2rem',
@@ -145,7 +146,7 @@ export default function HomePublic() {
                   -6px  6px 0 rgba(0,0,0,1),
                   6px  6px 0 rgba(0,0,0,1)
                 `,
-                              })}
+                              }}
                             >
               SKOL
             </Typography>
@@ -386,171 +387,46 @@ export default function HomePublic() {
           </Typography>
         </Box>
       </Box>
+{/* LOCALES */}
+<Box
+  id="locales"
+  sx={{
+    py: 10,
+    backgroundColor: '#0F0F0F',
+    width: '100vw',
+    marginLeft: 'calc(50% - 50vw)',
+  }}
+>
+  {/* TÍTULO */}
+  <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
+    <Typography
+      sx={{
+        fontFamily: 'Keania One',
+        fontSize: { xs: 28, sm: 32, md: 36 },
+        color: '#DBD515',
+        letterSpacing: 1.5,
+        mb: 1,
+      }}
+    >
+      Nuestros locales
+    </Typography>
 
-      {/* LOCALES */}
-      <Box
-       id="locales"
-          sx={{
-            py: 10,
-            backgroundColor: '#0F0F0F',
-            width: '100vw',
-            marginLeft: 'calc(50% - 50vw)',
-          }}
-        >
-          {/* TÍTULO */}
-          <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
-            <Typography
-              sx={{
-                fontFamily: 'Keania One',
-                fontSize: { xs: 28, sm: 32, md: 36 },
-                color: '#DBD515',
-                letterSpacing: 1.5,
-                mb: 1,
-              }}
-            >
-              Nuestros locales
-            </Typography>
+    <Typography
+      sx={{
+        color: '#aaa',
+        fontSize: { xs: 14, sm: 15 },
+        maxWidth: 420,
+        mx: 'auto',
+        lineHeight: 1.6,
+      }}
+    >
+      Elegí el local más cercano para reservar tu turno
+    </Typography>
+  </Box>
 
-            <Typography
-              sx={{
-                color: '#aaa',
-                fontSize: { xs: 14, sm: 15 },
-                maxWidth: 420,
-                mx: 'auto',
-                lineHeight: 1.6,
-              }}
-            >
-              Elegí el local más cercano para reservar tu turno
-            </Typography>
-          </Box>
-
-
-          {/* GRID ORDENADO */}
-          <Box
-          sx={{
-            maxWidth: 1050,
-            mx: 'auto',
-            px: { xs: 2, md: 4 },
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: 'repeat(auto-fit, 170px)',
-              sm: 'repeat(auto-fit, 200px)',
-              md: 'repeat(auto-fit, 225px)',
-            },
-            justifyContent: 'center',   // centra la grilla
-            gap: { xs: 1.75, sm: 3 },
-          }}
-        >
-
-
-            {locales.map((local) => (
-              <Card
-              key={local.id}
-              sx={{
-                borderRadius: 2,
-                backgroundColor: '#111',
-                border: '1px solid rgba(255,255,255,0.06)',
-                overflow: 'hidden',
-                transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
-                cursor: 'pointer',
-
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  borderColor: 'rgba(219,213,21,0.15)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.55)',
-                },
-              }}
-            >
-
-              
-                <CardActionArea href="/login" sx={{ height: '100%' }}>
-                  {/* IMAGEN */}
-                  <Box
-                  sx={{
-                    height: 110, // antes 100
-                    backgroundImage: `url(${local.imageUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                />
-
-
-
-
-                  {/* CONTENIDO */}
-                  <CardContent
-                  sx={{
-                    textAlign: 'center',
-                    py: { xs: 1.25, sm: 1.75 }, // antes 1 / 1.5
-                    px: { xs: 1.25, sm: 1.75 },
-                  }}
-                >
-
-           
-                  {/* NOMBRE */}
-                  <Typography
-                    sx={{
-                      fontFamily: 'Keania One',
-                      color: '#DBD515',
-                      fontSize: { xs: 12, sm: 18 },
-                      lineHeight: 1.2,
-                      mb: 0.25,
-                    }}
-                  >
-                    {local.name}
-                  </Typography>
-
-                  {/* DIRECCIÓN + ICONO */}
-                  <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 0.4,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      color: '#bbb',
-                      fontSize: { xs: 10.5, sm: 14 },
-                      lineHeight: 1.25,
-                    }}
-                  >
-                     {local.address}{local.department ? ', ' + local.department : ''}
-                  </Typography>
-
-                  <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const fullAddress = `${local.address}${local.department ? ', ' + local.department : ''}`;
-                    window.open(
-                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`,
-                      '_blank',
-                      'noopener,noreferrer'
-                    );
-                  }}
-                  sx={{
-                    color: 'rgba(219,213,21,0.5)',
-                    p: 0.25,
-                    '&:hover': {
-                      color: 'rgba(219,213,21,0.85)',
-                    },
-                  }}
-                >
-                  <LocationOnIcon sx={{ fontSize: 20 }} />
-                </IconButton>
-
-
-                </Box>
-
-                </CardContent>
-
-                </CardActionArea>
-              </Card>
-            ))}
-          </Box>
-        </Box>
+  {/* 👇 COMPONENTE */}
+  <HomeLocations locales={locales} />
+</Box>    
 
 
     </>
