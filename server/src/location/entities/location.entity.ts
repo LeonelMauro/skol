@@ -24,9 +24,8 @@ export class Location {
   @Column({ default: true })
   is_active: boolean;
 
-  @Column({ nullable: true })
-  imageUrl: string; // URL de la imagen
-
+  @Column("simple-array", { nullable: true })
+  images: string[];
 
   @OneToMany(() => User, user => user.location)
   barbers: User[];

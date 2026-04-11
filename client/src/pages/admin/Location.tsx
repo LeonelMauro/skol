@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
-import { type CreateLocationPayload, type Location } from '../../types/location';
+import { type Location } from '../../types/location';
+import { useAuth } from "../../context/AuthContext";
 import { Box, Card, CardActionArea, CardContent, Typography, IconButton, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import LocationDialog from "./LocationDialog";
@@ -12,11 +12,8 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 export default function Locations(){
 
-    //User authorization
-    const {user}= useAuth();
-    const authHeader={
-      Authorization: `Bearer ${user?.access_token}`
-    }
+   
+    const { user } = useAuth();
     //Snackbar Mensajes al cliente
      const [snackbar, setSnackbar] = useState<{
       open: boolean;
@@ -33,14 +30,31 @@ export default function Locations(){
       ) => {
         setSnackbar({ open: true, message, severity });
       };
+      const [imageIndex, setImageIndex] = useState<Record<number, number>>({});
 
+      const nextImage = (locationId: number, total: number) => {
+        setImageIndex(prev => ({
+          ...prev,
+          [locationId]: ((prev[locationId] || 0) + 1) % total
+        }));
+      };
+
+      const prevImage = (locationId: number, total: number) => {
+        setImageIndex(prev => ({
+          ...prev,
+          [locationId]:
+            (prev[locationId] || 0) === 0
+              ? total - 1
+              : (prev[locationId] || 0) - 1
+        }));
+      };
       //Fromluario crear local
       //Endpoind crear local
-      const handleCreateLocation= async (data: CreateLocationPayload)=>{
+      const handleCreateLocation= async (data: FormData)=>{
         try {
-          await api.post('/location', data, { headers: authHeader });
+          await api.post('/location', data,);
           showSnackbar('Local creado con exito', 'success');
-          feachLocations();
+          fetchLocations();
         } catch (error) {
           showSnackbar('Error al crear local', 'error');
         }
@@ -51,11 +65,9 @@ export default function Locations(){
     const [locations, setLocations] = useState<Location[]>([]);
 
       //Endpoind para mostrar locales
-    const feachLocations = async () =>{
+    const fetchLocations = async () =>{
         try{
-           const res =  await api.get('/location',{
-            headers: authHeader
-           });
+           const res =  await api.get('/location');
 
            setLocations(res.data)
         }
@@ -68,18 +80,20 @@ export default function Locations(){
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
     const [locationToDelete, setLocationToDelete] = useState<Location | null>(null);
 
+    
+
     const handleDelete= async (id: number) =>{
       try{
-         await api.delete(`/location/${id}`, {headers: authHeader});
+         await api.delete(`/location/${id}`);
         showSnackbar('Local eliminado con exito','success');
-        feachLocations();
+        fetchLocations();
       }catch{
         showSnackbar('Error al eliminar local','error')
       }
     }
 
     useEffect(()=>{
-        feachLocations();
+        fetchLocations();
     },[]);
     
     //Endpoind para editar locales
@@ -87,23 +101,39 @@ export default function Locations(){
     const [openDialog, setOpenDialog] = useState(false);
     const [editingLocation, setEditingLocation] = useState<Location | null>(null);
 
-    const handleUpdateLocation = async (data: CreateLocationPayload) => {
+    const handleUpdateLocation = async (data: FormData) => {
       if (!editingLocation) return;
 
       try {
-        await api.patch(`/location/${editingLocation.id}`, data, {
-          headers: authHeader,
-        });
+        await api.patch(`/location/${editingLocation.id}`, data);
         showSnackbar('Local actualizado con éxito', 'success');
         setOpenDialog(false);
         setEditingLocation(null);
-        feachLocations();
+        fetchLocations();
       } catch {
         showSnackbar('Error al actualizar local', 'error');
       }
     };
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setImageIndex(prev => {
+          const updated = { ...prev };
 
+          locations.forEach(loc => {
+            if (loc.images?.length > 1) {
+              const current = prev[loc.id] || 0;
+              updated[loc.id] = (current + 1) % loc.images.length;
+            }
+          });
 
+          return updated;
+        });
+      }, 4000);
+
+      return () => clearInterval(interval);
+    }, [locations]);
+
+    
     return(
     <Box
   sx={{
@@ -140,7 +170,20 @@ export default function Locations(){
       gap: { xs: 1.5, sm: 3 },
     }}
   >
-    {locations.map((local) => (
+    {locations.map((local) => {
+
+  const currentIndex = imageIndex[local.id] ?? 0;
+
+const currentImage =
+  local.images && local.images.length > 0
+    ? local.images[currentIndex] || local.images[0]
+    : null;
+    
+const imageUrl = currentImage
+  ? `${import.meta.env.VITE_API_URL}/uploads/location/${currentImage}`
+  : '/placeholder.jpg';
+  console.log("IMG FINAL:", imageUrl);
+  return (
       <Card
         key={local.id}
         sx={{
@@ -159,14 +202,108 @@ export default function Locations(){
       >
         <CardActionArea sx={{  }}>
           {/* IMAGEN */}
-          <Box
-            sx={{
-              height: { xs: 110, sm: 130, md: 150 },
-              backgroundImage: `url(${local.imageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          />
+          <Box sx={{ position: 'relative', '&:hover .controls': { opacity: 1 } }}>
+            <Box
+  sx={{
+    height: { xs: 110, sm: 130, md: 150 },
+    overflow: 'hidden',
+  }}
+>
+  <img
+    src={imageUrl}
+    alt={local.name}
+    style={{
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      display: 'block',
+    }}
+    onError={(e) => {
+      console.log("ERROR IMG:", imageUrl);
+      e.currentTarget.src = "/placeholder.jpg";
+    }}
+  />
+</Box>
+        
+
+            {/* FLECHA IZQUIERDA */}
+            {local.images?.length > 1 && (
+              <Box
+                className="controls"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prevImage(local.id, local.images.length);
+                }}
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: 5,
+                  transform: 'translateY(-50%)',
+                  cursor: 'pointer',
+                  color: '#fff',
+                  fontSize: 18,
+                  background: 'rgba(0,0,0,0.4)',
+                  px: 1,
+                  borderRadius: 1,
+                }}
+              >
+                ‹
+              </Box>
+            )}
+
+            {/* FLECHA DERECHA */}
+            {local.images?.length > 1 && (
+              <Box
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nextImage(local.id, local.images.length);
+                }}
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  right: 5,
+                  transform: 'translateY(-50%)',
+                  cursor: 'pointer',
+                  color: '#fff',
+                  fontSize: 18,
+                  background: 'rgba(0,0,0,0.4)',
+                  px: 1,
+                  borderRadius: 1,
+                }}
+              >
+                ›
+              </Box>
+            )}
+
+            {/* DOTS */}
+            {local.images?.length > 1 && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 5,
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: 0.5,
+                }}
+              >
+                {local.images.map((_, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      backgroundColor:
+                        (imageIndex[local.id] || 0) === i
+                          ? '#DBD515'
+                          : 'rgba(255,255,255,0.5)',
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+          </Box>
 
           {/* CONTENIDO */}
           <CardContent
@@ -239,49 +376,50 @@ export default function Locations(){
         </CardActionArea>
 
          {/* BOTONES ADMIN */}
-  {user?.role === 'admin' && (
-    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, px: 2, pb: 2 }}>
-      <IconButton
-        onClick={(e) => {
-          e.stopPropagation();
-          setEditingLocation(local);
-          setOpenDialog(true);
-        }}
-        sx={{ color: '#DBD515' }}
-      >
-        <EditIcon />
-      </IconButton>
-      <IconButton
-        color="error"
-        onClick={(e) => {
-          e.stopPropagation();
-          setLocationToDelete(local);
-          setConfirmDeleteOpen(true);
-        }}
-      >
-        <DeleteIcon />
-      </IconButton>
-    </Box>
-  )}
-      </Card>
-    ))}
+      {user?.role === 'admin' && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, px: 2, pb: 2 }}>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditingLocation(local);
+              setOpenDialog(true);
+            }}
+            sx={{ color: '#DBD515' }}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            color="error"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLocationToDelete(local);
+              setConfirmDeleteOpen(true);
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      )}
+          </Card>
+        );
+      })}
 
-    {/* BOTÓN NUEVO LOCAL */}
-    {user?.role === 'admin' && (
-      <Box textAlign="center" mb={4} mt={2}>
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: '#DBD515', color: '#000' }}
-          onClick={() => {
-            setEditingLocation(null);
-            setOpenDialog(true);
-          }}
-        >
-          Más local
-        </Button>
+        {/* BOTÓN NUEVO LOCAL */}
+        {user?.role === 'admin' && (
+          <Box textAlign="center" mb={4} mt={2}>
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: '#DBD515', color: '#000' }}
+              onClick={() => {
+                setEditingLocation(null);
+                setOpenDialog(true);
+              }}
+            >
+              Más local
+            </Button>
+          </Box>
+        )}
       </Box>
-    )}
-  </Box>
 
   {/* DIALOG CREAR/EDITAR */}
   <LocationDialog

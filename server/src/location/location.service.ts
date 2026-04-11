@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Location } from './entities/location.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
+import * as fs from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class LocationService {
@@ -16,11 +18,12 @@ export class LocationService {
     private readonly userRepository: Repository<User>,
 
   ){}
-  async create(dto: CreateLocationDto) {
-    const location= await this.locationRepository.create({
-      ...dto
-    })
-    
+  async create(dto: CreateLocationDto, images: string[]) {
+    const location = this.locationRepository.create({
+      ...dto,
+      images,
+    });
+
     return this.locationRepository.save(location);
   }
 
@@ -57,33 +60,54 @@ export class LocationService {
   }
 
 
-  async update(id: number, dto: UpdateLocationDto) {
-    const location= await this.locationRepository.findOne({
-      where:{id}
-    })
-    if(!location){
-      throw new NotFoundException('No se encontro local')
+  async update(id: number, dto: UpdateLocationDto, newImages: string[]) {
+    const location = await this.locationRepository.findOne({ where: { id } });
+
+    if (!location) {
+      throw new NotFoundException('No se encontró el local');
     }
-    if(dto.name !==undefined){
-      location.name=dto.name
+
+    // 🔥 SOLO si vienen imágenes nuevas
+    if (newImages && newImages.length > 0) {
+      const oldImages = location.images || [];
+
+      const imagesToDelete = oldImages.filter(img => !newImages.includes(img));
+
+      imagesToDelete.forEach(img => {
+        const filePath = join(process.cwd(), 'uploads/location', img);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      });
+
+      location.images = newImages;
     }
-    if(dto.address !==undefined){
-      location.address=dto.address
-    }
-    if(dto.imageUrl !==undefined){
-      location.imageUrl=dto.imageUrl
-    }
-    if(dto.phone !==undefined){
-      location.phone=dto.phone
-    }
-    if(dto.department !==undefined){
-      location.department=dto.department
-    }
-    return await this.locationRepository.save(location);
+
+    // actualizar otros campos
+    Object.assign(location, dto);
+
+    return this.locationRepository.save(location);
   }
 
   async remove(id: number) {
-  const location = await this.locationRepository.delete(id);
-  return location;
+    const location = await this.locationRepository.findOne({ where: { id } });
+
+    if (!location) {
+      throw new NotFoundException('No se encontró el local');
+    }
+
+    // 🔥 eliminar imágenes del disco
+    const images = location.images || [];
+
+    images.forEach(img => {
+      const filePath = join(process.cwd(), 'uploads/location', img);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    });
+
+    await this.locationRepository.delete(id);
+
+    return { message: 'Local eliminado correctamente' };
   }
 }

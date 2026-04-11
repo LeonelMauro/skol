@@ -86,7 +86,6 @@ export default function LocationReport({ location }: Props) {
           ? `${import.meta.env.VITE_API_URL}${b.avatar}`
           : undefined;
 
-          console.log(b)
 
         return (
           <Box
