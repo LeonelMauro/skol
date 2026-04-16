@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import * as fs from 'fs';
 import { join } from 'path';
+import { Role } from 'src/roles/entities/role.entity';
 
 @Injectable()
 export class LocationService {
@@ -110,4 +111,19 @@ export class LocationService {
 
     return { message: 'Local eliminado correctamente' };
   }
+  async getBarbersByLocation(locationId: number) {
+      return this.userRepository.find({
+        where: {
+          role: { name: 'barber' },
+          location: {
+            id: locationId,
+          },
+          isActive: true,
+        },
+        relations: ['location', 'availabilities'],
+        order: {
+          name: 'ASC',
+        },
+      });
+    }
 }

@@ -86,6 +86,10 @@ export class LocationController {
   findAll() {
     return this.locationService.findAll();
   }
+  @Get(':id/barbers')
+  getBarbersByLocation(@Param('id') id: string) {
+    return this.locationService.getBarbersByLocation(+id);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

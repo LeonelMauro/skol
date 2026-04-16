@@ -19,7 +19,7 @@ import IconButton from '@mui/material/IconButton';
 import Slide from '@mui/material/Slide';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import type { TodayBooking } from '../../types/booking';
-
+import { DialogActions } from '@mui/material';
 
 const statusConfig = {
   pending:   { label: 'Pendiente',   color: 'warning' },
@@ -55,8 +55,17 @@ export default function ReservationsBarber() {
   
   const [processingId, setProcessingId] = useState<number | null>(null);
 
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);  
 
+  const [paymentDialog, setPaymentDialog] = useState<{
+  open: boolean;
+  reservationId: number | null;
+}>({
+  open: false,
+  reservationId: null,
+});
+
+const [paymentMethod, setPaymentMethod] = useState<'cash' | 'mercado_pago' | null>(null);
   
 
 
@@ -116,25 +125,6 @@ export default function ReservationsBarber() {
       }
     };
 
-   const handleComplete = async (id: number) => {
-      try {
-        setProcessingId(id);
-
-        const res = await api.post(
-          `/bookings/${id}/complete`,
-          {},
-          { headers: { Authorization: `Bearer ${user?.access_token}` } }
-        );
-
-        setReservations(prev =>
-          prev.map(r => (r.id === id ? res.data : r))
-        );
-      } catch (error) {
-        console.error('Error completando la reserva', error);
-      } finally {
-        setProcessingId(null);
-      }
-    };
 
 
     const handleNoShow = async (id: number) => {
@@ -184,7 +174,45 @@ const metrics = {
 const dailyRevenue = todayHistory
   .filter(r => r.status === 'completed')
   .reduce((total, r) => total + r.service.price, 0);
+const handleConfirmPayment = async () => {
+  if (!paymentDialog.reservationId || !paymentMethod) return;
 
+  try {
+    setProcessingId(paymentDialog.reservationId);
+
+    // 🔥 SOLO ESTO
+    await api.post(
+      '/payment',
+      {
+        reservationId: paymentDialog.reservationId,
+        method: paymentMethod,
+      },
+      {
+        headers: { Authorization: `Bearer ${user?.access_token}` },
+      }
+    );
+
+    // ❌ BORRAR esto
+    // await api.post(`/bookings/${id}/complete`)
+
+    // 🔥 actualizar manualmente estado en UI
+    setReservations(prev =>
+      prev.map(r =>
+        r.id === paymentDialog.reservationId
+          ? { ...r, status: 'completed' }
+          : r
+      )
+    );
+
+    setPaymentDialog({ open: false, reservationId: null });
+    setPaymentMethod(null);
+
+  } catch (error: any) {
+    console.error('Error confirmando pago', error.response?.data);
+  } finally {
+    setProcessingId(null);
+  }
+};
 
   if (loading) {
     return (
@@ -369,7 +397,9 @@ const dailyRevenue = todayHistory
                           size="small"
                           color="success"
                           disabled={processingId === r.id}
-                          onClick={() => handleComplete(r.id)}
+                          onClick={() =>
+                            setPaymentDialog({ open: true, reservationId: r.id })
+                          }
                         >
                           Atendido
                         </Button>
@@ -540,7 +570,51 @@ const dailyRevenue = todayHistory
                     },
                       mx: 'auto'
       }}
+      
     >
+      <Dialog
+  open={paymentDialog.open}
+  onClose={() => setPaymentDialog({ open: false, reservationId: null })}
+>
+  <DialogTitle>Confirmar pago</DialogTitle>
+
+  <DialogContent>
+    <Stack spacing={2} mt={1}>
+      <Button
+        variant={paymentMethod === 'cash' ? 'contained' : 'outlined'}
+        onClick={() => setPaymentMethod('cash')}
+      >
+        Efectivo
+      </Button>
+
+      <Button
+        variant={paymentMethod === 'mercado_pago' ? 'contained' : 'outlined'}
+        onClick={() => setPaymentMethod('mercado_pago')}
+      >
+        Mercado Pago
+      </Button>
+    </Stack>
+  </DialogContent>
+
+  <DialogActions>
+    <Button
+      onClick={() =>
+        setPaymentDialog({ open: false, reservationId: null })
+      }
+    >
+      Cancelar
+    </Button>
+
+    <Button
+      disabled={!paymentMethod}
+      onClick={handleConfirmPayment}
+      variant="contained"
+      color="success"
+    >
+      Confirmar
+    </Button>
+  </DialogActions>
+</Dialog>
     <Dialog
       open={Boolean(selectedReservation)}
       onClose={() => setSelectedReservation(null)}

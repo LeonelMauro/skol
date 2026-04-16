@@ -5,7 +5,6 @@ import {
   Divider,
   CircularProgress,
   Card,
-  CardMedia,
   CardContent,
   Button,
 } from '@mui/material';
@@ -21,6 +20,15 @@ export default function Reserve() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => prev + 1);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -100,9 +108,9 @@ export default function Reserve() {
             sx={{
               display: 'grid',
              gridTemplateColumns: {
-                xs: 'repeat(auto-fit, minmax(150px, 1fr))',
-                sm: 'repeat(auto-fit, minmax(220px, 1fr))',
-                md: 'repeat(auto-fit, minmax(260px, 1fr))',
+                xs: "repeat(auto-fit, minmax(220px, 1fr))",
+                sm: "repeat(auto-fit, minmax(260px, 1fr))",
+                md: "repeat(auto-fit, minmax(320px, 1fr))",
               },
               gap: { xs: 1.5, sm: 3 },
             }}
@@ -129,15 +137,66 @@ export default function Reserve() {
                   }}
                 >
                   <Box >
-                    <CardMedia
-                    component="img"
-                    image={loc.imageUrl}
-                    alt={loc.name}
-                    sx={{
-                      height: { xs: 85, sm: 120, md: 140 },
-                      objectFit: 'cover',
-                    }}
-                  />
+                    <Box
+                      sx={{
+                        position: "relative",
+                        height: { xs: 85, sm: 120, md: 140 },
+                        overflow: "hidden",
+                      }}
+                    >
+                      {loc.images?.map((img, i) => {
+                        const url = `${import.meta.env.VITE_API_URL}/uploads/location/${img}`;
+                        return (
+                          <Box
+                            key={img}
+                            component="img"
+                            src={url}
+                            alt={loc.name}
+                            loading="lazy"
+                            sx={{
+                              position: "absolute",
+                              inset: 0,
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+
+                              opacity: i === currentIndex % loc.images.length ? 1 : 0,
+                              transition: "opacity 1.2s ease-in-out",
+
+                              filter:
+                              i === currentIndex % loc.images.length
+                                ? "brightness(1)"
+                                : "brightness(0.85)"
+                            }}
+                          />
+                        );
+                      })}
+
+                      {/* overlay blanco tipo flash */}
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          inset: 0,
+                          background: "rgba(255,255,255,0.08)",
+                          opacity: 0,
+                          animation: "flash 1.2s ease",
+
+                          "@keyframes flash": {
+                            "0%": { opacity: 0.25 },
+                            "100%": { opacity: 0 },
+                          },
+                        }}
+                      />
+
+                      {/* overlay oscuro base */}
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          inset: 0,
+                          background: "rgba(0,0,0,0.25)",
+                        }}
+                      />
+                    </Box>
 
 
                     <CardContent sx={{ py: 1.2 }}>
