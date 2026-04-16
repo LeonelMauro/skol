@@ -321,12 +321,42 @@ const isFormValid =
 
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" fullScreen={isMobile}>
-  <DialogTitle>
-    Editar disponibilidad – {barberName}
-  </DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      scroll="paper"
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          backgroundColor: '#111',
 
-  <DialogContent>
+          // 🔥 clave para mobile
+          width: { xs: '92%', sm: '100%' },
+          margin: { xs: '16px auto', sm: 'auto' },
+          maxHeight: { xs: '90vh', sm: '85vh' },
+        },
+      }}
+    >
+  <DialogTitle
+  sx={{
+    fontSize: { xs: 18, sm: 22 },
+    pb: 1,
+    color: '#DBD515',
+    textAlign: 'center',
+    fontFamily: 'Keania One',
+  }}
+>
+  Editar disponibilidad – {barberName}
+</DialogTitle>
+
+  <DialogContent
+  dividers
+  sx={{
+    overflowY: 'auto',
+  }}
+>
     {days.map((day, dayIndex) => {
   const isActive = day.is_active;
 
@@ -334,11 +364,11 @@ const isFormValid =
     <Box
       key={day.day_of_week}
       sx={{
-        p: 3,
-        mb: 3,
+        p: { xs: 2, sm: 3 },
+        mb: 2,
         borderRadius: 4,
-        backgroundColor: "#ffffff",
-        border: "1px solid #dddddd",
+        backgroundColor: '#1a1a1a',
+        border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
       {/* Header */}
@@ -350,27 +380,47 @@ const isFormValid =
           mb: 2,
         }}
       >
-        <Typography fontWeight={700} fontSize={18}>
+        <Typography
+          sx={{
+            color: isActive ? '#DBD515' : '#777',
+            fontWeight: 700,
+            fontSize: 16,
+            letterSpacing: 0.5,
+          }}
+        >
           {DAY_LABELS[day.day_of_week]}
         </Typography>
 
         <Switch
-          checked={isActive}
-          onChange={(e) =>
-            updateDay(dayIndex, {
-              is_active: e.target.checked,
-            })
-          }
-        />
+        checked={isActive}
+        onChange={(e) =>
+          updateDay(dayIndex, {
+            is_active: e.target.checked,
+          })
+        }
+        sx={{
+          '& .MuiSwitch-switchBase.Mui-checked': {
+            color: '#DBD515',
+          },
+          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+            backgroundColor: '#DBD515',
+          },
+          '& .MuiSwitch-track': {
+            backgroundColor: '#555',
+          },
+        }}
+      />
       </Box>
 
       {/* Si no está activo */}
       {!isActive && (
         <Typography
-          sx={{ mb: 2 }}
-          fontSize={14}
-          color="text.secondary"
-        >
+           sx={{
+          mb: 2,
+          fontSize: 13,
+          color: '#999', // 🔥 mejor contraste
+          fontStyle: 'italic',
+        }}>
           Activá el día para agregar horarios
         </Typography>
       )}
@@ -462,19 +512,64 @@ const isFormValid =
 
 
     <Divider sx={{ my: 2 }} />
-     <Select
-      fullWidth
-      value={selectedLocationId}
-      onChange={handleLocationChange}
-      displayEmpty
-      required
-    >
+
+<Select
+  fullWidth
+  value={selectedLocationId}
+  onChange={handleLocationChange}
+  displayEmpty
+  required
+  sx={{
+    mt: 1,
+    color: '#fff',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 2,
+
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#444',
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#666',
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#DBD515',
+    },
+
+    '& .MuiSvgIcon-root': {
+      color: '#aaa', // flechita
+    },
+  }}
+
+  MenuProps={{
+    PaperProps: {
+      sx: {
+        backgroundColor: '#1a1a1a',
+        color: '#fff',
+        border: '1px solid rgba(255,255,255,0.08)',
+      },
+    },
+  }}
+>
   <MenuItem value="">
-    <em>Seleccionar local</em>
+    <em style={{ color: '#888' }}>Seleccionar local</em>
   </MenuItem>
 
   {locations.map((loc) => (
-    <MenuItem key={loc.id} value={loc.id}>
+    <MenuItem
+      key={loc.id}
+      value={loc.id}
+      sx={{
+        '&:hover': {
+          backgroundColor: 'rgba(219,213,21,0.08)',
+        },
+        '&.Mui-selected': {
+          backgroundColor: 'rgba(219,213,21,0.15)',
+        },
+        '&.Mui-selected:hover': {
+          backgroundColor: 'rgba(219,213,21,0.25)',
+        },
+      }}
+    >
       {loc.name}, {loc.address}
     </MenuItem>
   ))}
@@ -485,7 +580,21 @@ const isFormValid =
   </DialogContent>
 
   <DialogActions>
-    <Button onClick={onClose}>Cancelar</Button>
+    <Button
+  onClick={onClose}
+  sx={{
+    color: '#ccc',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: 2,
+    px: 2,
+    '&:hover': {
+      backgroundColor: 'rgba(255,255,255,0.05)',
+      borderColor: '#888',
+    },
+  }}
+>
+  Cancelar
+</Button>
     <Button variant="contained" onClick={handleSave} disabled={!isFormValid}>
       Guardar cambios
     </Button>

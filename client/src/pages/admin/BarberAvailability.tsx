@@ -1,18 +1,17 @@
-import { useEffect, useState ,useMemo} from 'react';
+import { useEffect, useState ,} from 'react';
 import api from '../../services/api';
 import type {
   BarberAvailability,
-  BarberTableInfo,
   CreateBarberAvailabilityPayload,
   UpdateBarberSchedulePayload,
 } from '../../types/barberAvailability';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 
 import type { Barber} from "../../types/user";
 
 import {
-  Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, IconButton, Chip,
+  
   Box, Typography,
   Snackbar,
   Alert,
@@ -21,7 +20,8 @@ import {
   Dialog,
   DialogTitle,
   InputAdornment,
-  TextField
+  TextField,
+  IconButton
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {useAuth} from '../../context/AuthContext';
@@ -32,6 +32,7 @@ import BarberDialogEditAvail from './BarberDialogEditAvail';
 import Register from '../Register';
 import { useTheme, useMediaQuery } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
+import { Avatar } from '@mui/material';
 
 export default function BarberAvailability() {
   
@@ -76,13 +77,8 @@ export default function BarberAvailability() {
   //Mostrar barberos disponibles barbero
   const [barbers, setBarbers] = useState<Barber[]>([]);
 
-  const barberIdsWithAvailability = new Set(
-  availabi.map(a => a.barber.id)
-  );
-  const barbersWithoutAvailability = barbers.filter(
-    barber => !barberIdsWithAvailability.has(barber.id)
-    
-  );
+  
+  
  
   
   const fechtBarbers = async () =>{
@@ -117,6 +113,27 @@ export default function BarberAvailability() {
   //CREAR BARBER
 
   const [openCreateBarber, setOpenCreateBarber] = useState(false);
+
+  const [selectedBarberView, setSelectedBarberView] = useState<{
+  barber: Barber;
+  availabilities: BarberAvailability[];
+} | null>(null);
+
+  const getBarberAvailability = (barberId: number) =>
+    availabi.filter(a => a.barber.id === barberId);
+
+  const groupByDay = (availabilities: BarberAvailability[]) => {
+    const grouped: Record<string, BarberAvailability[]> = {};
+
+    availabilities.forEach(a => {
+      if (!grouped[a.day_of_week]) {
+        grouped[a.day_of_week] = [];
+      }
+      grouped[a.day_of_week].push(a);
+    });
+
+    return grouped;
+  };
 
   //ACTUALIZAR
   
@@ -232,48 +249,6 @@ const [selectedBarber, setSelectedBarber] = useState<{
   
       return () => clearTimeout(timeout);
     }, [search]);
-  const availabilityByBarber = availabi.reduce((acc, availability) => {
-  const barberId = availability.barber.id;
-
-  if (!acc[barberId]) {
-    acc[barberId] = {
-      barber: {
-        id: availability.barber.id,
-        name: availability.barber.name,
-        location: availability.barber.location ?? null,
-      },
-      availabilities: [],
-    };
-  }
-
-  acc[barberId].availabilities.push(availability);
-  return acc;
-}, {} as Record<number, { barber: BarberTableInfo; availabilities: BarberAvailability[] }>);
-
-  const filteredBarbers = useMemo(() => {
-  const list = Object.values(availabilityByBarber);
-
-  if (!search.trim()) return list;
-
-  const lowerSearch = search.toLowerCase();
-
-  return list.filter(b =>
-    b.barber.name.toLowerCase().includes(lowerSearch)
-  );
-}, [availabilityByBarber, search]);
-
-const DAY_ORDER = [
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-  'sunday',
-] as const;
-
-type DayOfWeek = typeof DAY_ORDER[number];
-
 
 
   const DAY_LABELS: Record<string, string> = {
@@ -360,336 +335,233 @@ type DayOfWeek = typeof DAY_ORDER[number];
           }}
         />
       </Box>
+      <Box
+  sx={{
+    display: 'grid',
+    gridTemplateColumns: {
+      xs: 'repeat(auto-fit, minmax(140px, 1fr))',
+      sm: 'repeat(auto-fit, minmax(180px, 1fr))',
+    },
+    gap: 3,
+    justifyItems: 'center',
+  }}
+>
+  {barbers.map((barber) => {
+    const barberAvail = getBarberAvailability(barber.id);
+    const hasAvailability = barberAvail.length > 0;
 
-    
-      {isMobile ? (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {barbersWithoutAvailability.map((barber) => (
-          
-          
-          <Paper
-            key={`no-avail-${barber.id}`}
-            sx={{
-              p: { xs: 1.2, sm: 2 },
-              backgroundColor: '#111',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 2,
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 1,
-              }}
-            >
-              <Typography sx={{ color: '#DBD515', fontWeight: 600 }}>
-                {barber.name}
-              </Typography>
+    const avatarUrl = barber.avatar
+      ? `${import.meta.env.VITE_API_URL}${barber.avatar}`
+      : undefined;
 
-              <Chip
-                label="Sin disponibilidad"
-                color="warning"
-                size="small"
-              />
-            </Box>
+    return (
+      <Box
+        key={barber.id}
+        onClick={() => {
+          if (hasAvailability) {
+            setSelectedBarberView({
+              barber,
+              availabilities: barberAvail,
+            });
+          } else {
+            setSelectedBarberId(barber.id);
+            setOpenCreate(true);
+          }
+        }}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          cursor: 'pointer',
+          transition: '0.3s',
 
-            <Typography variant="caption" sx={{ color: '#888' }}>
-              Inactivo
-            </Typography>
+          '&:hover': {
+            transform: 'translateY(-5px)',
+          },
+        }}
+      >
+        <Avatar
+          src={avatarUrl}
+          sx={{
+            width: { xs: 80, sm: 100, md: 110 },
+            height: { xs: 80, sm: 100, md: 110 },
+            mb: 1,
 
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-              <IconButton
-                sx={{
-                  color: '#DBD515',
-                  border: '1px solid rgba(219,213,21,0.3)',
-                  borderRadius: 2,
-                }}
-                onClick={() => {
-                  setSelectedBarberId(barber.id);
-                  setOpenCreate(true);
-                }}
-              >
-                <EditIcon />
-              </IconButton>
-            </Box>
-          </Paper>
-        ))}
+            border: hasAvailability
+              ? '2px solid #444'
+              : '3px solid #ff9800',
 
-        {filteredBarbers.map(({ barber, availabilities }) => (
-          <Paper
-            key={barber.id}
-            sx={{
-              p: 2,
-              backgroundColor: '#111',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 2,
-            }}
-          >
-            {/* Nombre + Estado */}
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 1,
-              }}
-            >
-              <Typography sx={{ color: '#DBD515', fontWeight: 600 }}>
-                {barber.name}
-              </Typography>
+            boxShadow: hasAvailability
+              ? '0 6px 16px rgba(0,0,0,0.6)'
+              : '0 0 15px rgba(255,152,0,0.5)',
+          }}
+        >
+          {!barber.avatar && barber.name.charAt(0)}
+        </Avatar>
 
-              <Chip
-              label={
-                availabilities.some(a => a.is_active)
-                  ? "Disponible"
-                  : "Inactivo"
-              }
-              color={
-                availabilities.some(a => a.is_active)
-                  ? "success"
-                  : "default"
-              }
-              size="small"
-            />
-            </Box>
+        <Typography
+          sx={{
+            fontFamily: 'Keania One',
+            color: hasAvailability ? '#ccc' : '#ff9800',
+            textAlign: 'center',
+          }}
+        >
+          {barber.name}
+        </Typography>
 
-            {/* Horarios */}
-            <Box sx={{ mb: 1 }}>
-              {DAY_ORDER.map(day => {
-              const dayAvailabilities = availabilities
-                .filter(a => a.day_of_week === day)
-                .sort((a, b) =>
-                  a.start_time.localeCompare(b.start_time)
-                );
-
-              if (!dayAvailabilities.length) return null;
-
-              return (
-                <Box key={day} sx={{ mb: 0.5 }}>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: '#DBD515', fontWeight: 600 }}
-                  >
-                    {DAY_LABELS[day]}
-                  </Typography>
-
-                  {dayAvailabilities.map(a => (
-                    <Typography
-                      key={a.id}
-                      variant="caption"
-                      sx={{
-                        display: "block",
-                        ml: 1,
-                        color: a.is_active ? "#2e7d32" : "#434444ff",
-                        textDecoration: a.is_active ? "none" : "line-through",
-                        opacity: a.is_active ? 1 : 0.6,
-                      }}
-                    >
-                      • {a.start_time} – {a.end_time}
-                    </Typography>
-                  ))}
-
-                </Box>
-              );
-            })}
-
-            </Box>
-
-            {/* Local */}
-            <Typography variant="caption" sx={{ color: '#888' }}>
-              {barber.location?.name ?? 'Sin local'}
-            </Typography>
-
-            {/* Botón */}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-              <IconButton
-                onClick={() => {
-                  setSelectedBarber({
-                    barberId: barber.id,
-                    name: barber.name,
-                    availabilities,
-                    locationId: barber.location?.id ?? null,
-                  });
-                  setOpenEditDialog(true);
-                }}
-                sx={{ color: '#DBD515' }}
-              >
-                <EditIcon />
-              </IconButton>
-            </Box>
-          </Paper>
-        ))}
+        {!hasAvailability && (
+          <Typography variant="caption" sx={{ color: '#ff9800' }}>
+            Sin disponibilidad
+          </Typography>
+        )}
       </Box>
-    ) : (
-      // 👇 ACÁ DEJÁS TU TABLE ACTUAL
+    );
+  })}
+</Box>
+<Dialog
+  open={!!selectedBarberView}
+  onClose={() => setSelectedBarberView(null)}
+  maxWidth="xs"
+  fullWidth
+  PaperProps={{
+    sx: {
+      backdropFilter: 'blur(3px)',
+      borderRadius: 3,
+      backgroundColor: '#111',
+      width: { xs: '90%', sm: '100%' }, // 👈 achica en celular
+      m: { xs: 1, sm: 2 }, // 👈 margen para poder “tocar afuera”
+      maxHeight: '85vh', // 👈 evita que ocupe toda la pantalla
+    },
+  }}
+>
+  <DialogTitle
+    sx={{
+      fontSize: { xs: 18, sm: 22 },
+      pb: 1,
+      color: '#DBD515',
+      textAlign: 'center',
+    }}
+  >
+    {selectedBarberView?.barber.name}
+  </DialogTitle>
 
+  <DialogContent
+      dividers
+      sx={{
+        px: { xs: 2, sm: 3 },
+        py: { xs: 1.5, sm: 2 },
+        overflowY: 'auto',
+      }}
+    >
+    {selectedBarberView && (() => {
+      const grouped = groupByDay(selectedBarberView.availabilities);
 
-      <TableContainer component={Paper}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Barbero</TableCell>
-              <TableCell>Día</TableCell>
-              <TableCell>Horario</TableCell>
-              <TableCell>Local</TableCell>
-              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Dirección</TableCell>
-              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Estado</TableCell>
-              <TableCell align="right">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
+      return Object.entries(grouped).map(([day, ranges]) => (
+        <Box
+          key={day}
+          sx={{
+            mb: 1.2,
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            sx={{
+              color: '#DBD515',
+              fontWeight: 600,
+              minWidth: 40,
+            }}
+          >
+            {DAY_LABELS[day]}
+          </Typography>
 
-          <TableBody>
-            {barbersWithoutAvailability.map((barber) => (
-              <TableRow key={`no-avail-${barber.id}`}>
-                <TableCell>{barber.name}</TableCell>
-
-                <TableCell colSpan={3}>
-                  <Chip
-                    label="Sin disponibilidad"
-                    color="warning"
-                    size="small"
-                  />
-                </TableCell>
-
-                <TableCell sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                  <Chip label="Inactivo" size="small" />
-                </TableCell>
-
-                <TableCell align="right">
-                  <IconButton
-                    sx={{
-                      color: '#DBD515',
-                      border: '1px solid rgba(219,213,21,0.3)',
-                      borderRadius: 2,
-                    }}
-                    onClick={() => {
-                      setSelectedBarberId(barber.id);
-                      setOpenCreate(true);
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
+          {ranges
+            .sort((a, b) =>
+              a.start_time.localeCompare(b.start_time)
+            )
+            .map((r) => (
+              <Typography
+                key={r.id}
+                sx={{
+                  ml: 1,
+                  fontSize: 13,
+                  color: r.is_active ? '#2e7d32' : '#777',
+                }}
+              >
+                {r.start_time} – {r.end_time}
+              </Typography>
             ))}
-            {filteredBarbers.map(({ barber, availabilities }) => (
-              <TableRow key={barber.id}>
-                <TableCell>{barber.name}</TableCell>
+        </Box>
+      ));
+    })()}
 
-                {/* DÍAS AGRUPADOS */}
-                <TableCell>
-                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                    {Array.from(
-                      new Set(availabilities.map(a => a.day_of_week as DayOfWeek))
+    {/* BOTONES */}
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 1,
+        mt: 3,
+        justifyContent: 'flex-end',
+      }}
+    >
+      <IconButton
+        onClick={() => {
+          setSelectedBarber({
+            barberId: selectedBarberView!.barber.id,
+            name: selectedBarberView!.barber.name,
+            availabilities: selectedBarberView!.availabilities,
+            locationId:
+              selectedBarberView!.barber.location?.id ?? null,
+          });
+          setOpenEditDialog(true);
+        }}
+        sx={{
+          color: '#DBD515',
+          border: '1px solid rgba(219,213,21,0.3)',
+          borderRadius: 2,
+          '&:hover': {
+            backgroundColor: 'rgba(219,213,21,0.1)',
+          },
+        }}
+      >
+        <EditIcon />
+      </IconButton>
 
-                    )
-                      .sort((a, b) =>
-                        DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b)
-                      )
-                      .map(day => {
-                        const isActive = availabilities.some(
-                          a => a.day_of_week === day && a.is_active
-                        );
+      <IconButton
+        onClick={async () => {
+          try {
+            await Promise.all(
+              selectedBarberView!.availabilities.map(a =>
+                api.delete(`/barber-availability/${a.id}`, {
+                  headers: authHeader,
+                })
+              )
+            );
 
-                        return (
-                          <Chip
-                            key={day}
-                            label={DAY_LABELS[day]}
-                            size="small"
-                            color={isActive ? "success" : "default"}
-                            variant={isActive ? "filled" : "outlined"}
-                          />
-                        );
-                      })}
-                  </Box>
-                </TableCell>
-
-
-
-                {/* HORARIO (asumimos mismo rango) */}
-                <TableCell>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                    {DAY_ORDER
-                      .filter(day =>
-                        availabilities.some(a => a.day_of_week === day)
-                      )
-                      .map(day => {
-                        const dayRanges = availabilities
-                          .filter(a => a.day_of_week === day)
-                          .sort((a, b) =>
-                            a.start_time.localeCompare(b.start_time)
-                          );
-
-                        return (
-                          <Box key={day}>
-                            <Typography
-                              variant="caption"
-                              sx={{ fontWeight: 600 }}
-                            >
-                              {DAY_LABELS[day]}
-                            </Typography>
-
-                            {dayRanges.map(range => (
-                              <Typography
-                                key={range.id}
-                                variant="caption"
-                                sx={{
-                                  display: "block",
-                                  ml: 1,
-                                  color: range.is_active ? "#2e7d32" : "#777",
-                                  textDecoration: range.is_active
-                                    ? "none"
-                                    : "line-through",
-                                  opacity: range.is_active ? 1 : 0.6,
-                                }}
-                              >
-                                {range.start_time} – {range.end_time}
-                              </Typography>
-                            ))}
-                          </Box>
-                        );
-                      })}
-                  </Box>
-                </TableCell>
-
-
-                <TableCell>
-                  {barber.location?.name ?? "Sin local"}
-                </TableCell>
-
-                <TableCell sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                  {barber.location?.address ?? "Sin local"}
-                </TableCell>
-
-                <TableCell sx={{ display: { xs: "none", sm: "table-cell" } }}>
-                  <Chip label="Activo" color="success" size="small" />
-                </TableCell>
-
-                <TableCell align="right">
-                  <IconButton
-                    onClick={() => {
-                      setSelectedBarber({
-                        barberId: barber.id,
-                        name: barber.name,
-                        availabilities,
-                        locationId: barber.location?.id ?? null,
-                      });
-                      setOpenEditDialog(true);
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-
-                </TableCell>
-              </TableRow>
-            ))}
-
-          </TableBody>
-        </Table>
-      </TableContainer>
-    )}
+            showSnackbar('Disponibilidad eliminada', 'success');
+            setSelectedBarberView(null);
+            fechtAvailabilities();
+          } catch {
+            showSnackbar('Error al eliminar', 'error');
+          }
+        }}
+        sx={{
+          color: '#f44336',
+          border: '1px solid rgba(244,67,54,0.3)',
+          borderRadius: 2,
+          '&:hover': {
+            backgroundColor: 'rgba(244,67,54,0.1)',
+          },
+        }}
+      >
+        <DeleteIcon />
+      </IconButton>
+    </Box>
+  </DialogContent>
+</Dialog>
+    
+     
       {/* Acá después va el Dialog de crear / editar */}
       {/* Y el Dialog de confirmación */}
   <Snackbar
