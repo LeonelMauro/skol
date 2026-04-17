@@ -178,14 +178,14 @@ export default function Register({ mode = 'public' , onSuccess}: RegisterProps) 
   return (
     <Box
       sx={{
-      minHeight: '100vh',
-      backgroundColor: '#0F0F0F',
-      display: 'flex',
-      alignItems: 'flex-start',
-      justifyContent: 'center',
-      pt: { xs: '88px', sm: '104px' },
-      px: { xs: 1.5, sm: 0 },
-    }}
+        minHeight: 'calc(100vh - 60px)',
+        backgroundColor: '#0F0F0F',
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        px: { xs: 1.5, sm: 0 },
+        py: 3,
+      }}
     >
       <Paper
         elevation={6}

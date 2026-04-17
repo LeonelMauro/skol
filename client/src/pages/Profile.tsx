@@ -141,7 +141,7 @@ export default function Profile() {
       sx={{
         minHeight: "100vh",
         backgroundColor: "#0F0F0F",
-        pt: 10,
+        pt: 3,
         textAlign: "center",
       }}
     >

@@ -97,7 +97,7 @@ export default function MyReservations() {
       textAlign: 'center',
       minHeight: '100vh',
       backgroundColor: '#0F0F0F',
-      pt: { xs: 2, md: 4 },
+      pt: 3,
     }}
   >
     <Box

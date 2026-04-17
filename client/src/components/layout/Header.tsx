@@ -160,10 +160,13 @@ const instagramHover = {
       <AppBar
         position="fixed"
         elevation={0}
-        sx={{
-          backgroundColor: 'rgba(10,10,10,0.75)',
-          backdropFilter: 'blur(10px)',
-        }}
+      sx={{
+        backgroundColor: isHome
+          ? 'rgba(10,10,10,0.75)' // Home (semi transparente)
+          : '#0B0B0B',            // 🔥 páginas internas sólido
+
+        backdropFilter: isHome ? 'blur(10px)' : 'none',
+      }}
 
       >
         <Toolbar

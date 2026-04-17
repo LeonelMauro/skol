@@ -40,7 +40,7 @@ export default function DashboardAdmin() {
         minHeight: '100vh',
         backgroundColor: '#0F0F0F',
         px: { xs: 2, md: 6 },
-        pt: { xs: 10, md: 12 },
+        pt: 3,
         textAlign: 'center',
       }}
     >

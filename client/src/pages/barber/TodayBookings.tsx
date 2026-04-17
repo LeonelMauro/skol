@@ -225,16 +225,15 @@ const handleConfirmPayment = async () => {
   if (!reservations.length) {
   return (
     <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#0F0F0F',
-        px: 2,
-      }}
-      
-    >
+    sx={{
+      minHeight: 'calc(100vh - 60px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#0F0F0F',
+      px: 2,
+    }}
+  >
       <Stack spacing={1} alignItems="center">
         <Typography
           sx={{

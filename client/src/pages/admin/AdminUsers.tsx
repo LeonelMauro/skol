@@ -123,10 +123,8 @@ export default function AdminUsers() {
     <Box sx={{
         minHeight: '100vh',
         backgroundColor: '#f7f0f0ff',
-        width: '100vw',
-        marginLeft: 'calc(50% - 50vw)',
         px: { xs: 2, md: 6 },
-        pt: { xs: 10, md: 12 }, // AppBar fixed
+        pt: 3, // AppBar fixed
       }}    >
       <Box
         sx={{

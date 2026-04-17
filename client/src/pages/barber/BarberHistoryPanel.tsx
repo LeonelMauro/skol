@@ -220,7 +220,14 @@ const chartData =
 
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#0F0F0F', p: 2 }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        backgroundColor: '#0F0F0F',
+        px: 2,
+        py: 2,
+      }}
+    >
 
       <Button
         variant="outlined"

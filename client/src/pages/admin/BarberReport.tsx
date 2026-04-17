@@ -245,7 +245,7 @@ const totalDay = filteredHistory.reduce(
       sx={{
         maxWidth: 1000,
         mx: "auto",
-        mt: 6,
+        mt: 3,
       }}
     >
 

@@ -47,7 +47,7 @@ export default function AddService() {
       sx={{
         minHeight: '100vh',
         backgroundColor: '#0F0F0F',
-        pt: { xs: 10, md: 12 },
+        pt: 3,
       }}
     >
       <Box

@@ -57,7 +57,7 @@ export default function DashboardBarber() {
         minHeight: '100vh',
         backgroundColor: '#0F0F0F',
         px: { xs: 2, md: 6 },
-        pt: { xs: 10, md: 12 },
+        pt: 3,
         textAlign: 'center',
       }}
     >
@@ -65,7 +65,7 @@ export default function DashboardBarber() {
         sx={{
           display: 'flex',
           justifyContent: 'center',
-          mb: 2,
+          mb: 3,
         }}
       >
         <Avatar

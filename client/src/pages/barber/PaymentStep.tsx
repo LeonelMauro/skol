@@ -114,11 +114,11 @@ export default function PaymentStep() {
       sx={{
         minHeight: '100vh',
         backgroundColor: '#0F0F0F',
-        pt: 10,
+        pt: 3,
         px: 2,
       }}
     >
-      <Box sx={{ maxWidth: 500, mx: 'auto', textAlign: 'center' }}>
+      <Box sx={{ maxWidth: 500, mx: 'auto', mt: 2, textAlign: 'center' }}>
         <Typography
           variant="h4"
           sx={{ fontFamily: 'Keania One', color: '#DBD515', mb: 1 }}

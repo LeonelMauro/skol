@@ -66,19 +66,18 @@ export default function HomePublic() {
     <>
       {/* HERO */}
       <Box
-        sx={{
-          position: 'relative',
-          height: {
-            xs: '65vh',   // mobile
-            sm: '75vh',   // tablets
-            md: '90vh',   // desktop
-          },
-
-          width: '100vw',
-          marginLeft: 'calc(50% - 50vw)',
-          overflow: 'hidden',
-        }}
-      >
+  sx={{
+    position: 'relative',
+    height: {
+      xs: '65vh',
+      sm: '75vh',
+      md: '90vh',
+    },
+    width: '100%',
+    overflow: 'hidden',
+    mt: '-60px', // 🔥 clave
+  }}
+>
         {/* BACKGROUND IMAGES */}
         {heroImages.map((img, index) => (
           <Box

@@ -66,17 +66,17 @@ export default function Login() {
 
   return (
   <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: '#0F0F0F',
-        display: 'flex',
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: { xs: 'flex-start', sm: 'center' },
-        pt: { xs: '88px', sm: '104px' },
-        px: { xs: 2, sm: 0 },
-      }}
-    >
+  sx={{
+    minHeight: 'calc(100vh - 60px)',
+    backgroundColor: '#0F0F0F',
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: { xs: 'flex-start', sm: 'center' },
+    px: { xs: 2, sm: 0 },
+    py: 3,
+  }}
+>
 
 
       <Paper

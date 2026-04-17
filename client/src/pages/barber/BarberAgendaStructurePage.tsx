@@ -119,7 +119,7 @@ useEffect(() => {
     sx={{
       minHeight: '100vh',
       backgroundColor: '#0F0F0F',
-      pt: { xs: 8, md: 10 },
+      pt: 3,
     }}
   >
     <Box
@@ -228,7 +228,7 @@ useEffect(() => {
         );
       })}
     </Box>
-    <Box sx={{ mt: 8 }}>
+    <Box sx={{ mt: 5 }}>
     <Typography
       variant="h4"
       sx={{
