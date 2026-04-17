@@ -21,7 +21,11 @@ export class CommissionController {
   findOne(@Param('id') id: string) {
     return this.commissionService.findOne(+id);
   }
-
+  @Get('barber/:barberId')
+  findByBarberId(@Param('barberId') barberId: string) {
+    return this.commissionService.findByBarberId(+barberId);
+  }
+  
  @Patch('barber/:barberId')
   update(
     @Param('barberId') barberId: string,

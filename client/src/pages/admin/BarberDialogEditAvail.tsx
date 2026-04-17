@@ -15,6 +15,7 @@ import {
   Select,
   useTheme,
   useMediaQuery,
+  InputAdornment,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import type { SelectChangeEvent } from "@mui/material/Select";
@@ -120,7 +121,7 @@ const validateAll = (updatedDays: EditableBarberAvailability[]) => {
   setErrors(newErrors);
   return Object.keys(newErrors).length === 0;
 };
-
+const [hasCommission, setHasCommission] = useState(false);
 
 const DAY_ORDER = [
   'monday',
@@ -131,6 +132,7 @@ const DAY_ORDER = [
   'saturday',
   'sunday',
 ] as const;
+  
 
 
 useEffect(() => {
@@ -193,7 +195,26 @@ const [removedIds, setRemovedIds] = useState<number[]>([]);
 
 const [locations, setLocations] = useState<Location[]>([]);
 
+const [percentage, setPercentage] = useState<number | "">("");
 
+useEffect(() => {
+  if (!open) return;
+
+  api.get(`/commission/barber/${barberId}`)
+    .then(res => {
+      if (res.data) {
+        setPercentage(res.data.percentage);
+        setHasCommission(true);
+      } else {
+        setPercentage("");
+        setHasCommission(false);
+      }
+    })
+    .catch(() => {
+      setPercentage("");
+      setHasCommission(false);
+    });
+}, [open, barberId]);
 const validateDayRanges = (day: EditableBarberAvailability) => {
   const ranges = day.timeRanges;
 
@@ -259,6 +280,18 @@ const handleSave = async () => {
       removedIds,
     });
 
+    // 🔥 comisión
+if (hasCommission) {
+  await api.patch(`/commission/barber/${barberId}`, {
+    percentage: Number(percentage),
+  });
+} else {
+  await api.post('/commission', {
+    barberId,
+    percentage: Number(percentage),
+  });
+}
+
     if (selectedLocationId !== locationId) {
       await onSaveLocation(barberId, selectedLocationId);
     }
@@ -316,8 +349,11 @@ const removeTimeRange = (dayIndex: number, rangeIndex: number) => {
 
 const isFormValid =
   Object.keys(errors).length === 0 &&
-  selectedLocationId !== "";
-
+  selectedLocationId !== "" &&
+  percentage !== "" &&
+  !isNaN(Number(percentage)) &&
+  Number(percentage) >= 0 &&
+  Number(percentage) <= 100;
 
 
   return (
@@ -357,6 +393,68 @@ const isFormValid =
     overflowY: 'auto',
   }}
 >
+  <Box
+  sx={{
+    mb: 3,
+    p: 2,
+    borderRadius: 3,
+    backgroundColor: '#1a1a1a',
+    border: '1px solid rgba(255,255,255,0.08)',
+  }}
+>
+  <Typography
+    sx={{
+      color: '#DBD515',
+      fontWeight: 600,
+      mb: 1,
+    }}
+  >
+    Comisión
+  </Typography>
+
+  <TextField
+    fullWidth
+    size="small"
+    type="number"
+    value={percentage}
+    onChange={(e) => {
+      let value = Number(e.target.value);
+
+      if (value < 0) value = 0;
+      if (value > 100) value = 100;
+
+      setPercentage(value);
+    }}
+    placeholder="Ej: 20"
+    InputProps={{
+      endAdornment: <InputAdornment position="end">%</InputAdornment>,
+    }}
+    sx={{
+      backgroundColor: '#111',
+      borderRadius: 2,
+      '& input': { color: '#fff' },
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#444',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#666',
+      },
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#DBD515',
+      },
+    }}
+    error={
+      percentage === "" ||
+      Number(percentage) < 0 ||
+      Number(percentage) > 100
+    }
+    helperText={
+      percentage === ""
+        ? "Campo obligatorio"
+        : "Debe ser entre 0 y 100"
+    }
+  />
+</Box>
     {days.map((day, dayIndex) => {
   const isActive = day.is_active;
 

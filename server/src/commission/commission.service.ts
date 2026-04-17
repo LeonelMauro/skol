@@ -41,8 +41,10 @@ export class CommissionService {
     return await this.commissionRepo.save(commission);
   }
 
-  findAll() {
-    return `This action returns all commission`;
+  async findAll() {
+    return this.commissionRepo.find({
+      relations: ['barber'],
+    });
   }
 
   findOne(id: number) {
@@ -63,7 +65,18 @@ export class CommissionService {
 
     return await this.commissionRepo.save(commission);
   }
+  async findByBarberId(barberId: number) {
+  const commission = await this.commissionRepo.findOne({
+    where: { barber: { id: barberId } },
+    relations: ['barber'], // opcional
+  });
 
+  if (!commission) {
+    return null; // 👈 mejor que tirar error
+  }
+
+  return commission;
+}
   remove(id: number) {
     return `This action removes a #${id} commission`;
   }

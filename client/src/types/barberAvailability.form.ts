@@ -5,4 +5,5 @@ export interface AvailabilityForm {
     start_time: string;
     end_time: string;
   }[];
+  percentage: number | ""; // 🔥 nuevo
 }

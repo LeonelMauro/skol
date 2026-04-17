@@ -60,6 +60,23 @@ export default function BarberAvailability() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [availabi, setAvailabi] = useState<BarberAvailability[]>([]);
+
+  const [commissions, setCommissions] = useState<Record<number, number>>({});
+  const fetchCommissions = async () => {
+  try {
+    const res = await api.get('/commission');
+
+    const map: Record<number, number> = {};
+
+    res.data.forEach((c: any) => {
+      map[c.barber.id] = c.percentage;
+    });
+
+    setCommissions(map);
+  } catch (error) {
+    console.error('Error cargando comisiones', error);
+  }
+};
   
   const fechtAvailabilities = async () => {
     try {
@@ -71,12 +88,14 @@ export default function BarberAvailability() {
   };
 
   useEffect(() => {
-    fechtAvailabilities();
-  }, []);
-  
+  fechtBarbers();
+  fechtAvailabilities();
+  fetchCommissions();
+}, []);
   //Mostrar barberos disponibles barbero
   const [barbers, setBarbers] = useState<Barber[]>([]);
 
+  const [search, setSearch] = useState('');
   
   
  
@@ -90,10 +109,11 @@ export default function BarberAvailability() {
       console.error('No se encontraron los barbers',error)
     }
   }
-  useEffect(() => {
-  fechtBarbers();
-}, []);
-
+ 
+  const filteredBarbers = barbers.filter(b =>
+  b.name.toLowerCase().includes(search.toLowerCase()) ||
+  b.email.toLowerCase().includes(search.toLowerCase())
+);
   // CREAR DISPONIBILIDAD
   const [openCreate, setOpenCreate] = useState(false);
   const [selectedBarberId, setSelectedBarberId] = useState<number | null>(null);
@@ -206,6 +226,7 @@ const [selectedBarber, setSelectedBarber] = useState<{
     setOpenEditDialog(false);
     setSelectedBarber(null);
     fechtAvailabilities();
+    await fetchCommissions();
   } catch (error) {
     console.error(error);
     showSnackbar('Error al actualizar disponibilidad', 'error');
@@ -230,26 +251,6 @@ const [selectedBarber, setSelectedBarber] = useState<{
     showSnackbar('Error al actualizar local', 'error');
   }
 };
-  const [search, setSearch] = useState('');
-
-  const fetchUsers = async (query?: string) => {
-    const res = await api.get('/user', {
-      headers: authHeader,
-      params: query ? { q: query } : {},
-    });
-    (res.data);
-  };
-  
-    
-
-   useEffect(() => {
-      const timeout = setTimeout(() => {
-        fetchUsers(search);
-      }, 300); // debounce
-  
-      return () => clearTimeout(timeout);
-    }, [search]);
-
 
   const DAY_LABELS: Record<string, string> = {
   monday: "Lun",
@@ -346,9 +347,10 @@ const [selectedBarber, setSelectedBarber] = useState<{
     justifyItems: 'center',
   }}
 >
-  {barbers.map((barber) => {
+  {filteredBarbers.map((barber)  => {
     const barberAvail = getBarberAvailability(barber.id);
     const hasAvailability = barberAvail.length > 0;
+    const commission = commissions[barber.id];
 
     const avatarUrl = barber.avatar
       ? `${import.meta.env.VITE_API_URL}${barber.avatar}`
@@ -408,6 +410,14 @@ const [selectedBarber, setSelectedBarber] = useState<{
         >
           {barber.name}
         </Typography>
+        {commission !== undefined && (
+          <Typography
+            variant="caption"
+            sx={{ color: '#DBD515', fontSize: 12 }}
+          >
+            Comisión: {commission}%
+          </Typography>
+        )}
 
         {!hasAvailability && (
           <Typography variant="caption" sx={{ color: '#ff9800' }}>
@@ -435,15 +445,43 @@ const [selectedBarber, setSelectedBarber] = useState<{
   }}
 >
   <DialogTitle
+  sx={{
+    fontSize: { xs: 18, sm: 22 },
+    pb: 1,
+    color: '#DBD515',
+    textAlign: 'center',
+  }}
+>
+  <Typography
     sx={{
-      fontSize: { xs: 18, sm: 22 },
-      pb: 1,
-      color: '#DBD515',
-      textAlign: 'center',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 1,
+      fontSize: 'inherit',
+      fontWeight: 600,
     }}
   >
     {selectedBarberView?.barber.name}
-  </DialogTitle>
+
+    {selectedBarberView &&
+      commissions[selectedBarberView.barber.id] !== undefined && (
+        <Box
+          component="span"
+          sx={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: '#DBD515',
+            backgroundColor: 'rgba(219,213,21,0.1)',
+            px: 1.5,
+            py: 0.5,
+            borderRadius: 2,
+          }}
+        >
+          {Math.round(commissions[selectedBarberView.barber.id])}%
+        </Box>
+      )}
+  </Typography>
+</DialogTitle>
 
   <DialogContent
       dividers
@@ -453,6 +491,7 @@ const [selectedBarber, setSelectedBarber] = useState<{
         overflowY: 'auto',
       }}
     >
+      
     {selectedBarberView && (() => {
       const grouped = groupByDay(selectedBarberView.availabilities);
 

@@ -9,10 +9,12 @@ import {
   MenuItem,
   Chip,
   Box,
+  InputAdornment,
 } from "@mui/material";
 import type { CreateBarberAvailabilityPayload } from "../../types/barberAvailability";
 import type { AvailabilityForm } from "../../types/barberAvailability.form";
 import { useTheme, useMediaQuery } from "@mui/material";
+import api from "../../services/api";
 
 
 interface BarberDialogAvailProps {
@@ -29,13 +31,11 @@ export default function BarberDialogAvail({
   onSubmit,
 }: BarberDialogAvailProps) {
   const [form, setForm] = useState<AvailabilityForm>({
-    barberId: 0,
-    days: [],
-    timeRanges: [
-  { start_time: "", end_time: "" }
-],
-
-  });
+  barberId: 0,
+  days: [],
+  timeRanges: [{ start_time: "", end_time: "" }],
+  percentage: "",
+});
 
   /** Reset al cerrar */
   useEffect(() => {
@@ -44,9 +44,11 @@ export default function BarberDialogAvail({
       barberId: barberId ?? 0,
       days: [],
       timeRanges: [{ start_time: "", end_time: "" }],
+      percentage: "", // 🔥 importante
     });
   }
 }, [open, barberId]);
+
 
 
  
@@ -63,7 +65,10 @@ export default function BarberDialogAvail({
   form.timeRanges.length > 0 &&
   form.timeRanges.every((range) =>
     isValidRange(range.start_time, range.end_time)
-  );
+  ) &&
+  form.percentage !== "" &&
+  form.percentage >= 0 &&
+  form.percentage <= 100;
 
 
 
@@ -83,6 +88,13 @@ export default function BarberDialogAvail({
   const handleSubmit = async () => {
   if (!isFormValid || !barberId) return;
 
+  // 🔥 1. guardar comisión
+  await api.post('/commission', {
+    barberId,
+    percentage: Number(form.percentage),
+  });
+
+  // 🔥 2. guardar disponibilidad
   for (const day of form.days) {
     for (const range of form.timeRanges) {
       await onSubmit({
@@ -118,6 +130,58 @@ export default function BarberDialogAvail({
       }}
     >
 
+    <DialogTitle
+      sx={{
+        fontSize: { xs: 18, sm: 22 },
+        pb: 1,
+      }}
+    >
+      Asignar comisión
+    </DialogTitle>
+    <DialogContent
+      dividers
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+        px: 2,
+        py: 1.5,
+        overflowY: "auto",
+      }}
+    >
+      <TextField
+  label="Comisión (%)"
+  type="number"
+  fullWidth
+  size="small"
+  required
+  value={form.percentage}
+  onChange={(e) => {
+    let value = Number(e.target.value);
+
+    if (value < 0) value = 0;
+    if (value > 100) value = 100;
+
+    setForm({
+      ...form,
+      percentage: value,
+    });
+  }}
+  InputProps={{
+    endAdornment: <InputAdornment position="end">%</InputAdornment>,
+  }}
+  error={
+    form.percentage === "" ||
+    Number(form.percentage) < 0 ||
+    Number(form.percentage) > 100
+  }
+  helperText={
+    form.percentage === ""
+      ? "Campo obligatorio"
+      : "Debe ser entre 0 y 100"
+  }
+/>
+    </DialogContent>
     <DialogTitle
       sx={{
         fontSize: { xs: 18, sm: 22 },
