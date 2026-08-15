@@ -85,9 +85,18 @@ export default function MyReservations() {
 
   if (!reservations.length) {
     return (
+       <Box
+    sx={{
+      textAlign: 'center',
+      minHeight: '100vh',
+      backgroundColor: '#0F0F0F',
+      pt: 3,
+    }}
+  >
       <Typography sx={{ color: '#aaa', textAlign: 'center', mt: 4 }}>
         Todavía no tenés reservas realizadas.
       </Typography>
+  </Box>
     );
   }
 

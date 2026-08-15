@@ -47,10 +47,17 @@ export default function ServicesGrid({ services, serviceIcons }: Props) {
       {/* HEADER */}
       <Box sx={{ textAlign: 'center', mb: { xs: 2, md: 4 } }}>
         <Typography
+           variant="h3"
           sx={{
-            fontFamily: 'Playfair Display, serif',
-            fontSize: { xs: 28, sm: 32, md: 36 },
+            mb: 2,
+            fontFamily: 'Keania One',
+            letterSpacing: 2,
+            fontSize: {
+              xs: '2rem',
+              md: '3rem',
+            },
             color: '#DBD515',
+            textTransform: 'uppercase',
           }}
         >
           Servicios

@@ -94,8 +94,8 @@ export default function Header() {
     to={!link.startsWith('#') ? link : undefined}
     onClick={onClick}
     sx={{
-      fontFamily: 'Inter, sans-serif',
-      fontSize: 11,
+      fontFamily: "'Keania One', sans-serif", 
+      fontSize: { xs: 12, md: 14 },
       fontWeight: 700,          // ✅ negrita
       letterSpacing: '0.06em',
       color: '#EAEAEA',
@@ -124,7 +124,7 @@ export default function Header() {
       },
     }}
   >
-    {label.toLowerCase()}
+    {label}
   </Button>
 );
 
@@ -386,7 +386,7 @@ const instagramHover = {
                   <ListItemText
                   primary={item.label}
                   primaryTypographyProps={{
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: "'Keania One', sans-serif",
                     fontSize: 14,
                     fontWeight: 700,     // 🔥 igual al header
                     letterSpacing: '0.04em',

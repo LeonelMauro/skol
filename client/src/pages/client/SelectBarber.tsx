@@ -16,12 +16,31 @@ import { useAuth } from '../../context/AuthContext';
 type SelectedBarber =
   | { mode: 'any' }
   | { mode: 'specific'; barber: Barber };
+type Availability = {
+  barber: {
+    id: number;
+  };
+  is_active: boolean;
+};
 
 export default function SelectBarber() {
   const navigate = useNavigate();
   const locationRouter = useLocation();
   const { user } = useAuth();
+  const [availabilities, setAvailabilities] = useState<Availability[]>([]);
 
+  useEffect(() => {
+  api
+    .get('/barber-availability', {
+      headers: {
+        Authorization: `Bearer ${user?.access_token}`,
+      },
+    })
+    .then(res => setAvailabilities(res.data))
+    .catch(console.error);
+}, [user?.access_token]);
+
+  
   const state = locationRouter.state as
     | { location: Location }
     | undefined;
@@ -40,7 +59,13 @@ export default function SelectBarber() {
   const [selectedBarber, setSelectedBarber] =
     useState<SelectedBarber | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const availableBarbers = barbers.filter((barber) => {
+    return availabilities.some(
+      (a) =>
+        a.barber.id === barber.id &&
+        a.is_active
+    );
+  });
   useEffect(() => {
   setLoading(true);
 
@@ -123,7 +148,7 @@ export default function SelectBarber() {
         >
 
             {/* BARBEROS */}
-            {barbers.map((barber) => {
+            {availableBarbers.map((barber) => {
               const selected =
                 selectedBarber?.mode === 'specific' &&
                 selectedBarber.barber.id === barber.id;

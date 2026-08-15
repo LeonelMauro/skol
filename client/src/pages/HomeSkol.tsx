@@ -80,13 +80,17 @@ export default function SobreSkol() {
       >
         {/* TEXTO */}
         <Typography
-          variant="h4"
+          variant="h3"
           sx={{
             mb: 2,
             fontFamily: 'Keania One',
+             fontSize: {
+              xs: '2rem',
+              md: '3rem',
+            },
             letterSpacing: 2,
             color: '#DBD515',
-            textTransform: 'uppercase',
+            
           }}
         >
           Sobre SKOL
@@ -127,7 +131,12 @@ export default function SobreSkol() {
                 }}
                 data-index={index}
                 sx={{
-                  height: 240,
+                  height: {
+                    xs: 'auto',   // 🔥 mobile crece solo
+                    sm: 220,
+                    md: 240,
+                  },
+                  py: { xs: 3, md: 0 }, // padding vertical en mobile
                   backgroundColor: '#111',
                   borderRadius: 3,
                   border: '1px solid rgba(255,255,255,0.06)',

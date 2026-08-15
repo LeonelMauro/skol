@@ -223,13 +223,18 @@ export default function HomePublic() {
   {/* TÍTULO */}
   <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
     <Typography
-      sx={{
-        fontFamily: 'Keania One',
-        fontSize: { xs: 28, sm: 32, md: 36 },
-        color: '#DBD515',
-        letterSpacing: 1.5,
-        mb: 1,
-      }}
+      variant="h3"
+          sx={{
+            mb: 2,
+            fontFamily: 'Keania One',
+             fontSize: {
+              xs: '2rem',
+              md: '3rem',
+            },
+            letterSpacing: 2,
+            color: '#DBD515',
+            
+          }}
     >
       Nuestros locales
     </Typography>

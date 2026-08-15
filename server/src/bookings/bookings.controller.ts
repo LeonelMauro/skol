@@ -36,7 +36,7 @@ export class BookingsController {
     @Query('date') date: string
   ) {
     return this.bookingsService.getBookingsByDate(
-      req.user.sub,
+      req.user.id,
       date
     );
   }
@@ -69,7 +69,7 @@ export class BookingsController {
   @UseGuards(JwtAuthGuard)
   @Get('my')
   getMyReservations(@Req() req) {
-    return this.bookingsService.findMyReservations(req.user.sub);
+    return this.bookingsService.findMyReservations(req.user.id);
   }
   @Post(':id/complete')
   complete(@Param('id') id: number) {
@@ -82,12 +82,12 @@ export class BookingsController {
   @UseGuards(JwtAuthGuard)
   @Get('barber/today')
   getTodayBookingsForBarber(@Req() req) {
-    return this.bookingsService.getTodayBookingsForBarber(req.user.sub);
+    return this.bookingsService.getTodayBookingsForBarber(req.user.id);
   }
   @UseGuards(JwtAuthGuard)
   @Get('barber/history')
   getMyBarberHistory(@Req() req) {
-    return this.bookingsService.getBarberHistory(req.user.sub);
+    return this.bookingsService.getBarberHistory(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
