@@ -16,7 +16,7 @@ type Reservation = {
   id: number;
   date: string;
   time: string;
-  status: 'pending' | 'confirmed' | 'canceled' | 'no_show';
+  status: 'pending' | 'confirmed' | 'completed' | 'no_show' | 'canceled';
   barber: { name: string };
   service: { name: string; price: number };
   location: { name: string; address: string };
@@ -37,8 +37,16 @@ export default function MyReservations() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const pendingReservations = reservations.filter(r => r.status === 'pending');
-  const otherReservations = reservations.filter(r => r.status !== 'pending');
+  const pendingReservations = reservations.filter(r => {
+  if (r.status !== 'pending') return false;
+
+  const reservationDateTime = new Date(`${r.date}T${r.time}`);
+    return reservationDateTime > new Date();
+  });
+
+  const otherReservations = reservations.filter(
+    r => r.status === 'confirmed' || r.status === 'completed'
+  );
 
 
   useEffect(() => {
